@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.11.10)  10 NOV 2015 12:53
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.11.10)  10 NOV 2015 13:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -942,14 +942,14 @@ Package pdftex.def Info: vignette_files/figure-latex/unnamed-chunk-9-1.pdf used
  on input line 509.
 (pdftex.def)             Requested size: 459.7304pt x 177.66873pt.
 [5 <./vignette_files/figure-latex/unnamed-chunk-9-1.pdf>] [6]
-<vignette_files/figure-latex/unnamed-chunk-12-1.pdf, id=146, 409.53pt x 199.746
-25pt>
+<vignette_files/figure-latex/unnamed-chunk-12-1.pdf, id=146, 409.53pt x 211.791
+24pt>
 File: vignette_files/figure-latex/unnamed-chunk-12-1.pdf Graphic file (type pdf
 )
 <use vignette_files/figure-latex/unnamed-chunk-12-1.pdf>
 Package pdftex.def Info: vignette_files/figure-latex/unnamed-chunk-12-1.pdf use
 d on input line 620.
-(pdftex.def)             Requested size: 409.54773pt x 199.7549pt.
+(pdftex.def)             Requested size: 409.54149pt x 211.79718pt.
 
 <vignette_files/figure-latex/unnamed-chunk-13-1.pdf, id=147, 406.51875pt x 131.
 49126pt>
@@ -988,7 +988,7 @@ Here is how much of TeX's memory you used:
  16175 multiletter control sequences out of 15000+600000
  73623 words of font info for 123 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 32i,8n,35p,401b,443s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 32i,8n,35p,401b,349s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
 ips/lm/lm-ts1.enc}</usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/shar
 e/texmf/fonts/type1/public/lm/lmbx9.pfb></usr/share/texmf/fonts/type1/public/lm
@@ -999,7 +999,7 @@ fonts/type1/public/lm/lmr6.pfb></usr/share/texmf/fonts/type1/public/lm/lmr7.pfb
 are/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/public
 /lm/lmtk10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb></usr/share/t
 exmf/fonts/type1/public/lm/lmtt8.pfb>
-Output written on vignette.pdf (11 pages, 402448 bytes).
+Output written on vignette.pdf (11 pages, 402439 bytes).
 PDF statistics:
  264 PDF objects out of 1000 (max. 8388607)
  223 compressed objects within 3 object streams
