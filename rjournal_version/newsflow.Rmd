@@ -1,34 +1,35 @@
 ---
 title: "Newsflow: An R package for analyzing content homogeneity and news diffusion using computational text analysis"
-author: "by Kasper Welbers and Wouter van Atteveldt"
-bibliography: references.bib
-date: ""
-output:
-  pdf_document:
-    toc: false
-    keep_tex: TRUE
-vignette: >
-  %\VignetteIndexEntry{Newsflow}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-abstract: |
+author:
+  - name: Kasper Welbers
+    affiliation: VU University Amsterdam
+    address:
+    - De Boelelaan 1081,
+    - 1081 HV Amsterdam, The Netherlands
+    email:  k.welbers@vu.nl
+  - name: Wouter van Atteveldt
+    affiliation: VU University Amsterdam
+    address:
+    - De Boelelaan 1081,
+    - 1081 HV Amsterdam, The Netherlands
+    email:  wouter@vanatteveldt.com
+output: rticles::rjournal_article
+abstract: >
   Given the sheer amount of news sources in the digital age (e.g., newspapers, blogs, social media) it has become difficult to determine where news is first introduced and how it diffuses across sources.
   We introduce Newsflow: an R package for analyzing content homogeneity and diffusion patterns using computational text analysis. 
   The content of news messages is compared using techniques from the field of information retrieval, similar to plagiarism detection.
   By using a sliding window approach to only compare messages within a given time distance, it is made easy to compare many sources over long periods of time.
   Furthermore, the package introduces an approach for analyzing the news similarity data as a network, and includes various functions to analyze and visualize this network.
-  
 ---
 
 ```{r, include=FALSE}
-options(digits=3)
+options(scipen=1, digits=2)
 library(newsflow)
-library(printr)
 ```
 
 ## Introduction
 
-The news diffusion process in the digital age involves many interdependent sources, ranging from news agencies and traditional newspapers to blogs and people on social media [@meraz11; @paterson05; @pew10].
+The news diffusion process in the digital age involves many interdependent sources, ranging from news agencies and traditional newspapers to blogs and people on social media [@meraz11;@paterson05;@pew10].
 We offer the `Newsflow` package[^reviewernote] as a toolkit to analyze the homogeneity and diffusion of news content using computational text analysis.
 This analysis consists of two steps.
 First, techniques from the field of information retrieval are used to measure the similarity of news messages (e.g., addressing the same event, containing identical phrases).
@@ -91,19 +92,20 @@ as.matrix(dtm)
 ```
 
 Based on the representation of texts in the DTM, the similarity of documents can be calculated as the similarity of row vectors.
-With this approach, simply looking at all words in their literal form has certain pitfalls.
-For instance, the words "human" and "humans" are given separate columns.
-As a result, this similarity of the first two texts is not recognized.
+Yet, in the current form there are still some issues.
+For instance, in the example the words "human" and "humans" are given separate columns.
+As a result, the similarity of the first two texts is not recognized.
 Also, the words "are", and "is" do not have any particular meaning, so they are not informative and can be misleading for the calculation of document similarity.
 There are various techniques to filter and transform words that can be used to mend these issues.
 In addition, we can use these techniques to steer on what grounds documents are compared.
+The following techniques are commonly used, and available in free software packages.
 
 * First of all, it is advisable to make all terms lowercase, and reduce terms to their root using stemming or lemmatizing[^lemma].
 Thus, "Hope", "hoped", "hoping", etc. all become "hope".
 This is because we are interested in the meaning of these terms, and not the specific form in which they are used. 
 
 * Second, one should filter out irrelevant words.
-Very common words, stopwords and boilerplate words contain little or no relevant information about news items.
+Very common words, stopwords and boilerplate words contain little or no information about news items.
 Very rare terms, while ignored in many computational text analysis approaches, are particularly informative for our current purpose, and should be kept.
 
 * Third, It is also possible to specifically select or filter out only certain types of words by using part-of-speech tagging[^pos].
@@ -118,31 +120,33 @@ Without going into specifics, the difference is that lemmatization is a much mor
 
 [^pos]: Part-of-speech tagging is a technique that identifies types of words, such as verbs, nouns and adjectives.
 
-All mentioned techniques except for lemmatizing and part-of-speech tagging are available in the `tm` package and in the `create_matrix` function of the `RTextTools` package.
+All mentioned preprocessing steps except for lemmatizing and part-of-speech tagging are available in the `tm` package and in the `create_matrix` function of the `RTextTools` package.
 To use lemmatization or part-of-speech tagging there are several free to use grammar parsers, such as *CoreNLP* for English [@corenlp] and *Frog* for Dutch [@bosch07].
 
 For this paper, data is used that has been preprocessed with the Dutch grammar parser Frog. 
 The data is based on a recent study on the influence of a Dutch news agency on the print and online editions of Dutch newspapers in political news coverage (Author citation, forthcoming).
 The terms have been lemmatized, and only the nouns and proper names of the headline and first five sentences (that generally contain the essential who, what and where of news) are used.
 By focusing on these elements, the analysis in this study focused on whether documents address the same events.
-This data is also made available in the package as demo data, in which the actual nouns and proper names have been replaced by numbered types.
+This data is also made available in the package as demo data[^anon].
+
+[^anon]: The newspapers have been made anonymous, and words have been transformed to reveal only the type of word (e.g, noun, person, organization, location).
 
 ```{r}
 data(dtm)
-as.matrix(dtm[1:3,1:5])
+#as.matrix(dtm[1:5,1:5])
+#dtm = dtm[,sample(1:ncol(dtm))]
 ```
 
-In addition to the DTM, we need meta information about the publication time and source of each document.
+In addition to the DTM, we need meta information about (at least) the publication time and source of each document.
 This should be structured as a data frame that contains a column labeled `document_id`, that should match with the rownames (i.e. documents) of the DTM.
 The date values should be in the `Date` or `POSIXct` class.
-Any additional meta information can be used in the analysis to aggregate results.
 
 ```{r}
 data(meta)
 head(meta,3)
 ```
 
-As a final step in the data preparation, we can filter out words based on statistics regarding their occurence.
+Given the DTM and meta information, we can calculate statistics for the occurrence of words, based on which we can filter out words that are not relevant for our analysis.
 Since we are analyzing news diffusion, a particularly interesting characteristic of words is the distribution of their use over time.
 To focus the comparison of documents on words that indicate new events, we can filter out words that are evenly used over time.
 To calculate this, we offer the `term.day.dist` function. 
@@ -152,7 +156,7 @@ tdd = term.day.dist(dtm, meta)
 head(tdd)
 ```
 
-Of particular interest is the `days.entropy` score, which is the entropy of the distribution of words over days.
+The most interesting output is the `days.entropy` score, which is the entropy of the distribution of words over days.
 This tells us whether the occurrence of a word over time is evenly distributed (high entropy) or concentrated (low entropy).[^autoboiler]
 The maximum value for entropy is the total number of days (in case of a uniform distribution).
 The `days.entropy.norm` score normalizes the entropy by dividing by the number of days.
@@ -213,7 +217,7 @@ Alternatively, both elements of the data can easily be viewed or extracted with 
 [^external_sim]: If data about document similarities is imported, then the `document.network` function can be used to create this network. 
 This way the analysis functions of this package can still be used.
 
-```{r, fig.show='hold'}
+```{r}
 v = get.data.frame(g, 'vertices')
 e = get.data.frame(g, 'edges')
 
@@ -226,7 +230,7 @@ The `hourdiff` attribute represents the time difference in hours between two doc
 Note that this corresponds with the `hour.window` parameter of the `documents.window.compare` function.
 A histogram can provide a good first indication of this data.
 
-```{r, fig.width = 7, fig.height = 3}
+```{r}
 hist(E(g)$hourdiff, main='Histogram of time distance between documents in hours', 
      xlab = 'Lag in hours', breaks = 100)
 ```
@@ -413,4 +417,6 @@ Ultimately, the goal is to extract communication networks from content data for 
 This package contributes to this goal by facilitating different approaches for creating and aggregating the document network.
 
 # References
+
+\bibliography{references}
 

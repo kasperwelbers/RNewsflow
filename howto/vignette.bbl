@@ -1,0 +1,104 @@
+\begin{thebibliography}{15}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Baum and Groeling(2008)]{baum08}
+Matthew~A Baum and Tim Groeling.
+\newblock New media and the polarization of {A}merican political discourse.
+\newblock \emph{Political Communication}, 25\penalty0 (4):\penalty0 345--365,
+  2008.
+
+\bibitem[Bennett and Iyengar(2008)]{bennett08}
+W~Lance Bennett and Shanto Iyengar.
+\newblock A new era of minimal effects? the changing foundations of political
+  communication.
+\newblock \emph{Journal of Communication}, 58\penalty0 (4):\penalty0 707--731,
+  2008.
+
+\bibitem[Blumler and Kavanagh(1999)]{blumler99}
+Jay~G Blumler and Dennis Kavanagh.
+\newblock The third age of political communication: Influences and features.
+\newblock \emph{Political communication}, 16\penalty0 (3):\penalty0 209--230,
+  1999.
+
+\bibitem[Boczkowski and De~Santos(2007)]{boczkowski07}
+Pablo~J Boczkowski and Martin De~Santos.
+\newblock When more media equals less news: Patterns of content homogenization
+  in argentina's leading print and online newspapers.
+\newblock \emph{Political Communication}, 24\penalty0 (2):\penalty0 167--180,
+  2007.
+
+\bibitem[Galtung and Ruge(1965)]{galtung65}
+Johan Galtung and Mari~Holmboe Ruge.
+\newblock The structure of foreign news the presentation of the congo, cuba and
+  cyprus crises in four norwegian newspapers.
+\newblock \emph{Journal of peace research}, 2\penalty0 (1):\penalty0 64--90,
+  1965.
+
+\bibitem[Grimmer and Stewart(2013)]{grimmer13}
+Justin Grimmer and Brandon~M Stewart.
+\newblock Text as data: The promise and pitfalls of automatic content analysis
+  methods for political texts.
+\newblock \emph{Political Analysis}, 21:\penalty0 267--297, 2013.
+
+\bibitem[Manning et~al.(2014)Manning, Surdeanu, Bauer, Finkel, Bethard, and
+  McClosky]{corenlp}
+Christopher~D. Manning, Mihai Surdeanu, John Bauer, Jenny Finkel, Steven~J.
+  Bethard, and David McClosky.
+\newblock The {Stanford} {CoreNLP} natural language processing toolkit.
+\newblock In \emph{Proceedings of 52nd Annual Meeting of the Association for
+  Computational Linguistics: System Demonstrations}, pages 55--60, 2014.
+\newblock URL \url{http://www.aclweb.org/anthology/P/P14/P14-5010}.
+
+\bibitem[Meraz(2011)]{meraz11}
+Sharon Meraz.
+\newblock Using time series analysis to measure intermedia agenda-setting
+  influence in traditional media and political blog networks.
+\newblock \emph{Journalism \& Mass Communication Quarterly}, 88\penalty0
+  (1):\penalty0 176--194, 2011.
+
+\bibitem[Paterson(2005)]{paterson05}
+Chris Paterson.
+\newblock News agency dominance in international news on the internet.
+\newblock \emph{Converging Media, Diverging Politics. Lanham, MD: Lexington
+  Books}, pages 145--163, 2005.
+
+\bibitem[{Pew Research Center}(2010)]{pew10}
+{Pew Research Center}.
+\newblock New media old media: How blogs and social media agendas relate.
+\newblock Available at: http://www.journalism.org/node/20621, 5 2010.
+
+\bibitem[Ragas(2014)]{ragas14}
+Matthew~W Ragas.
+\newblock Intermedia agenda setting in business news coverage.
+\newblock \emph{Communication and Language Analysis in the Public Sphere}, page
+  335, 2014.
+
+\bibitem[Salton and Harman(2003)]{salton03}
+Gerard Salton and Donna Harman.
+\newblock \emph{Information retrieval}.
+\newblock John Wiley and Sons Ltd., 2003.
+
+\bibitem[Salton et~al.(1975)Salton, Wong, and Yang]{salton75}
+Gerard Salton, Anita Wong, and Chung-Shu Yang.
+\newblock A vector space model for automatic indexing.
+\newblock \emph{Communications of the ACM}, 18\penalty0 (11):\penalty0
+  613--620, 1975.
+
+\bibitem[Shoemaker and Vos(2009)]{shoemaker09}
+Pamela~J Shoemaker and Timothy Vos.
+\newblock \emph{Gatekeeping theory}.
+\newblock Routledge, 2009.
+
+\bibitem[Van~den Bosch et~al.(2007)Van~den Bosch, Busser, Daelemans, and
+  Canisius]{bosch07}
+A~Van~den Bosch, G.J. Busser, W.~Daelemans, and S.~Canisius.
+\newblock An efficient memory-based morphosyntactic tagger and parser for
+  dutch.
+\newblock In \emph{Selected Papers of the 17th Computational Linguistics in the
+  Netherlands Meeting}, Leuven, 2007.
+
+\end{thebibliography}

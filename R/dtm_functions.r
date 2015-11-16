@@ -51,5 +51,6 @@ term.day.dist <- function(dtm, meta, id.var='document_id', date.var='date'){
                  days.entropy = days.entropy, 
                  days.entropy.norm=days.entropy / length(dateseq))
   d$term = as.character(d$term)
+  rownames(d) = NULL
   d
 }
