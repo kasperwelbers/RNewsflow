@@ -62,13 +62,12 @@ plot.document.network <- function(g, date.attribute='date', source.attribute='so
   
   plotDocNet(cluster, sources, only.outer.date, date.format, margins, isolate.color=NULL, source.loops=T, ...)
   layout(matrix(c(1, 1, 1, 1), 2, 2, byrow = TRUE))
-  cluster
 }
 
 plotDocNet <- function(cluster, sources=NULL, only.outer.date=F, date.format='%Y-%m-%d %H:%M', margins=c(5,8,1,13), isolate.color=NULL, source.loops=T, ...){
   par(mar = margins)
   if(is.null(sources)) sources = sort(unique(V(cluster)$source))
-  E(cluster)$width = scales::rescale(E(cluster)$weight, c(2,3), from = c(0,1))
+  E(cluster)$width = scales::rescale(E(cluster)$weight, c(2,4), from = c(0,1))
   E(cluster)$arrow.size = 0.45
   E(cluster)$color = grey(scales::rescale(E(cluster)$weight, c(0.8,0.2), from = c(0,1)))
   
@@ -132,14 +131,36 @@ plotDocNet <- function(cluster, sources=NULL, only.outer.date=F, date.format='%Y
 }
 
 #' @export
-show.window <- function(g, meta.attribute='source'){  
-  edgemed = get.vertex.attribute(g, meta.attribute)[get.edges(g, E(g))[,1]]
+show.window <- function(g, vertex.attribute=NULL){
+  from.edge.i = get.edges(g, E(g))[,1]
+  
+  if(is.null(vertex.attribute)) {
+    edgemed = rep('All vertices', vcount(g))[from.edge.i]
+  } else {
+    edgemed = get.vertex.attribute(g, vertex.attribute)[from.edge.i]  
+  }
   medwindow = aggregate(E(g)$hourdiff, by=list(source=edgemed), FUN = function(x) cbind(min(x), max(x)))
   d = data.frame(source = medwindow$source, window.left=medwindow$x[,1], window.right=medwindow$x[,2])
-  colnames(d) = c(meta.attribute, 'window.left','window.right')
+  colnames(d) = c('vertex.attribute', 'window.left','window.right')
   d
 }
 
+#' @export
+filter.window <- function(g, hour.window, select.vertices=NULL){
+  if(is.null(select.vertices)) select.vertices = rep(T, vcount(g))
+  
+  # get vector indicating which edges are selected given the vertex.filter
+  from.edge.i = get.edges(g, E(g))[,1]
+  selected_edge = select.vertices[from.edge.i]
+  
+  # filter the selected edges
+  delete.i = selected_edge & (E(g)$hourdiff < hour.window[1] | E(g)$hourdiff > hour.window[2])
+  delete.edges(g, which(delete.i))
+}
+
+
+###
+###
 #' @export
 source.window.settings <- function(g, direct.edit=F, max.window.left=0.5, max.window.right=36, meta.attribute='source'){
   sources = unique(get.vertex.attribute(g, meta.attribute))
@@ -156,7 +177,7 @@ source.window.settings <- function(g, direct.edit=F, max.window.left=0.5, max.wi
 }
 
 #' @export
-filter.window <- function(g, source.window){
+filter.window_oud <- function(g, source.window){
   if(is.null(source.window)) source.window = source.window.settings(g, direct.edit=T)
   
   sourcevar = colnames(source.window)[1]
@@ -172,6 +193,9 @@ filter.window <- function(g, source.window){
   }
   delete.edges(g, unique(unlist(delete_i)))
 }
+####
+###
+
 
 #' @export
 only.first.match <- function(g){
@@ -211,7 +235,7 @@ only.strongest.match <- function(g, by.vertex.meta=NULL){
 }
 
 #' @export
-aggregate.network <- function(g, by.from=NULL, by.to=NULL, edge.attribute='weight', agg.FUN=median, return.network=F, network.edge.weight='from.prop'){
+aggregate.network <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='weight', agg.FUN=median, return.df=F){
   V(g)$all_vertices = 'all_vertices'
   if(is.null(by.from)) by.from = 'all_vertices'
   if(is.null(by.to)) by.to = 'all_vertices'
@@ -229,8 +253,8 @@ aggregate.network <- function(g, by.from=NULL, by.to=NULL, edge.attribute='weigh
   e$var = get.edge.attribute(g, edge.attribute)
   e = setDT(e)[, .(edges=.N,
                    edge.attribute=agg.FUN(var),
-                   from.matched=sum(from.unique_match),
-                   to.matched=sum(to.unique_match)),
+                   from.V=sum(from.unique_match),
+                   to.V=sum(to.unique_match)),
                    by= eval(paste(aggvars, collapse=','))]
   e = as.data.frame(e)
   colnames(e)[colnames(e) == 'edge.attribute'] = paste('agg',edge.attribute, sep='.')
@@ -241,32 +265,30 @@ aggregate.network <- function(g, by.from=NULL, by.to=NULL, edge.attribute='weigh
   
   e = merge(e, from.totals, by.x=paste('from', by.from, sep='.'), by.y=by.from, all.x=T)
   e = merge(e, to.totals, by.x=paste('to', by.to, sep='.'), by.y=by.to, all.x=T)
-  e$from.prop = e$from.matched / e$from.N
-  e$to.prop = e$to.matched / e$to.N
+  e$from.V_prop = e$from.V / e$from.N
+  e$to.V_prop = e$to.V / e$to.N
   
-  colnames_ordered =  c(paste('from', by.from, sep='.'), paste('to', by.to, sep='.'), 
-                        'edges', paste('agg',edge.attribute, sep='.'), 
-                        'from.matched','from.N','from.prop','to.matched','to.N','to.prop')
-  
-  e = e[,c(colnames_ordered)]
-  
-  if(return.network) e = return.aggregate.network(e, network.edge.weight)  
-  e
+  if(!return.df) return(return.aggregate.network(e))  
+  if(return.df) {
+    e = e[,!colnames(e) %in% c('from.N', 'to.N')]
+    return(e) 
+  }
 }
 
-return.aggregate.network <- function(g.df, network.edge.weight){
+return.aggregate.network <- function(g.df){
   vnames = colnames(g.df)[1:(grep('^edges$', colnames(g.df))-1)]
   
   # create network
   from.v = g.df[,grep('^from\\.', vnames), drop=F]
   to.v = g.df[,grep('^to\\.', vnames), drop=F]
-  from.name = apply(from.v, MARGIN = 1, paste, collapse='\n')
-  to.name = apply(to.v, MARGIN = 1, paste, collapse='\n')
+  from.name = if(ncol(from.v) > 1) apply(from.v, MARGIN = 1, paste, collapse='; ') else from.v
+  to.name = if(ncol(to.v) > 1) apply(to.v, MARGIN = 1, paste, collapse='; ') else to.v
   g.agg = graph.data.frame(cbind(from.name,to.name))
-  for(edge.attrib in c('edges','agg.weight','from.matched','from.prop','to.matched','to.prop')){
+  
+  aggvar = colnames(g.df)[grep('agg\\.', colnames(g.df))]
+  for(edge.attrib in c('edges',aggvar,'from.V','from.V_prop','to.V','to.V_prop')){
     g.agg = set.edge.attribute(g.agg, edge.attrib, value=g.df[,edge.attrib])
   }
-  E(g.agg)$weight = g.df[,network.edge.weight]
   
   # create meta table
   from.v = cbind(from.name, from.v, from.N=g.df$from.N)
@@ -275,10 +297,11 @@ return.aggregate.network <- function(g.df, network.edge.weight){
   colnames(from.v) = gsub('^from\\.', '', colnames(from.v))
   colnames(to.v) = gsub('^to\\.', '', colnames(to.v))
   metavars = unique(c(colnames(from.v), colnames(to.v)))
-  for(metavar in vnames){
+  for(metavar in metavars){
     if(!metavar %in% colnames(from.v)) from.v[,metavar] = NA
     if(!metavar %in% colnames(to.v)) to.v[,metavar] = NA
   }
+
   meta = unique(rbind(from.v[,metavars], to.v[,metavars]))
   
   # add meta attributes
@@ -287,7 +310,7 @@ return.aggregate.network <- function(g.df, network.edge.weight){
     g.agg = set.vertex.attribute(g.agg, metavar, value=meta[meta_i,metavar])
   }
   
-  graph.plot.presets(g.agg)
+  g.agg
 }
 
 graph.plot.presets <- function(g){
@@ -302,34 +325,3 @@ graph.plot.presets <- function(g){
   g
 }
 
-
-topSimilarities <- function(g, min.similarity=0, as.sparse.matrix=F, binary.scores=F, break.by='source'){
-  V(g)$source = get.vertex.attribute(g, break.by)
-  
-  d = get.data.frame(g, 'edges')
-  colnames(d) = c('x','y','similarity')
-  d = d[d$similarity > min.similarity,]
-  
-  v = get.data.frame(g, 'vertices')
-
-  d$ybreak = v$source[match(d$y, v$name)]
-  
-  d = d[order(-d$similarity),]
-  d = d[!duplicated(d[,c('x','ybreak')]),]
-  
-  rows = v$name
-  cols = unique(d$ybreak)
-  if(binary.scores) d$similarity[d$similarity > 0] = 1
-  m = spMatrix(length(rows), length(cols), match(d$x, rows), match(d$ybreak, cols), d$similarity)
-  dimnames(m) = list(rows, cols)
-  
-  if(!as.sparse.matrix){
-    m = as.data.frame(as.matrix(m))
-    yvars = colnames(m)
-    m$id = v$name
-    m$date = v$date
-    rownames(m) = NULL
-    m = m[,c('id','date',yvars)]
-  }
-  m
-}
