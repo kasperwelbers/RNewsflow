@@ -36,13 +36,12 @@ Second, the temporal order in which messages are published is used to analyze co
 
 [^reviewernote]: R is an open-source statistical software package (https://www.r-project.org/).
 
-The main contribution of this package lies in the specialized application of document similarity measures for the purpose of analyzing the homogeneity and diffusion of news.
+The main contribution of this package lies in the specialized application of document similarity measures for the purpose of comparing news messages.
 News is a special type of information in the sense that it has a time dimension---it quickly loses its relevance.
 Therefore, we are often only interested in the similarity of news documents that occured within a short time distance.
 By restricting document comparisons to a given time distance, it becomes possible to compare many documents over a long period of time, but available document comparison software generally does not have this feature.
 We therefore offer the `documents.window.compare` function which compares documents using a sliding window over time.
 In addition, this package offers tools to aggregate, analyze and visualize the document similarity data.
-By proposing a standardized network format, using the `igraph` package, to organize the document similarity data, it lays the foundation for developing standardized procedures to analyze this type of data.
 
 The primary intended audience of this package is scholars and professionals in fields where the impact of news on society is a prime factor, such as journalism, political communication and public relations [@baum08;@boczkowski07;@ragas14].
 To what extent the content of certain sources is homogeneous or diverse has implications for central theories of media effects, such as agenda-setting and the spiral of silence [@bennett08;@blumler99]
@@ -76,7 +75,7 @@ Third, it discusses several ways to filter and weight the DTM based on word stat
 ## Pre-processing texts and creating the DTM
 A DTM is a matrix in which rows represent documents, columns represent terms, and cells indicate how often each term occurred in each document.
 This is referred to as a *bag of words* respresentation of texts, since we ignore the order of words. 
-This simplified representation makes analysis much easier and less computationally demanding, and as much research has shown: ``a simple list of words, which we call unigrams, is often sufficient to convey the general meaning of a text'' [@grimmer13: 6].
+This simplified representation makes analysis much easier and less computationally demanding, and as research has shown: ``a simple list of words, which we call unigrams, is often sufficient to convey the general meaning of a text'' [@grimmer13: 6].
 
 As input for this package, the DTM has to be in the `DocumentTermMarix` class of the  `tm` package.
 This is a popular R package for text mining, or computational text analysis, which also contains functions to create a DTM based on raw text in various formats.
@@ -85,10 +84,10 @@ For example, see the following DTM, created with the `create_matrix` function.
 
 
 ```{r, echo=T}
-document1 = 'Socrates is human'
-document2 = 'Humans are mortal'
-document3 = 'Therefore, Socrates is mortal'
-dtm = RTextTools::create_matrix(textColumns = c(document1,document2,document3), 
+doc1 = 'Socrates is human'
+doc2 = 'Humans are mortal'
+doc3 = 'Therefore, Socrates is mortal'
+dtm = RTextTools::create_matrix(textColumns = c(doc1,doc2,doc3), 
                                 minWordLength = 1, removeStopwords = F)
 
 rownames(dtm) = paste('Document', 1:nrow(dtm))
@@ -124,8 +123,9 @@ Without going into specifics, lemmatization is a much more computationally deman
 [^pos]: Part-of-speech tagging is a technique that identifies types of words, such as verbs, nouns and adjectives.
 
 All mentioned techniques except for lemmatization and part-of-speech tagging are available in the `tm` package and in the `create_matrix` function of the `RTextTools` package.
-To use lemmatization or part-of-speech tagging there are several free to use grammar parsers, such as *CoreNLP* for English [@corenlp] and *Frog* for Dutch [@bosch07].
-To create a DTM based on externally pre-processed documents, one can use the base function `xtabs` to create a sparse matrix and the `as.DocumentTermMatrix` function from the `tm` package to transform this matrix to the `DocumentTermMatrix` class.
+To use lemmatization or part-of-speech tagging there are several free to use grammar parsers, such as *CoreNLP* for English [@corenlp] and *Frog* for Dutch [@bosch07][^external].
+
+[^external]: To create a DTM based on externally pre-processed documents, one can use the base function `xtabs` to create a sparse matrix and the `as.DocumentTermMatrix` function from the `tm` package to transform this matrix to the `DocumentTermMatrix` class.
 
 For this vignette, data is used that has been preprocessed with the Dutch grammar parser Frog. 
 The data is based on a recent study on the influence of a Dutch news agency on the print and online editions of Dutch newspapers in political news coverage (Author citation, forthcoming).
@@ -181,7 +181,7 @@ dtm = dtm[,select_terms]
 ```
 
 Instead of deleting terms, we can also weight terms. 
-Turney explains that ``The idea of weighting is to give more weight to surprising events and less weight to expected events'', which is important because ``surprising events, if shared by two vectors, are more discriminative of the similarity between the vectors than less surprising events'' [@turney02: 156]. 
+Turney explains that ''The idea of weighting is to give more weight to surprising events and less weight to expected events'', which is important because ''surprising events, if shared by two vectors, are more discriminative of the similarity between the vectors than less surprising events'' [@turney02: 156]. 
 Thus, we want to give more weight to rare words than common words.
 A classic weighting scheme and recommended standard in information retrieval is the term-frequency inverse document frequency (tf.idf) [@sparck72,@monroe08].
 This and other weighting schemes can easily be applied using the `tm` pacakge, for instance using the `weightTfIdf` function.
@@ -258,7 +258,7 @@ hist(E(g)$hourdiff, main='Histogram of time distance between documents in hours'
 ```
 
 In the histogram we see that most document pairs with a similarity score above the threshold are about an hour apart (-1 on the x-axis). 
-This is mainly because the online newspapers often follow the news agency within a very short amount of time.
+This is mainly because the online newspapers often follow the news agency within a very short amount of time{^delaynote].
 As time distance increases, the number of document pairs decreases, which makes sense because news gets old fast, so news diffusion should occur within a limited time after publication.
 
 [^delaynote]: Actually, many of the newspapers publish nearly simultaneous with the news agency. Since we had reason to believe that the time stamps of our news agency data were occasionally later than the actual publication time, we subtracted one hour from its publication time in general.
@@ -336,9 +336,11 @@ Depending on the purpose of the analysis it can be relevant to add or delete cer
 For instance, in the previous visualizations we see that a print newspaper message matched both a recent newsagency message and two online newspaper messages.
 If we are specifically interested in who the original source of the message is, then it makes sense to only count the edge to the newsagency.
 Thus, we can develop functions to transform the network to enable such alternative types of analysis.
-here we demonstrate the `only.first.match` function, which transforms the network so that a document only has an edge to the earliest dated document it matches within the specified time window.
+Here we demonstrate the `only.first.match` function, which transforms the network so that a document only has an edge to the earliest dated document it matches within the specified time window[^duplicate].
 
-```{r}
+[^duplicate]: If there are multiple earliest dated documents (that is, having the same publication date) then edges to all earliest dated documents are kept.
+
+```{r, fig.width = 7, fig.height = 3}
 gs_onlyfirst = only.first.match(gs)
 plot.document.network(gs_onlyfirst)
 ```
@@ -368,16 +370,16 @@ The `edges` attribute counts the number of edges from the `from` group to the `t
 For example, we see that *online NP 1* documents have 451 edges to *newsagency* documents.
 The `agg.hourdiff` attribute shows that the median of the hourdiff attribute of these 451 edges is -1.27 (1 hour and 16 minutes).
 In addition to the edges, we can look at the number of vertices (i.e. documents) in the `from` group that matched with at least one vertex in the `to` group. 
-This is given by the `from.V` attribute, which shows here that 384 *online NP 1* documents matched with a *newsagency* document. [^lowerthanedges].
-This is also given as the proportion of all vertices/documents in the `from` group, as the `from.V_prop` attribute.
-Substantially, the `from.V_prop` score thus indicates that 83.12% of political news messages in *online NP 1* is similar or identical to recent *newsagency* messages.
-For the analysis of content homogeneity and news diffusion, the `from.V_prop` attribute is often most relevant.
+This is given by the `from.V` attribute, which shows here that 384 *online NP 1* documents matched with a *newsagency* document[^lowerthanedges].
+This is also given as the proportion of all vertices/documents in the `from` group, as the `from.Vprop` attribute.
+Substantially, the `from.Vprop` score thus indicates that 83.12% of political news messages in *online NP 1* is similar or identical to recent *newsagency* messages.
+For the analysis of content homogeneity and news diffusion, the `from.Vprop` attribute is often most relevant.
 
-The `V' and 'V_prop` scores are also reported for the `to` group. 
+The `V' and 'Vprop` scores are also reported for the `to` group. 
 This gives an inversed perspective on the relation between the `from` and `to` groups.
 Based on the `to.V` score, we see that 71.12% of documents published by the *newsagency* is similar or identical to future documents in *online NP 1*.
 In other words, of all the political news messages published by the *newsagency*, 71.12% was afterwards also published by *online NP 1*.
-Thus, `from.V_prop` and `to.v_prop` are related but different scores, and can be used to answer different research questions.
+Thus, `from.Vprop` and `to.Vprop` are related but different scores, and can be used to answer different research questions.
 
 [^lowerthanedges]: Note that the `edges` score is always equal to or higher than the `from.matched` score, since one document can match with multiple other documents. 
 
@@ -387,24 +389,28 @@ We already saw that the network data can be transformed to a common data.frame w
 Alternatively, `igraph` has the `get.adjacency` function to return the values for one edge attribute as a matrix with the vertices in the rows and columns.
 
 ```{r}
-get.adjacency(g.agg, attr= 'from.V_prop', sparse = F)
+get.adjacency(g.agg, attr= 'from.Vprop', sparse = F)
 ```
 
-Furthermore, we can use the network visualization features.
+Furthermore, we can use the network visualization features of the `igraph` package. 
+This can help present the document similarity data in an intuitively interpretable way.
+For the sake of convenience, we offer `plot.aggregate.network` function.
+This is a wrapper for the plot.igraph function, which makes it easier to use different edge weight attributes and to use an edge threshold, and has default plotting parameters to work well for directed graphs with edge labels.
+For this example we use the `from.Vprop` edge attribute with a threshold of 0.2.
 
-```{r, fig.align='center'}
-plot(g.agg, layout=layout.circle, edge.width = E(g.agg)$from.V_prop*10, 
-             edge.curved=0.2, vertex.label.dist=0.6)
+```{r, fig.align='center', fig.width=7, fig.height=5}
+plot.aggregate.network(g.agg, weight.var = 'from.Vprop',
+                       weight.thres = 0.2)
 ```
 
-For illustration, we can now see how the results change if we transform the network with the `only.first.match` function, as discussed above.
+For illustration, we can now see how the results change if we transform the network with the `only.first.match` function, which only counts edges to the first source that published a document.
 
-```{r, fig.align='center'}
+```{r, fig.align='center', fig.width=7, fig.height=5}
 g2 = only.first.match(g)
 g2.agg = aggregate.network(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
-plot(g2.agg, layout=layout.circle, edge.width = E(g2.agg)$from.V_prop*10, 
-             edge.curved=0.2, vertex.label.dist=0.6)
+plot.aggregate.network(g2.agg, weight.var = 'from.Vprop',
+                       weight.thres = 0.2)
 ```
 
 The first network is much more dense compared to the second.
@@ -426,7 +432,7 @@ Here we briefly point out some of the more usefull alternatives.
 In the aggregate.network function it is possible to use different vertex attributes to aggregate the edges for `from` and `to` nodes.
 A particularlly interesting application of this feature is to use the publication date in the aggregation.
 For instance, with the following settings, we can get the proportion of matched documents per day.
-Here we also use the `return.df` parameter in the `aggregate.network` function, to directly return the results as a data.frame[^returndf]. 
+Here we also use the `return.df` parameter in the `aggregate.network` function, to directly return the results as a data.frame. 
 
 ```{r}
 V(g)$day = format(as.Date(V(g)$date), '%Y-%m-%d')
@@ -470,22 +476,18 @@ Using this data, we can analyze to what extent different sources publish the sam
 The secondary focus of this package is to provide functions to conduct this analysis, and to provide a platform for scholars to share additional or alternative approaches.
 
 The data input required for this analysis consists solely of textual documents and their corresponding publication date and source.
-If the texts are imported as natural language, the `tm` package or `RTextTools` package can be used to preprocess them and to create a DTM.
-If the texts are imported as preprocessed tokens, the `create.dtm` function can be used to create a DTM.
 Since no human coding is required, the package enables large scale comparative and longitudinal studies.
-Although the demonstration in this vignette used a moderate sized dataset, the functions can handle much larger data [^scale_test].
-
-[^scale_test]: A test showed that on a laptop with 8Gb RAM and a 1.80GHz processor (no multi-threading used) the analysis performed well with a DTM containing 315.000 documents and 120.000 unique terms. This data covered 1 year in 14 sources, and a window of 3 days and threshold of 0.4 was used.
+Although the demonstration in this vignette used a moderate sized dataset, the `document.window.compare` can handle much larger data and is fast, thanks to the excellent sparse matrix multiplication alghoritm of the `Matrix` package.
 
 The goal is to continue developing this package as a specialized toolkit for analyzing the homogeneity and diffusion of news content.
 First of all, additional approaches for measuring whether documents are related will be added.
 Currently only a vector space model approach for calculating document similarity is implemented.
 For future versions alternative approaches such as language modeling will also be explored.
 In particular, we want to add alternative measures to express the relation of documents over time in terms of probability and information gain.
-This would also allow us to define a more formal way to determine whether or not a relation exists, other than using a similarity threshold.
+This would also allow us to define a more formal way to determine whether or not a relation exists, other than using a constant threshold.
 Secondly, new methods for analyzing and visualizing the network data will be explored. 
 In particular, methods will be implemented for analyzing patterns beyond dyadic ties between news outlets, building on techniques from the field of network analysis.
-To promote the involvement of other scholars and professionals in this development, the package is entirely open-source. 
+To promote the involvement of other scholars and professionals in this development, the package is published entirely open-source. 
 The source code is hosted on GitHub--*https://github.com/kasperwelbers/newsflow*.
 
 # Practical code example
@@ -504,12 +506,11 @@ dtm = weightTfIdf(dtm)
 g = documents.window.compare(dtm, meta, hour.window = c(-36,-0.1), min.similarity = 0.4)
 g = filter.window(g, hour.window = c(-36, -6), V(g)$sourcetype == 'Print NP')
 
-# Aggregate and visualize network 
+# Aggregate network 
 g.agg = aggregate.network(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
-get.adjacency(g.agg, attr='from.V_prop')
-plot(g.agg, layout=layout.circle, edge.width = E(g.agg)$from.V_prop*10, 
-             edge.curved=0.2, vertex.label.dist=0.6)
+get.adjacency(g.agg, attr='from.Vprop')
+plot.aggregate.network(g.agg, weight.var = 'from.Vprop', weight.thres=0.2)
 ```
 
 # References

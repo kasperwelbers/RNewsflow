@@ -143,21 +143,18 @@ phrases). Second, the temporal order in which messages are published is
 used to analyze consistent patterns in who follows whom.
 
 The main contribution of this package lies in the specialized
-application of document similarity measures for the purpose of analyzing
-the homogeneity and diffusion of news. News is a special type of
-information in the sense that it has a time dimension---it quickly loses
-its relevance. Therefore, we are often only interested in the similarity
-of news documents that occured within a short time distance. By
-restricting document comparisons to a given time distance, it becomes
-possible to compare many documents over a long period of time, but
-available document comparison software generally does not have this
-feature. We therefore offer the \texttt{documents.window.compare}
-function which compares documents using a sliding window over time. In
-addition, this package offers tools to aggregate, analyze and visualize
-the document similarity data. By proposing a standardized network
-format, using the \texttt{igraph} package, to organize the document
-similarity data, it lays the foundation for developing standardized
-procedures to analyze this type of data.
+application of document similarity measures for the purpose of comparing
+news messages. News is a special type of information in the sense that
+it has a time dimension---it quickly loses its relevance. Therefore, we
+are often only interested in the similarity of news documents that
+occured within a short time distance. By restricting document
+comparisons to a given time distance, it becomes possible to compare
+many documents over a long period of time, but available document
+comparison software generally does not have this feature. We therefore
+offer the \texttt{documents.window.compare} function which compares
+documents using a sliding window over time. In addition, this package
+offers tools to aggregate, analyze and visualize the document similarity
+data.
 
 The primary intended audience of this package is scholars and
 professionals in fields where the impact of news on society is a prime
@@ -216,9 +213,9 @@ A DTM is a matrix in which rows represent documents, columns represent
 terms, and cells indicate how often each term occurred in each document.
 This is referred to as a \emph{bag of words} respresentation of texts,
 since we ignore the order of words. This simplified representation makes
-analysis much easier and less computationally demanding, and as much
-research has shown: ``a simple list of words, which we call unigrams, is
-often sufficient to convey the general meaning of a text''
+analysis much easier and less computationally demanding, and as research
+has shown: ``a simple list of words, which we call unigrams, is often
+sufficient to convey the general meaning of a text''
 \citep[6]{grimmer13}.
 
 As input for this package, the DTM has to be in the
@@ -233,10 +230,10 @@ function.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{document1 =}\StringTok{ 'Socrates is human'}
-\NormalTok{document2 =}\StringTok{ 'Humans are mortal'}
-\NormalTok{document3 =}\StringTok{ 'Therefore, Socrates is mortal'}
-\NormalTok{dtm =}\StringTok{ }\NormalTok{RTextTools::}\KeywordTok{create_matrix}\NormalTok{(}\DataTypeTok{textColumns =} \KeywordTok{c}\NormalTok{(document1,document2,document3), }
+\NormalTok{doc1 =}\StringTok{ 'Socrates is human'}
+\NormalTok{doc2 =}\StringTok{ 'Humans are mortal'}
+\NormalTok{doc3 =}\StringTok{ 'Therefore, Socrates is mortal'}
+\NormalTok{dtm =}\StringTok{ }\NormalTok{RTextTools::}\KeywordTok{create_matrix}\NormalTok{(}\DataTypeTok{textColumns =} \KeywordTok{c}\NormalTok{(doc1,doc2,doc3), }
                                 \DataTypeTok{minWordLength =} \DecValTok{1}\NormalTok{, }\DataTypeTok{removeStopwords =} \NormalTok{F)}
 
 \KeywordTok{rownames}\NormalTok{(dtm) =}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{'Document'}\NormalTok{, }\DecValTok{1}\NormalTok{:}\KeywordTok{nrow}\NormalTok{(dtm))}
@@ -310,11 +307,11 @@ tagging are available in the \texttt{tm} package and in the
 \texttt{create\_matrix} function of the \texttt{RTextTools} package. To
 use lemmatization or part-of-speech tagging there are several free to
 use grammar parsers, such as \emph{CoreNLP} for English \citep{corenlp}
-and \emph{Frog} for Dutch \citep{bosch07}. To create a DTM based on
-externally pre-processed documents, one can use the base function
-\texttt{xtabs} to create a sparse matrix and the
-\texttt{as.DocumentTermMatrix} function from the \texttt{tm} package to
-transform this matrix to the \texttt{DocumentTermMatrix} class.
+and \emph{Frog} for Dutch \citep{bosch07}\footnote{To create a DTM based
+  on externally pre-processed documents, one can use the base function
+  \texttt{xtabs} to create a sparse matrix and the
+  \texttt{as.DocumentTermMatrix} function from the \texttt{tm} package
+  to transform this matrix to the \texttt{DocumentTermMatrix} class.}.
 
 For this vignette, data is used that has been preprocessed with the
 Dutch grammar parser Frog. The data is based on a recent study on the
@@ -436,16 +433,17 @@ the DTM can be filtered by using the selected terms as column values.
 \end{Shaded}
 
 Instead of deleting terms, we can also weight terms. Turney explains
-that
-\texttt{The idea of weighting is to give more weight to surprising events and less weight to expected events\textquotesingle{}\textquotesingle{}, which is important because}surprising
-events, if shared by two vectors, are more discriminative of the
-similarity between the vectors than less surprising events''
-\citep[156]{turney02}. Thus, we want to give more weight to rare words
-than common words. A classic weighting scheme and recommended standard
-in information retrieval is the term-frequency inverse document
-frequency (tf.idf) \citep[\citet{monroe08}]{sparck72}. This and other
-weighting schemes can easily be applied using the \texttt{tm} pacakge,
-for instance using the \texttt{weightTfIdf} function.
+that `'The idea of weighting is to give more weight to surprising events
+and less weight to expected events'`, which is important
+because'`surprising events, if shared by two vectors, are more
+discriminative of the similarity between the vectors than less
+surprising events'' \citep[156]{turney02}. Thus, we want to give more
+weight to rare words than common words. A classic weighting scheme and
+recommended standard in information retrieval is the term-frequency
+inverse document frequency (tf.idf) \citep[\citet{monroe08}]{sparck72}.
+This and other weighting schemes can easily be applied using the
+\texttt{tm} pacakge, for instance using the \texttt{weightTfIdf}
+function.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -608,9 +606,10 @@ histogram can provide a good first indication of this data.
 In the histogram we see that most document pairs with a similarity score
 above the threshold are about an hour apart (-1 on the x-axis). This is
 mainly because the online newspapers often follow the news agency within
-a very short amount of time. As time distance increases, the number of
-document pairs decreases, which makes sense because news gets old fast,
-so news diffusion should occur within a limited time after publication.
+a very short amount of time\{\^{}delaynote{]}. As time distance
+increases, the number of document pairs decreases, which makes sense
+because news gets old fast, so news diffusion should occur within a
+limited time after publication.
 
 \subsection{Tailoring the document comparison
 window}\label{tailoring-the-document-comparison-window}
@@ -746,10 +745,12 @@ newspaper message matched both a recent newsagency message and two
 online newspaper messages. If we are specifically interested in who the
 original source of the message is, then it makes sense to only count the
 edge to the newsagency. Thus, we can develop functions to transform the
-network to enable such alternative types of analysis. here we
+network to enable such alternative types of analysis. Here we
 demonstrate the \texttt{only.first.match} function, which transforms the
 network so that a document only has an edge to the earliest dated
-document it matches within the specified time window.
+document it matches within the specified time window\footnote{If there
+  are multiple earliest dated documents (that is, having the same
+  publication date) then edges to all earliest dated documents are kept.}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -795,8 +796,8 @@ attribute.
 
 \begin{longtable}[c]{@{}llrrrrrr@{}}
 \toprule
-from & to & edges & agg.hourdiff & from.V & from.V\_prop & to.V &
-to.V\_prop\tabularnewline
+from & to & edges & agg.hourdiff & from.V & from.Vprop & to.V &
+to.Vprop\tabularnewline
 \midrule
 \endhead
 Newsagency & Newsagency & 124 & -8.08 & 95 & 0.159 & 112 &
@@ -824,27 +825,26 @@ minutes). In addition to the edges, we can look at the number of
 vertices (i.e.~documents) in the \texttt{from} group that matched with
 at least one vertex in the \texttt{to} group. This is given by the
 \texttt{from.V} attribute, which shows here that 384 \emph{online NP 1}
-documents matched with a \emph{newsagency} document. \footnote{Note that
+documents matched with a \emph{newsagency} document\footnote{Note that
   the \texttt{edges} score is always equal to or higher than the
   \texttt{from.matched} score, since one document can match with
   multiple other documents.}. This is also given as the proportion of
 all vertices/documents in the \texttt{from} group, as the
-\texttt{from.V\_prop} attribute. Substantially, the
-\texttt{from.V\_prop} score thus indicates that 83.12\% of political
-news messages in \emph{online NP 1} is similar or identical to recent
-\emph{newsagency} messages. For the analysis of content homogeneity and
-news diffusion, the \texttt{from.V\_prop} attribute is often most
-relevant.
+\texttt{from.Vprop} attribute. Substantially, the \texttt{from.Vprop}
+score thus indicates that 83.12\% of political news messages in
+\emph{online NP 1} is similar or identical to recent \emph{newsagency}
+messages. For the analysis of content homogeneity and news diffusion,
+the \texttt{from.Vprop} attribute is often most relevant.
 
-The \texttt{V\textquotesingle{} and \textquotesingle{}V\_prop} scores
-are also reported for the \texttt{to} group. This gives an inversed
+The \texttt{V\textquotesingle{} and \textquotesingle{}Vprop} scores are
+also reported for the \texttt{to} group. This gives an inversed
 perspective on the relation between the \texttt{from} and \texttt{to}
 groups. Based on the \texttt{to.V} score, we see that 71.12\% of
 documents published by the \emph{newsagency} is similar or identical to
 future documents in \emph{online NP 1}. In other words, of all the
 political news messages published by the \emph{newsagency}, 71.12\% was
 afterwards also published by \emph{online NP 1}. Thus,
-\texttt{from.V\_prop} and \texttt{to.v\_prop} are related but different
+\texttt{from.Vprop} and \texttt{to.Vprop} are related but different
 scores, and can be used to answer different research questions.
 
 \subsection{Inspecting and visualizing
@@ -858,7 +858,7 @@ and columns.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{get.adjacency}\NormalTok{(g.agg, }\DataTypeTok{attr=} \StringTok{'from.V_prop'}\NormalTok{, }\DataTypeTok{sparse =} \NormalTok{F)}
+\KeywordTok{get.adjacency}\NormalTok{(g.agg, }\DataTypeTok{attr=} \StringTok{'from.Vprop'}\NormalTok{, }\DataTypeTok{sparse =} \NormalTok{F)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -876,28 +876,36 @@ Print NP 1 & 0.231 & 0.218 & 0.184 & 0.007 & 0.027\tabularnewline
 \bottomrule
 \end{longtable}
 
-Furthermore, we can use the network visualization features.
+Furthermore, we can use the network visualization features of the
+\texttt{igraph} package. This can help present the document similarity
+data in an intuitively interpretable way. For the sake of convenience,
+we offer \texttt{plot.aggregate.network} function. This is a wrapper for
+the plot.igraph function, which makes it easier to use different edge
+weight attributes and to use an edge threshold, and has default plotting
+parameters to work well for directed graphs with edge labels. For this
+example we use the \texttt{from.Vprop} edge attribute with a threshold
+of 0.2.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(g.agg, }\DataTypeTok{layout=}\NormalTok{layout.circle, }\DataTypeTok{edge.width =} \KeywordTok{E}\NormalTok{(g.agg)$from.V_prop*}\DecValTok{10}\NormalTok{, }
-             \DataTypeTok{edge.curved=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{vertex.label.dist=}\FloatTok{0.6}\NormalTok{)}
+\KeywordTok{plot.aggregate.network}\NormalTok{(g.agg, }\DataTypeTok{weight.var =} \StringTok{'from.Vprop'}\NormalTok{,}
+                       \DataTypeTok{weight.thres =} \FloatTok{0.2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{center}\includegraphics{vignette_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
 For illustration, we can now see how the results change if we transform
-the network with the \texttt{only.first.match} function, as discussed
-above.
+the network with the \texttt{only.first.match} function, which only
+counts edges to the first source that published a document.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{g2 =}\StringTok{ }\KeywordTok{only.first.match}\NormalTok{(g)}
 \NormalTok{g2.agg =}\StringTok{ }\KeywordTok{aggregate.network}\NormalTok{(g2, }\DataTypeTok{by=}\StringTok{'source'}\NormalTok{, }\DataTypeTok{edge.attribute=}\StringTok{'hourdiff'}\NormalTok{, }\DataTypeTok{agg.FUN=}\NormalTok{median)}
 
-\KeywordTok{plot}\NormalTok{(g2.agg, }\DataTypeTok{layout=}\NormalTok{layout.circle, }\DataTypeTok{edge.width =} \KeywordTok{E}\NormalTok{(g2.agg)$from.V_prop*}\DecValTok{10}\NormalTok{, }
-             \DataTypeTok{edge.curved=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{vertex.label.dist=}\FloatTok{0.6}\NormalTok{)}
+\KeywordTok{plot.aggregate.network}\NormalTok{(g2.agg, }\DataTypeTok{weight.var =} \StringTok{'from.Vprop'}\NormalTok{,}
+                       \DataTypeTok{weight.thres =} \FloatTok{0.2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -932,7 +940,7 @@ the publication date in the aggregation. For instance, with the
 following settings, we can get the proportion of matched documents per
 day. Here we also use the \texttt{return.df} parameter in the
 \texttt{aggregate.network} function, to directly return the results as a
-data.frame{[}\^{}returndf{]}.
+data.frame.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -948,7 +956,7 @@ data.frame{[}\^{}returndf{]}.
 \begin{longtable}[c]{@{}lllrrrrrr@{}}
 \toprule
 to.source & from.source & from.day & edges & agg.hourdiff & from.V &
-to.V & from.V\_prop & to.V\_prop\tabularnewline
+to.V & from.Vprop & to.Vprop\tabularnewline
 \midrule
 \endhead
 Newsagency & Newsagency & 2013-06-01 & 1 & -9.70 & 1 & 1 & 0.100 &
@@ -1034,19 +1042,12 @@ and to provide a platform for scholars to share additional or
 alternative approaches.
 
 The data input required for this analysis consists solely of textual
-documents and their corresponding publication date and source. If the
-texts are imported as natural language, the \texttt{tm} package or
-\texttt{RTextTools} package can be used to preprocess them and to create
-a DTM. If the texts are imported as preprocessed tokens, the
-\texttt{create.dtm} function can be used to create a DTM. Since no human
-coding is required, the package enables large scale comparative and
-longitudinal studies. Although the demonstration in this vignette used a
-moderate sized dataset, the functions can handle much larger data
-\footnote{A test showed that on a laptop with 8Gb RAM and a 1.80GHz
-  processor (no multi-threading used) the analysis performed well with a
-  DTM containing 315.000 documents and 120.000 unique terms. This data
-  covered 1 year in 14 sources, and a window of 3 days and threshold of
-  0.4 was used.}.
+documents and their corresponding publication date and source. Since no
+human coding is required, the package enables large scale comparative
+and longitudinal studies. Although the demonstration in this vignette
+used a moderate sized dataset, the \texttt{document.window.compare} can
+handle much larger data and is fast, thanks to the excellent sparse
+matrix multiplication alghoritm of the \texttt{Matrix} package.
 
 The goal is to continue developing this package as a specialized toolkit
 for analyzing the homogeneity and diffusion of news content. First of
@@ -1057,14 +1058,13 @@ alternative approaches such as language modeling will also be explored.
 In particular, we want to add alternative measures to express the
 relation of documents over time in terms of probability and information
 gain. This would also allow us to define a more formal way to determine
-whether or not a relation exists, other than using a similarity
-threshold. Secondly, new methods for analyzing and visualizing the
-network data will be explored. In particular, methods will be
-implemented for analyzing patterns beyond dyadic ties between news
-outlets, building on techniques from the field of network analysis. To
-promote the involvement of other scholars and professionals in this
-development, the package is entirely open-source. The source code is
-hosted on
+whether or not a relation exists, other than using a constant threshold.
+Secondly, new methods for analyzing and visualizing the network data
+will be explored. In particular, methods will be implemented for
+analyzing patterns beyond dyadic ties between news outlets, building on
+techniques from the field of network analysis. To promote the
+involvement of other scholars and professionals in this development, the
+package is published entirely open-source. The source code is hosted on
 GitHub--\emph{\url{https://github.com/kasperwelbers/newsflow}}.
 
 \section{Practical code example}\label{practical-code-example}
@@ -1084,12 +1084,11 @@ GitHub--\emph{\url{https://github.com/kasperwelbers/newsflow}}.
 \NormalTok{g =}\StringTok{ }\KeywordTok{documents.window.compare}\NormalTok{(dtm, meta, }\DataTypeTok{hour.window =} \KeywordTok{c}\NormalTok{(-}\DecValTok{36}\NormalTok{,-}\FloatTok{0.1}\NormalTok{), }\DataTypeTok{min.similarity =} \FloatTok{0.4}\NormalTok{)}
 \NormalTok{g =}\StringTok{ }\KeywordTok{filter.window}\NormalTok{(g, }\DataTypeTok{hour.window =} \KeywordTok{c}\NormalTok{(-}\DecValTok{36}\NormalTok{, -}\DecValTok{6}\NormalTok{), }\KeywordTok{V}\NormalTok{(g)$sourcetype ==}\StringTok{ 'Print NP'}\NormalTok{)}
 
-\CommentTok{# Aggregate and visualize network }
+\CommentTok{# Aggregate network }
 \NormalTok{g.agg =}\StringTok{ }\KeywordTok{aggregate.network}\NormalTok{(g, }\DataTypeTok{by=}\StringTok{'source'}\NormalTok{, }\DataTypeTok{edge.attribute=}\StringTok{'hourdiff'}\NormalTok{, }\DataTypeTok{agg.FUN=}\NormalTok{median)}
 
-\KeywordTok{get.adjacency}\NormalTok{(g.agg, }\DataTypeTok{attr=}\StringTok{'from.V_prop'}\NormalTok{)}
-\KeywordTok{plot}\NormalTok{(g.agg, }\DataTypeTok{layout=}\NormalTok{layout.circle, }\DataTypeTok{edge.width =} \KeywordTok{E}\NormalTok{(g.agg)$from.V_prop*}\DecValTok{10}\NormalTok{, }
-             \DataTypeTok{edge.curved=}\FloatTok{0.2}\NormalTok{, }\DataTypeTok{vertex.label.dist=}\FloatTok{0.6}\NormalTok{)}
+\KeywordTok{get.adjacency}\NormalTok{(g.agg, }\DataTypeTok{attr=}\StringTok{'from.Vprop'}\NormalTok{)}
+\KeywordTok{plot.aggregate.network}\NormalTok{(g.agg, }\DataTypeTok{weight.thres=}\FloatTok{0.2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 

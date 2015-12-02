@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.11.14)  18 NOV 2015 18:10
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.11.14)  1 DEC 2015 17:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1036,7 +1036,7 @@ Package: booktabs 2005/04/14 v1.61803 publication quality tables
 \@lastruleclass=\count144
 \@thisrulewidth=\dimen197
 )
-No file RJwrapper.aux.
+(./RJwrapper.aux)
 \openout1 = `RJwrapper.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 14.
@@ -1053,7 +1053,7 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 14.
 LaTeX Font Info:    ... okay on input line 14.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 14.
 LaTeX Font Info:    Try loading font information for TS1+cmr on input line 14.
-(/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
+ (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 14.
@@ -1161,13 +1161,14 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 14.
 LaTeX Info: Redefining \pageref on input line 14.
 LaTeX Info: Redefining \nameref on input line 14.
+
+(./RJwrapper.out) (./RJwrapper.out)
 \@outlinefile=\write5
 \openout5 = `RJwrapper.out'.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-
-(./newsflow.tex
+ (./newsflow.tex
 LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <20.74> not available
 (Font)              Font shape `T1/ppl/b/n' tried instead on input line 6.
 LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <9> not available
@@ -1273,283 +1274,182 @@ Package microtype Info: Character `textemdash ' is missing
 (microtype)             Ignoring protrusion settings for this character.
 
 
-Package natbib Warning: Citation `baum08' on page 1 undefined on input line 58.
+Package natbib Warning: Citation `baum08' on page 1 undefined on input line 55.
 
 
 
 Package natbib Warning: Citation `boczkowski07' on page 1 undefined on input li
-ne 58.
+ne 55.
 
 
-Package natbib Warning: Citation `ragas14' on page 1 undefined on input line 58
+Package natbib Warning: Citation `ragas14' on page 1 undefined on input line 55
 .
 
 
 Package natbib Warning: Citation `bennett08' on page 1 undefined on input line 
-61.
+58.
 
 
 Package natbib Warning: Citation `blumler99' on page 1 undefined on input line 
-61.
+58.
 
 
 Package natbib Warning: Citation `shoemaker09' on page 1 undefined on input lin
-e 64.
+e 61.
 
 
 Package natbib Warning: Citation `galtung65' on page 1 undefined on input line 
-65.
+62.
 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 ]
 LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <10> not available
-(Font)              Font shape `T1/ppl/b/n' tried instead on input line 106.
+(Font)              Font shape `T1/ppl/b/n' tried instead on input line 102.
 
 
 Package natbib Warning: Citation `grimmer13' on page 2 undefined on input line 
-115.
+111.
 
-LaTeX Font Info:    Try loading font information for TS1+zi4 on input line 129.
+LaTeX Font Info:    Try loading font information for TS1+zi4 on input line 125.
 
 (/usr/share/texlive/texmf-dist/tex/latex/inconsolata/ts1zi4.fd
 File: ts1zi4.fd 2013/06/07 Fontinst v1.933 font definitions for TS1/zi4.
 )
 LaTeX Font Info:    Font shape `TS1/zi4/m/n' will be
-(Font)              scaled to size 9.18004pt on input line 129.
+(Font)              scaled to size 9.18004pt on input line 125.
 Package microtype Info: Loading generic settings for font family
 (microtype)             `zi4' (encoding: TS1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Try loading font information for TS1+ppl on input line 162.
+LaTeX Font Info:    Try loading font information for TS1+ppl on input line 157.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ppl.fd
 File: ts1ppl.fd 2001/06/04 font definitions for TS1/ppl.
 ) [2]
 
-Package natbib Warning: Citation `corenlp' on page 3 undefined on input line 20
-0.
-
-
-Package natbib Warning: Citation `bosch07' on page 3 undefined on input line 20
-1.
+Package natbib Warning: Citation `bosch07' on page 3 undefined on input line 19
+7.
 
 [3]
 
 Package natbib Warning: Citation `turney02' on page 4 undefined on input line 3
-22.
+16.
 
 
 Package natbib Warning: Citation `sparck72' on page 4 undefined on input line 3
-25.
+19.
 
 
 Package natbib Warning: Citation `monroe08' on page 4 undefined on input line 3
-25.
+19.
 
 
 Package natbib Warning: Citation `salton75' on page 4 undefined on input line 3
-42.
+36.
 
 
 Package natbib Warning: Citation `salton03' on page 4 undefined on input line 3
-42.
+36.
 
 [4]
-<newsflow_files/figure-latex/unnamed-chunk-11-1.pdf, id=54, 459.7175pt x 177.66
-376pt>
+<newsflow_files/figure-latex/unnamed-chunk-11-1.pdf, id=109, 337.26pt x 177.663
+76pt>
 File: newsflow_files/figure-latex/unnamed-chunk-11-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-11-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-11-1.pdf use
-d on input line 463.
-(pdftex.def)             Requested size: 459.71637pt x 177.66331pt.
-
-Overfull \hbox (76.37779pt too wide) in paragraph at lines 463--464
-[][]
+d on input line 458.
+(pdftex.def)             Requested size: 337.25917pt x 177.66331pt.
+ [5]
+Overfull \hbox (35.56956pt too wide) in paragraph at lines 485--493
+\T1/zi4/m/n/9 hour.window \T1/ppl/m/n/9 (-20) pa-ram-e-ter, which works iden-ti
+-cal to the \T1/zi4/m/n/9 hour.window \T1/ppl/m/n/9 (-20) pa-ram-e-ter in the \
+T1/zi4/m/n/9 documents.window.compare
  []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 463--464
-
- []
-
-[5]
-! Missing $ inserted.
-<inserted text> 
-                $
-l.466 ...ency within a very short amount of time[^
-                                                  delaynote].
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.468 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (489.97122pt too wide) in paragraph at lines 465--468
-\T1/ppl/m/n/9 (-20) news agency within a very short amount of time[$[]\OML/zplm
-/m/it/9 elaynote\OT1/zplm/m/n/9 ]\OT1/ppl/m/n/9 (-20) .\OML/zplm/m/it/9 Astimed
-istanceincreases\OT1/ppl/m/n/9 (-20) , \OML/zplm/m/it/9 thenumberofdocumentpair
-sdecreases\OT1/ppl/m/n/9 (-20) , \OML/zplm/m/it/9 whichmakessensebecausenewsget
-soldfast\OT1/ppl/m/n/9 (-20) , \OML/zplm/m/it/9 sonewsdiffusionshouldoccurwithi
-nalimitedtimeafterpublication\OT1/ppl/m/n/9 (-20) .$ 
- []
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.469 [^
-        delaynote]: Actually, many of the newspapers publish nearly simultan...
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.470 
-      
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (986.39114pt too wide) in paragraph at lines 469--470
-[]\T1/ppl/m/n/9 (-20) [$[]\OML/zplm/m/it/9 elaynote\OT1/zplm/m/n/9 ] : \OML/zpl
-m/m/it/9 Actually\OT1/ppl/m/n/9 (-20) , \OML/zplm/m/it/9 manyofthenewspaperspub
-lishnearlysimultaneouswiththenewsagency\OT1/ppl/m/n/9 (-20) .\OML/zplm/m/it/9 S
-incewehadreasontobelievethatthetimestampsofournewsagencydatawereoccasionallylat
-erthantheactualpublicationtime\OT1/ppl/m/n/9 (-20) , \OML/zplm/m/it/9 wesubtrac
-tedonehourfromitspublicationtimeingeneral\OT1/ppl/m/n/9 (-20) .\OML/zplm/m/it/9
- Asaresult\OT1/ppl/m/n/9 (-20) , \OML/zplm/m/it/9 thetimedistancebetweennewsage
-ncyandnewspaperarticlescanbeoffbyanhour\OT1/ppl/m/n/9 (-20) .$ 
- []
-
-! You can't use `macro parameter character #' in vertical mode.
-l.471 #
-       # Tailoring the document comparison window
-Sorry, but I'm not programmed to handle this case;
-I'll just pretend that you didn't ask for it.
-If you're in the wrong mode, you might be able to
-return to the right one by typing `I}' or `I$' or `I\par'.
-
-! You can't use `macro parameter character #' in vertical mode.
-l.471 ##
-         Tailoring the document comparison window
-Sorry, but I'm not programmed to handle this case;
-I'll just pretend that you didn't ask for it.
-If you're in the wrong mode, you might be able to
-return to the right one by typing `I}' or `I$' or `I\par'.
 
 [6 <./newsflow_files/figure-latex/unnamed-chunk-11-1.pdf>]
-Overfull \hbox (45.89233pt too wide) in paragraph at lines 536--540
+Overfull \hbox (45.10101pt too wide) in paragraph at lines 541--544
 []\T1/ppl/m/n/9 (-20) The cur-rent data has 658 sub-components. To vi-su-al-ize
- these com-po-nents, we of-fer the \T1/zi4/m/n/9 plot.document.network
+ these com-po-nents, we of-fer the `plot.document.network`
  []
 
 
-<newsflow_files/figure-latex/unnamed-chunk-15-1.pdf, id=74, 378.41376pt x 131.4
-9126pt>
+<newsflow_files/figure-latex/unnamed-chunk-15-1.pdf, id=129, 378.41376pt x 131.
+49126pt>
 File: newsflow_files/figure-latex/unnamed-chunk-15-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-15-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-15-1.pdf use
-d on input line 547.
+d on input line 551.
 (pdftex.def)             Requested size: 378.41283pt x 131.49092pt.
 
-<newsflow_files/figure-latex/unnamed-chunk-16-1.pdf, id=75, 378.41376pt x 220.8
-25pt>
+<newsflow_files/figure-latex/unnamed-chunk-16-1.pdf, id=130, 378.41376pt x 220.
+825pt>
 File: newsflow_files/figure-latex/unnamed-chunk-16-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-16-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-16-1.pdf use
-d on input line 567.
+d on input line 565.
 (pdftex.def)             Requested size: 378.41283pt x 220.82445pt.
  [7 <./newsflow_files/figure-latex/unnamed-chunk-15-1.pdf> <./newsflow_files/fi
 gure-latex/unnamed-chunk-16-1.pdf>]
-<newsflow_files/figure-latex/unnamed-chunk-17-1.pdf, id=95, 343.2825pt x 191.71
-625pt>
+<newsflow_files/figure-latex/unnamed-chunk-17-1.pdf, id=150, 343.2825pt x 191.7
+1625pt>
 File: newsflow_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-17-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-17-1.pdf use
-d on input line 597.
+d on input line 586.
 (pdftex.def)             Requested size: 343.28165pt x 191.71577pt.
  [8 <./newsflow_files/figure-latex/unnamed-chunk-17-1.pdf>]
-Overfull \hbox (16.67924pt too wide) in paragraph at lines 684--689
+Overfull \hbox (11.90944pt too wide) in paragraph at lines 646--648
 \T1/ppl/m/n/9 (-20) We al-ready saw that the net-work data can be trans-formed 
-to a com-mon data.frame with the \T1/zi4/m/n/9 get.data.frame
+to a com-mon data.frame with the `get.data.frame`
  []
 
 
-<newsflow_files/figure-latex/unnamed-chunk-20-1.pdf, id=109, 225.84375pt x 185.
-69376pt>
+<newsflow_files/figure-latex/unnamed-chunk-20-1.pdf, id=163, 225.84375pt x 188.
+705pt>
 File: newsflow_files/figure-latex/unnamed-chunk-20-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-20-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-20-1.pdf use
-d on input line 713.
-(pdftex.def)             Requested size: 225.84319pt x 185.6933pt.
-
-<newsflow_files/figure-latex/unnamed-chunk-21-1.pdf, id=110, 220.825pt x 185.69
-376pt>
+d on input line 677.
+(pdftex.def)             Requested size: 225.84319pt x 188.70453pt.
+ [9]
+<newsflow_files/figure-latex/unnamed-chunk-21-1.pdf, id=169, 220.825pt x 188.70
+5pt>
 File: newsflow_files/figure-latex/unnamed-chunk-21-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-21-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-21-1.pdf use
-d on input line 729.
-(pdftex.def)             Requested size: 220.82445pt x 185.6933pt.
- [9 <./newsflow_files/figure-latex/unnamed-chunk-20-1.pdf>] [10 <./newsflow_fil
-es/figure-latex/unnamed-chunk-21-1.pdf>]
-Overfull \hbox (30.6344pt too wide) in paragraph at lines 842--853
-\T1/ppl/m/n/9 (-20) of doc-u-ments. The pri-mary fo-cus and most im-por-tant fe
-a-ture of this pack-age is the \T1/zi4/m/n/9 documents.window.compare
- []
-
-
-LaTeX Font Warning: Font shape `T1/zi4/m/it' undefined
-(Font)              using `T1/zi4/m/n' instead on input line 886.
-
-[11])
+d on input line 698.
+(pdftex.def)             Requested size: 220.82445pt x 188.70453pt.
+ [10 <./newsflow_files/figure-latex/unnamed-chunk-20-1.pdf> <./newsflow_files/f
+igure-latex/unnamed-chunk-21-1.pdf>] [11])
 
 Package natbib Warning: There were undefined citations.
 
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 27.
-[12]
+[12] [13]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 27.
  (./RJwrapper.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 27.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 27.
-
-
-Package rerunfilecheck Warning: File `RJwrapper.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `RJwrapper.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  B517A7C73A8960DB4A4CC01A2A9D51F3;1153.
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
+Package rerunfilecheck Info: File `RJwrapper.out' has not changed.
+(rerunfilecheck)             Checksum: EAA54991505C3931A843265994A017D8;1305.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 27.
  ) 
 Here is how much of TeX's memory you used:
- 20128 strings out of 493304
- 342290 string characters out of 6139870
- 449305 words of memory out of 5000000
- 22923 multiletter control sequences out of 15000+600000
- 50118 words of font info for 215 fonts, out of 8000000 for 9000
+ 20142 strings out of 493304
+ 342214 string characters out of 6139870
+ 449409 words of memory out of 5000000
+ 22924 multiletter control sequences out of 15000+600000
+ 50276 words of font info for 217 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 63i,11n,57p,456b,663s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 63i,12n,57p,456b,671s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.9} has been referenced but does not exi
 st, replaced by a fixed one
 
@@ -1585,10 +1485,10 @@ nts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/typ
 e1/urw/palatino/uplb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palat
 ino/uplr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palatino/uplri8a.
 pfb>
-Output written on RJwrapper.pdf (12 pages, 169493 bytes).
+Output written on RJwrapper.pdf (13 pages, 159285 bytes).
 PDF statistics:
- 185 PDF objects out of 1000 (max. 8388607)
- 146 compressed objects within 2 object streams
- 37 named destinations out of 1000 (max. 500000)
- 38443 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 237 PDF objects out of 1000 (max. 8388607)
+ 197 compressed objects within 2 object streams
+ 40 named destinations out of 1000 (max. 500000)
+ 38563 words of extra memory for PDF output out of 42996 (max. 10000000)
 

@@ -1,4 +1,4 @@
-\begin{thebibliography}{15}
+\begin{thebibliography}{18}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -60,6 +60,12 @@ Sharon Meraz.
 \newblock \emph{Journalism \& Mass Communication Quarterly}, 88\penalty0
   (1):\penalty0 176--194, 2011.
 
+\bibitem[Monroe et~al.(2008)Monroe, Colaresi, and Quinn]{monroe08}
+Burt~L Monroe, Michael~P Colaresi, and Kevin~M Quinn.
+\newblock Fightin'words: Lexical feature selection and evaluation for
+  identifying the content of political conflict.
+\newblock \emph{Political Analysis}, 16\penalty0 (4):\penalty0 372--403, 2008.
+
 \bibitem[Paterson(2005)]{paterson05}
 Chris Paterson.
 \newblock News agency dominance in international news on the internet.
@@ -92,6 +98,20 @@ Gerard Salton, Anita Wong, and Chung-Shu Yang.
 Pamela~J Shoemaker and Timothy Vos.
 \newblock \emph{Gatekeeping theory}.
 \newblock Routledge, 2009.
+
+\bibitem[Sparck~Jones(1972)]{sparck72}
+Karen Sparck~Jones.
+\newblock A statistical interpretation of term specificity and its application
+  in retrieval.
+\newblock \emph{Journal of documentation}, 28\penalty0 (1):\penalty0 11--21,
+  1972.
+
+\bibitem[Turney(2002)]{turney02}
+Peter~D. Turney.
+\newblock Thumbs up or thumbs down? semantic orientation applied to
+  unsupervised classification of reviews.
+\newblock In \emph{Proceedings of the 40th Annual Meeting of the Association
+  for Computational Linguistics (ACL'02)}, pages 417--424, 2002.
 
 \bibitem[Van~den Bosch et~al.(2007)Van~den Bosch, Busser, Daelemans, and
   Canisius]{bosch07}

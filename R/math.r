@@ -17,13 +17,6 @@ exp.decay <- function(r, decay_constant=0.6931472, halflife=NULL) {
   exp(-r*decay_constant)
 }
 
-corry <- function(x, y){
-  x = x-mean(x)
-  y = y-mean(y)
-  l = sqrt(sum(x^2)) * sqrt(sum(y^2))
-  sum(x*y) / l
-}
-
 matrix.autocor <- function(m, rows_lag=1){
   ## a sparse matrix solution for calculating the autocorrelation for each column vector
   m_lag = m[1:(nrow(m) - rows_lag),]

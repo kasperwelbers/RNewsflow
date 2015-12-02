@@ -203,18 +203,11 @@ only.first.match <- function(g){
   e$i = 1:nrow(e)
   e$to.date = V(g)$date[e$X2]
   e = e[order(e$to.date),]
-  e = e[duplicated(e$X1),]
-  delete.edges(g, e$i)
-}
-
-#' @export
-only.last.match <- function(g){
-  e = data.frame(get.edges(g, E(g)))
-  e$i = 1:nrow(e)
-  e$to.date = V(g)$date[e$X2]
-  e = e[order(-e$to.date),]
-  e = e[duplicated(e$X1),]
-  delete.edges(g, e$i)
+  
+  first = !duplicated(e$X1)
+  first = paste(e$X1, e$to.date, sep='.') %in% paste(e$X1[first], e$to.date[first], sep='.') # also first if same date as first
+  
+  delete.edges(g, e$i[!first])
 }
 
 #' @export
@@ -265,8 +258,8 @@ aggregate.network <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='
   
   e = merge(e, from.totals, by.x=paste('from', by.from, sep='.'), by.y=by.from, all.x=T)
   e = merge(e, to.totals, by.x=paste('to', by.to, sep='.'), by.y=by.to, all.x=T)
-  e$from.V_prop = e$from.V / e$from.N
-  e$to.V_prop = e$to.V / e$to.N
+  e$from.Vprop = e$from.V / e$from.N
+  e$to.Vprop = e$to.V / e$to.N
   
   if(!return.df) return(return.aggregate.network(e))  
   if(return.df) {
@@ -286,7 +279,7 @@ return.aggregate.network <- function(g.df){
   g.agg = graph.data.frame(cbind(from.name,to.name))
   
   aggvar = colnames(g.df)[grep('agg\\.', colnames(g.df))]
-  for(edge.attrib in c('edges',aggvar,'from.V','from.V_prop','to.V','to.V_prop')){
+  for(edge.attrib in c('edges',aggvar,'from.V','from.Vprop','to.V','to.Vprop')){
     g.agg = set.edge.attribute(g.agg, edge.attrib, value=g.df[,edge.attrib])
   }
   
@@ -323,5 +316,39 @@ graph.plot.presets <- function(g){
   V(g)$color = 'white'
   V(g)$size = 10
   g
+}
+
+#' @export
+plot.aggregate.network <- function(g, weight.var='from.Vprop', weight.thres=NULL, delete.isolates=F, 
+                                   vertex.size=30, vertex.color='lightblue', vertex.label.color='black', vertex.label.cex=0.7, 
+                                   edge.color = 'grey', show.edge.labels=T, edge.label.color = 'black', edge.label.cex = 0.6, edge.arrow.size=1, 
+                                   layout=layout.davidson.harel, ...){
+  E(g)$weight = get.edge.attribute(g, 'from.Vprop')
+  if(!is.null(weight.thres)) g = delete.edges(g, which(E(g)$weight < weight.thres))
+  if(delete.isolates) g = delete.vertices(g, degree(g) == 0)
+  
+  argnames = names(list(...))  
+  E(g)$color = edge.color
+  E(g)$arrow.size = edge.arrow.size
+  E(g)$label.cex = edge.label.cex
+  E(g)$label.color = edge.label.color
+  if(!'edge.width' %in% argnames) E(g)$width = scales::rescale(E(g)$weight, to = c(1,5))
+  if(!'edge.label' %in% argnames & show.edge.labels) E(g)$label = round(E(g)$weight, 2)
+  if(!'edge.label.font' %in% argnames) E(g)$label.font = 3
+  if(!'edge.curved' %in% argnames) {
+    e = get.edges(g, E(g))
+    twoway = paste(e[,1], e[,2], sep='.') %in% paste(e[,2], e[,1], sep='.')
+    E(g)$curved = ifelse(twoway, 0.35, 0.15)
+  } 
+  
+  V(g)$size = vertex.size
+  V(g)$label.cex = vertex.label.cex
+  V(g)$color = vertex.color
+  V(g)$label.color = vertex.label.color
+  if(!'vertex.label' %in% argnames) V(g)$label = gsub(' ', '\n', V(g)$name)  
+  if(!'vertex.frame.color' %in% argnames) V(g)$frame.color = V(g)$color
+  
+  g$layout = layout
+  plot(g, ...)
 }
 
