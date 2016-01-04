@@ -493,6 +493,8 @@ The source code is hosted on GitHub--*https://github.com/kasperwelbers/newsflow*
 # Practical code example
 
 ```{r eval=FALSE}
+library(newsflow)
+
 # Prepare DTM and meta data
 data(dtm)
 data(meta)
@@ -505,6 +507,9 @@ dtm = weightTfIdf(dtm)
 # Prepare document similarity network
 g = documents.window.compare(dtm, meta, hour.window = c(-36,-0.1), min.similarity = 0.4)
 g = filter.window(g, hour.window = c(-36, -6), V(g)$sourcetype == 'Print NP')
+
+g_subcomps = decompose.graph(g)
+plot.document.network(g_subcomps[[1]], dtm=dtm)
 
 # Aggregate network 
 g.agg = aggregate.network(g, by='source', edge.attribute='hourdiff', agg.FUN=median)

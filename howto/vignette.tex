@@ -1071,6 +1071,8 @@ GitHub--\emph{\url{https://github.com/kasperwelbers/newsflow}}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(newsflow)}
+
 \CommentTok{# Prepare DTM and meta data}
 \KeywordTok{data}\NormalTok{(dtm)}
 \KeywordTok{data}\NormalTok{(meta)}
@@ -1084,11 +1086,14 @@ GitHub--\emph{\url{https://github.com/kasperwelbers/newsflow}}.
 \NormalTok{g =}\StringTok{ }\KeywordTok{documents.window.compare}\NormalTok{(dtm, meta, }\DataTypeTok{hour.window =} \KeywordTok{c}\NormalTok{(-}\DecValTok{36}\NormalTok{,-}\FloatTok{0.1}\NormalTok{), }\DataTypeTok{min.similarity =} \FloatTok{0.4}\NormalTok{)}
 \NormalTok{g =}\StringTok{ }\KeywordTok{filter.window}\NormalTok{(g, }\DataTypeTok{hour.window =} \KeywordTok{c}\NormalTok{(-}\DecValTok{36}\NormalTok{, -}\DecValTok{6}\NormalTok{), }\KeywordTok{V}\NormalTok{(g)$sourcetype ==}\StringTok{ 'Print NP'}\NormalTok{)}
 
+\NormalTok{g_subcomps =}\StringTok{ }\KeywordTok{decompose.graph}\NormalTok{(g)}
+\KeywordTok{plot.document.network}\NormalTok{(g_subcomps[[}\DecValTok{1}\NormalTok{]], }\DataTypeTok{dtm=}\NormalTok{dtm)}
+
 \CommentTok{# Aggregate network }
 \NormalTok{g.agg =}\StringTok{ }\KeywordTok{aggregate.network}\NormalTok{(g, }\DataTypeTok{by=}\StringTok{'source'}\NormalTok{, }\DataTypeTok{edge.attribute=}\StringTok{'hourdiff'}\NormalTok{, }\DataTypeTok{agg.FUN=}\NormalTok{median)}
 
 \KeywordTok{get.adjacency}\NormalTok{(g.agg, }\DataTypeTok{attr=}\StringTok{'from.Vprop'}\NormalTok{)}
-\KeywordTok{plot.aggregate.network}\NormalTok{(g.agg, }\DataTypeTok{weight.thres=}\FloatTok{0.2}\NormalTok{)}
+\KeywordTok{plot.aggregate.network}\NormalTok{(g.agg, }\DataTypeTok{weight.var =} \StringTok{'from.Vprop'}\NormalTok{, }\DataTypeTok{weight.thres=}\FloatTok{0.2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
