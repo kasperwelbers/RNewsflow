@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.11.14)  1 DEC 2015 17:14
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.11.14)  1 FEB 2016 09:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1175,34 +1175,6 @@ LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <9> not available
 (Font)              Font shape `T1/ppl/b/n' tried instead on input line 21.
 LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <12> not available
 (Font)              Font shape `T1/ppl/b/n' tried instead on input line 23.
-
-
-Package natbib Warning: Citation `meraz11' on page 1 undefined on input line 28
-.
-
-
-Package natbib Warning: Citation `paterson05' on page 1 undefined on input line
- 28.
-
-
-Package natbib Warning: Citation `pew10' on page 1 undefined on input line 28.
-
-LaTeX Font Info:    Try loading font information for T1+zi4 on input line 28.
-(/usr/share/texlive/texmf-dist/tex/latex/inconsolata/t1zi4.fd
-File: t1zi4.fd 2013/06/09 T1/zi4 (Inconsolata)
-)
-LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
-(Font)              scaled to size 9.18004pt on input line 28.
-Package microtype Info: Loading generic settings for font family
-(microtype)             `zi4' (encoding: T1).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
-Package microtype Info: Character `textendash ' is missing
-(microtype)             in font `T1/zi4/m/n/9'.
-(microtype)             Ignoring protrusion settings for this character.
-Package microtype Info: Character `textemdash ' is missing
-(microtype)             in font `T1/zi4/m/n/9'.
-(microtype)             Ignoring protrusion settings for this character.
 LaTeX Font Info:    Try loading font information for OT1+ppl on input line 29.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ppl.fd
@@ -1264,194 +1236,150 @@ LaTeX Font Info:    Font shape `U/msb/m/n' will be
 (Font)              scaled to size 8.33606pt on input line 30.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
 (Font)              scaled to size 6.25204pt on input line 30.
+LaTeX Font Info:    Try loading font information for T1+zi4 on input line 30.
+
+(/usr/share/texlive/texmf-dist/tex/latex/inconsolata/t1zi4.fd
+File: t1zi4.fd 2013/06/09 T1/zi4 (Inconsolata)
+)
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
 (Font)              scaled to size 8.16003pt on input line 30.
+Package microtype Info: Loading generic settings for font family
+(microtype)             `zi4' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
 Package microtype Info: Character `textendash ' is missing
 (microtype)             in font `T1/zi4/m/n/8'.
 (microtype)             Ignoring protrusion settings for this character.
 Package microtype Info: Character `textemdash ' is missing
 (microtype)             in font `T1/zi4/m/n/8'.
 (microtype)             Ignoring protrusion settings for this character.
-
-
-Package natbib Warning: Citation `baum08' on page 1 undefined on input line 55.
-
-
-
-Package natbib Warning: Citation `boczkowski07' on page 1 undefined on input li
-ne 55.
-
-
-Package natbib Warning: Citation `ragas14' on page 1 undefined on input line 55
-.
-
-
-Package natbib Warning: Citation `bennett08' on page 1 undefined on input line 
-58.
-
-
-Package natbib Warning: Citation `blumler99' on page 1 undefined on input line 
-58.
-
-
-Package natbib Warning: Citation `shoemaker09' on page 1 undefined on input lin
-e 61.
-
-
-Package natbib Warning: Citation `galtung65' on page 1 undefined on input line 
-62.
-
-[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
+(Font)              scaled to size 9.18004pt on input line 76.
+Package microtype Info: Character `textendash ' is missing
+(microtype)             in font `T1/zi4/m/n/9'.
+(microtype)             Ignoring protrusion settings for this character.
+Package microtype Info: Character `textemdash ' is missing
+(microtype)             in font `T1/zi4/m/n/9'.
+(microtype)             Ignoring protrusion settings for this character.
+ [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 ]
 LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <10> not available
-(Font)              Font shape `T1/ppl/b/n' tried instead on input line 102.
+(Font)              Font shape `T1/ppl/b/n' tried instead on input line 104.
+LaTeX Font Info:    Try loading font information for TS1+zi4 on input line 126.
 
-
-Package natbib Warning: Citation `grimmer13' on page 2 undefined on input line 
-111.
-
-LaTeX Font Info:    Try loading font information for TS1+zi4 on input line 125.
 
 (/usr/share/texlive/texmf-dist/tex/latex/inconsolata/ts1zi4.fd
 File: ts1zi4.fd 2013/06/07 Fontinst v1.933 font definitions for TS1/zi4.
 )
 LaTeX Font Info:    Font shape `TS1/zi4/m/n' will be
-(Font)              scaled to size 9.18004pt on input line 125.
+(Font)              scaled to size 9.18004pt on input line 126.
 Package microtype Info: Loading generic settings for font family
 (microtype)             `zi4' (encoding: TS1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Try loading font information for TS1+ppl on input line 157.
+LaTeX Font Info:    Try loading font information for TS1+ppl on input line 159.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ppl.fd
 File: ts1ppl.fd 2001/06/04 font definitions for TS1/ppl.
-) [2]
-
-Package natbib Warning: Citation `bosch07' on page 3 undefined on input line 19
-7.
-
-[3]
-
-Package natbib Warning: Citation `turney02' on page 4 undefined on input line 3
-16.
-
-
-Package natbib Warning: Citation `sparck72' on page 4 undefined on input line 3
-19.
-
-
-Package natbib Warning: Citation `monroe08' on page 4 undefined on input line 3
-19.
-
-
-Package natbib Warning: Citation `salton75' on page 4 undefined on input line 3
-36.
-
-
-Package natbib Warning: Citation `salton03' on page 4 undefined on input line 3
-36.
-
-[4]
-<newsflow_files/figure-latex/unnamed-chunk-11-1.pdf, id=109, 337.26pt x 177.663
-76pt>
+) [2] [3] [4]
+<newsflow_files/figure-latex/unnamed-chunk-11-1.pdf, id=161, 357.335pt x 177.66
+376pt>
 File: newsflow_files/figure-latex/unnamed-chunk-11-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-11-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-11-1.pdf use
-d on input line 458.
-(pdftex.def)             Requested size: 337.25917pt x 177.66331pt.
- [5]
-Overfull \hbox (35.56956pt too wide) in paragraph at lines 485--493
-\T1/zi4/m/n/9 hour.window \T1/ppl/m/n/9 (-20) pa-ram-e-ter, which works iden-ti
--cal to the \T1/zi4/m/n/9 hour.window \T1/ppl/m/n/9 (-20) pa-ram-e-ter in the \
-T1/zi4/m/n/9 documents.window.compare
- []
-
-[6 <./newsflow_files/figure-latex/unnamed-chunk-11-1.pdf>]
-Overfull \hbox (45.10101pt too wide) in paragraph at lines 541--544
-[]\T1/ppl/m/n/9 (-20) The cur-rent data has 658 sub-components. To vi-su-al-ize
- these com-po-nents, we of-fer the `plot.document.network`
- []
-
-
-<newsflow_files/figure-latex/unnamed-chunk-15-1.pdf, id=129, 378.41376pt x 131.
+d on input line 468.
+(pdftex.def)             Requested size: 357.33412pt x 177.66331pt.
+ [5] [6 <./newsflow_files/figure-latex/unnamed-chunk-11-1.pdf>]
+<newsflow_files/figure-latex/unnamed-chunk-15-1.pdf, id=183, 378.41376pt x 131.
 49126pt>
 File: newsflow_files/figure-latex/unnamed-chunk-15-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-15-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-15-1.pdf use
-d on input line 551.
+d on input line 547.
 (pdftex.def)             Requested size: 378.41283pt x 131.49092pt.
 
-<newsflow_files/figure-latex/unnamed-chunk-16-1.pdf, id=130, 378.41376pt x 220.
-825pt>
+<newsflow_files/figure-latex/unnamed-chunk-16-1.pdf, id=184, 378.41376pt x 218.
+8175pt>
 File: newsflow_files/figure-latex/unnamed-chunk-16-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-16-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-16-1.pdf use
-d on input line 565.
-(pdftex.def)             Requested size: 378.41283pt x 220.82445pt.
+d on input line 567.
+(pdftex.def)             Requested size: 378.41283pt x 218.81696pt.
  [7 <./newsflow_files/figure-latex/unnamed-chunk-15-1.pdf> <./newsflow_files/fi
 gure-latex/unnamed-chunk-16-1.pdf>]
-<newsflow_files/figure-latex/unnamed-chunk-17-1.pdf, id=150, 343.2825pt x 191.7
-1625pt>
+<newsflow_files/figure-latex/unnamed-chunk-17-1.pdf, id=205, 378.41376pt x 131.
+49126pt>
 File: newsflow_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-17-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-17-1.pdf use
-d on input line 586.
-(pdftex.def)             Requested size: 343.28165pt x 191.71577pt.
+d on input line 598.
+(pdftex.def)             Requested size: 378.41283pt x 131.49092pt.
  [8 <./newsflow_files/figure-latex/unnamed-chunk-17-1.pdf>]
-Overfull \hbox (11.90944pt too wide) in paragraph at lines 646--648
-\T1/ppl/m/n/9 (-20) We al-ready saw that the net-work data can be trans-formed 
-to a com-mon data.frame with the `get.data.frame`
- []
-
-
-<newsflow_files/figure-latex/unnamed-chunk-20-1.pdf, id=163, 225.84375pt x 188.
-705pt>
+<newsflow_files/figure-latex/unnamed-chunk-20-1.pdf, id=219, 213.79875pt x 212.
+795pt>
 File: newsflow_files/figure-latex/unnamed-chunk-20-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-20-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-20-1.pdf use
-d on input line 677.
-(pdftex.def)             Requested size: 225.84319pt x 188.70453pt.
+d on input line 720.
+(pdftex.def)             Requested size: 213.79822pt x 212.79446pt.
  [9]
-<newsflow_files/figure-latex/unnamed-chunk-21-1.pdf, id=169, 220.825pt x 188.70
-5pt>
+<newsflow_files/figure-latex/unnamed-chunk-21-1.pdf, id=225, 213.79875pt x 212.
+795pt>
 File: newsflow_files/figure-latex/unnamed-chunk-21-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-21-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-21-1.pdf use
-d on input line 698.
-(pdftex.def)             Requested size: 220.82445pt x 188.70453pt.
+d on input line 738.
+(pdftex.def)             Requested size: 213.79822pt x 212.79446pt.
  [10 <./newsflow_files/figure-latex/unnamed-chunk-20-1.pdf> <./newsflow_files/f
-igure-latex/unnamed-chunk-21-1.pdf>] [11])
+igure-latex/unnamed-chunk-21-1.pdf>] [11] [12] (./RJwrapper.bbl (./RJwrapper.br
+f)
+\tf@brf=\write6
+\openout6 = `RJwrapper.brf'.
 
-Package natbib Warning: There were undefined citations.
-
+) [13])
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 27.
-[12] [13]
+
+[14]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 27.
  (./RJwrapper.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 27.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 27.
 Package rerunfilecheck Info: File `RJwrapper.out' has not changed.
-(rerunfilecheck)             Checksum: EAA54991505C3931A843265994A017D8;1305.
+(rerunfilecheck)             Checksum: B31649628B07AB6FF4D3385A58BB86FB;1299.
+Package rerunfilecheck Info: File `RJwrapper.brf' has not changed.
+(rerunfilecheck)             Checksum: 0B870285317B2AA3D1D650ED074AC9E0;750.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 27.
  ) 
 Here is how much of TeX's memory you used:
- 20142 strings out of 493304
- 342214 string characters out of 6139870
- 449409 words of memory out of 5000000
- 22924 multiletter control sequences out of 15000+600000
- 50276 words of font info for 217 fonts, out of 8000000 for 9000
+ 20333 strings out of 493304
+ 344547 string characters out of 6139870
+ 450082 words of memory out of 5000000
+ 23007 multiletter control sequences out of 15000+600000
+ 54054 words of font info for 270 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 63i,12n,57p,456b,671s stack positions out of 5000i,500n,10000p,200000b,80000s
-pdfTeX warning (dest): name{Hfootnote.9} has been referenced but does not exi
-st, replaced by a fixed one
+ 63i,12n,57p,710b,666s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): name{Hfootnote.13} has been referenced but does not ex
+ist, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.12} has been referenced but does not exis
+t, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.11} has been referenced but does not exis
+t, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.10} has been referenced but does not exis
+t, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.9} has been referenced but does not exist
+, replaced by a fixed one
 
 pdfTeX warning (dest): name{Hfootnote.8} has been referenced but does not exist
 , replaced by a fixed one
@@ -1481,14 +1409,13 @@ pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist
 re/texlive/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc}{/usr/share/texli
 ve/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/
 type1/public/inconsolata/Inconsolata-zi4r.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/urw/palatino/uplb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palat
-ino/uplr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palatino/uplri8a.
-pfb>
-Output written on RJwrapper.pdf (13 pages, 159285 bytes).
+nts/type1/urw/palatino/uplb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/ur
+w/palatino/uplr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palatino/u
+plri8a.pfb>
+Output written on RJwrapper.pdf (14 pages, 166100 bytes).
 PDF statistics:
- 237 PDF objects out of 1000 (max. 8388607)
- 197 compressed objects within 2 object streams
- 40 named destinations out of 1000 (max. 500000)
- 38563 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 321 PDF objects out of 1000 (max. 8388607)
+ 280 compressed objects within 3 object streams
+ 61 named destinations out of 1000 (max. 500000)
+ 42659 words of extra memory for PDF output out of 42996 (max. 10000000)
 

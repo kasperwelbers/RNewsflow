@@ -16,13 +16,8 @@ termOverlap <- function(m1, m2=m1){
   Matrix::crossprod(m1,m2)
 }
 
-termProduct <- function(m1, m2=m1){
-  #m2@x[Matrix::which(m2@x > 0)] = 1
-  Matrix::crossprod(m1,m2)
-}
-
-termOverlap_pct <- function(m1, m2=m1){
-  totalterms = Matrix::colSums(as(m1, 'dgCMatrix'))
+termOverlap_pct <- function(m1, m2=m1, reverse=F){
+  totalterms = if(!reverse) Matrix::colSums(as(m1, 'dgCMatrix')) else Matrix::colSums(as(m2, 'dgCMatrix'))
   m2@x[Matrix::which(m2@x > 0)] = 1
   Matrix::crossprod(m1,m2) / totalterms
 }
@@ -49,9 +44,8 @@ filterResults <- function(results, min.similarity, n.topsim){
   
 calculate.similarity <- function(m.x, m.y, measure){
   if(measure == 'cosine') results = cosineSimilarity(m.x, m.y)
-  if(measure == 'overlap') results = termOverlap(m.x, m.y)
-  if(measure == 'overlap_pct') results = termOverlap_pct(m.x, m.y)
-  if(measure == 'product') results = termProduct(m.x, m.y)
+  if(measure == 'percentage.from') results = termOverlap_pct(m.x, m.y)
+  if(measure == 'percentage.to') results = termOverlap_pct(m.x, m.y, reverse = T)
   results
 }
 
@@ -69,7 +63,7 @@ reindexTerms <- function(dtm, terms){
 #' 
 #' @param dtm a document-term matrix in format of the tm package.
 #' @param dtm.y Optional. If given, documents from dtm will only be compared to the documents in dtm.y
-#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently only cosine is supported
+#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine", for cosine similarity. Also supports assymetrical measures "percentage.from" and "percentage.to" for the percentage of overlapping terms (term scores taken into account). Here "percentage.from" gives the percentage of the document that is compared to the other, whereas "percentage.to" gives the percentage of the document to which is compared.
 #' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0.1 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
 #' @param return.zeros If true, all comparison results are returned, including those with zero similarity (quite possibly the worst thing to do with large data)
@@ -135,7 +129,7 @@ getDateIds <- function(date, row_filter=NULL){
 #' @param date a vector of date class, of the same length and order as the documents (rows) of the dtm.
 #' @param window.size the timeframe in days within which articles must occur in order to be compared. e.g., if 0, articles are only compared to articles of the same day. If 1, articles are compared to all articles of the previous, same or next day.
 #' @param window.direction For a more specific selection of which articles in the window to compare to. This is given with a combination of the symbols '<' (before x) '=' (simultanous with x) and '>' (after x). default is '<=>', which means all articles. '<>' means all articles before or after the [time.unit] of an article itself. '<' means all previous articles, and '<=' means all previous and simultaneous articles. etc.  
-#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently only cosine is supported
+#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).
 #' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0.1 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
 #' @param only.from A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare only these documents to other documents. 

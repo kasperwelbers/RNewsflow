@@ -146,12 +146,14 @@ show.window <- function(g, vertex.attribute=NULL){
 }
 
 #' @export
-filter.window <- function(g, hour.window, select.vertices=NULL){
-  if(is.null(select.vertices)) select.vertices = rep(T, vcount(g))
+filter.window <- function(g, hour.window, from.vertices=NULL, to.vertices=NULL){
+  if(is.null(from.vertices)) from.vertices = rep(T, vcount(g))
+  if(is.null(to.vertices)) to.vertices = rep(T, vcount(g))
   
   # get vector indicating which edges are selected given the vertex.filter
   from.edge.i = get.edges(g, E(g))[,1]
-  selected_edge = select.vertices[from.edge.i]
+  to.edge.i = get.edges(g, E(g))[,2]
+  selected_edge = from.vertices[from.edge.i] & to.vertices[to.edge.i]
   
   # filter the selected edges
   delete.i = selected_edge & (E(g)$hourdiff < hour.window[1] | E(g)$hourdiff > hour.window[2])
@@ -200,12 +202,18 @@ filter.window_oud <- function(g, source.window){
 #' @export
 only.first.match <- function(g){
   e = data.frame(get.edges(g, E(g)))
-  e$i = 1:nrow(e)
-  e$to.date = V(g)$date[e$X2]
-  e = e[order(e$to.date),]
   
-  first = !duplicated(e$X1)
-  first = paste(e$X1, e$to.date, sep='.') %in% paste(e$X1[first], e$to.date[first], sep='.') # also first if same date as first
+  # first make from and to columns of same temporal order (from before to) by switching columns with negative hourdiff.
+  switch_from.to = get.data.frame(g, 'edges')$hourdiff < 0
+  e = data.frame(from = ifelse(switch_from.to, e$X2, e$X1),
+                 to   = ifelse(switch_from.to, e$X1, e$X2))
+  
+  e$i = 1:nrow(e)
+  e$from.date = V(g)$date[e$from]
+  e = e[order(e$from.date),]
+  
+  first = !duplicated(e$to)
+  first = paste(e$to, e$from.date, sep='.') %in% paste(e$to[first], e$from.date[first], sep='.') # also first if same date as first
   
   delete.edges(g, e$i[!first])
 }
@@ -217,13 +225,13 @@ only.strongest.match <- function(g, by.vertex.meta=NULL){
 
   if(!is.null(by.vertex.meta)) {
     v = get.data.frame(g, 'vertices')
-    e$by = apply(v[,by.vertex.meta, drop=F], 1, paste, collapse=';')[e$X2]
+    e$by = apply(v[,by.vertex.meta, drop=F], 1, paste, collapse=';')[e$X1]
   } else {
     e$by = 1
   }
   
   e = e[order(-E(g)$weight),]
-  e = e[duplicated(e[,c('X1', 'by')]),]
+  e = e[duplicated(e[,c('X2', 'by')]),]
   delete.edges(g, e$i)
 }
 
@@ -323,7 +331,7 @@ plot.aggregate.network <- function(g, weight.var='from.Vprop', weight.thres=NULL
                                    vertex.size=30, vertex.color='lightblue', vertex.label.color='black', vertex.label.cex=0.7, 
                                    edge.color = 'grey', show.edge.labels=T, edge.label.color = 'black', edge.label.cex = 0.6, edge.arrow.size=1, 
                                    layout=layout.davidson.harel, ...){
-  E(g)$weight = get.edge.attribute(g, 'from.Vprop')
+  E(g)$weight = get.edge.attribute(g, weight.var)
   if(!is.null(weight.thres)) g = delete.edges(g, which(E(g)$weight < weight.thres))
   if(delete.isolates) g = delete.vertices(g, degree(g) == 0)
   
