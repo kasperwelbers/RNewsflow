@@ -4,9 +4,8 @@ entropy <- function(x) {
 }
 
 columnEntropy <- function(m){
-  #m = spMatrix(nrow(dtm), ncol(dtm), dtm$i, dtm$j, dtm$v)
   m = as(m, 'dgTMatrix')
-  m@x = m@x / col_sums(m)[m@j+1]
+  m@x = m@x / Matrix::colSums(m)[m@j+1]
   m@x = (1/m@x)^m@x
   tapply(m@x, m@j, prod)
 }
@@ -19,6 +18,7 @@ exp.decay <- function(r, decay_constant=0.6931472, halflife=NULL) {
 
 matrix.autocor <- function(m, rows_lag=1){
   ## a sparse matrix solution for calculating the autocorrelation for each column vector
+  ## (which, naturally, makes sense only if column vectors are time-series)
   m_lag = m[1:(nrow(m) - rows_lag),]
   if(rows_lag > 1){
     for(i in 2:rows_lag){

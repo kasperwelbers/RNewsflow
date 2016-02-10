@@ -15,3 +15,12 @@ NULL
 #' @usage data(meta)
 #' @format meta: A data.frame containing the meta information for each document.
 NULL
+
+#' Document similarity network for one news agency, and the print and online editions of two newspapers
+#' 
+#' @docType data
+#' @keywords datasets
+#' @name docnet
+#' @usage data(docnet)
+#' @format docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[rNewsflow]{document.network} or \link[rNewsflow]{newsflow.compare}.
+NULL

@@ -61,15 +61,26 @@ reindexTerms <- function(dtm, terms){
 #' 
 #' Compare the documents in corpus dtm.x with reference corpus dtm.y. 
 #' 
-#' @param dtm a document-term matrix in format of the tm package.
+#' The calculation of document similarity is performed using a vector space model approach. 
+#' Inner-product based similarity measures are used, such as cosine similarity.
+#' It is recommended to weight the DTM beforehand, for instance using Term frequency-inverse document frequency (tf.idf)
+#' 
+#' @param dtm A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.
 #' @param dtm.y Optional. If given, documents from dtm will only be compared to the documents in dtm.y
 #' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine", for cosine similarity. Also supports assymetrical measures "percentage.from" and "percentage.to" for the percentage of overlapping terms (term scores taken into account). Here "percentage.from" gives the percentage of the document that is compared to the other, whereas "percentage.to" gives the percentage of the document to which is compared.
-#' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0.1 by default.
+#' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
-#' @param return.zeros If true, all comparison results are returned, including those with zero similarity (quite possibly the worst thing to do with large data)
-#' @return A data frame with sets of documents and their similarities. 
+#' @param return.zeros If true, all comparison results are returned, including those with zero similarity (rarely usefull and problematic with large data)
+#' 
+#' @return A data frame with pairs of documents and their similarities. 
 #' @export
-documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0.1, n.topsim=NULL, return.zeros=F) {  
+#' 
+#' @examples
+#' data(dtm)
+#' 
+#' comp = documents.compare(dtm, min.similarity=0.4)
+#' head(comp)
+documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL, return.zeros=F) {  
   if(!is.null(dtm.y)){
     if(mean(colnames(dtm) == colnames(dtm.y)) < 1){
       ## if colnames do not match, reindex them.
@@ -88,7 +99,7 @@ documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=
   
   results = as(results, 'dgTMatrix')
   if(return.zeros) {
-    results = Matrix(which(!is.na(results), arr.ind=T))
+    results = Matrix(Matrix::which(!is.na(results), arr.ind=T))
     results = data.frame(x=colnames(m.x)[results[,1]], y=colnames(m.y)[results[,2]], similarity=as.vector(results))
   } else{
     if(sum(results) == 0) return(NULL)
@@ -118,28 +129,50 @@ getDateIds <- function(date, row_filter=NULL){
   datetime_ids
 }
 
-
-#' Compare the documents in a dtm per time frame
+#' Compare the documents in a dtm with a sliding window over time
 #' 
-#' This is an extension of the documents.compare function to only compare documents within a given range of days. 
+#' Given a document-term matrix (DTM) and corresponding document meta data, calculates the document similarities over time using with a sliding window.
+#'  
+#' The meta data.frame should have a column containing document id's that match the rownames of the DTM (i.e. document names) and should have a column indicating the publication time. 
+#' By default these columns should be labeled "document_id" and "date", but the column labels can also be set using the `id.var` and `date.var` parameters.
+#' Any other columns will automatically be included as document meta information in the output. 
 #' 
-#' Note that in this function it is not possible to use dtm.y to compare only certain documents (e.g., news and PR messages). Instead, the only.from and only.to parameters can be used for this purpose. 
+#' The calculation of document similarity is performed using a vector space model approach. 
+#' Inner-product based similarity measures are used, such as cosine similarity.
+#' It is recommended to weight the DTM beforehand, for instance using Term frequency-inverse document frequency (tf.idf)
 #' 
-#' @param dtm a document-term matrix in format of the tm package.
-#' @param date a vector of date class, of the same length and order as the documents (rows) of the dtm.
-#' @param window.size the timeframe in days within which articles must occur in order to be compared. e.g., if 0, articles are only compared to articles of the same day. If 1, articles are compared to all articles of the previous, same or next day.
-#' @param window.direction For a more specific selection of which articles in the window to compare to. This is given with a combination of the symbols '<' (before x) '=' (simultanous with x) and '>' (after x). default is '<=>', which means all articles. '<>' means all articles before or after the [time.unit] of an article itself. '<' means all previous articles, and '<=' means all previous and simultaneous articles. etc.  
+#' @param dtm A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.
+#' @param meta A data.frame where rows are documents and columns are document meta information. 
+#' Should at least contain 2 columns: the document name/id and date. 
+#' The name/id column should match the document names/ids of the edgelist, and its label is specified in the `id.var` argument. 
+#' The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
+#' @param id.var The label for the document name/id column in the `meta` data.frame. Default is "document_id"
+#' @param date.var The label for the document date column in the `meta` data.frame . default is "date"
+#' @param hour.window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.
 #' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).
 #' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0.1 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
 #' @param only.from A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare only these documents to other documents. 
 #' @param only.to A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare other documents to only these documents.
-#' @param return.zeros If true, all comparison results are returned, including those with zero similarity (quite possibly the worst thing to do with large data)
-#' @param return.date If true, the dates for x and y are given in the output
+#' @param return.zeros If true, all comparison results are returned, including those with zero similarity (rarely usefull and problematic with large data)
 #' @param only.complete.window if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.
-#' @return A data frame with columns x, y and similarity. If return.date == T, date.x and date.y are returned as well.
+#' 
+#' @return A network/graph in the \link[igraph]{igraph} class
 #' @export
-documents.window.compare <- function(dtm, meta, id.var='document_id', date.var='date', hour.window=c(-24,24), measure='cosine', min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, return.zeros=F, only.complete.window=T){
+#' 
+#' @examples 
+#' data(dtm)
+#' data(meta)
+#' 
+#' dtm = weightTfIdf(dtm)
+#' g = newsflow.compare(dtm, meta, hour.window = c(0.1, 36))
+#' 
+#' vcount(g) # number of documents, or vertices
+#' ecount(g) # number of document pairs, or edges
+#' 
+#' head(get.data.frame(g, 'vertices'))
+#' head(get.data.frame(g, 'edges'))
+newsflow.compare <- function(dtm, meta, id.var='document_id', date.var='date', hour.window=c(-24,24), measure='cosine', min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, return.zeros=F, only.complete.window=T){
   confirm.dtm.meta(meta, id.var, date.var)
   meta = match.dtm.meta(dtm, meta, id.var)
   
@@ -183,24 +216,45 @@ ldply_documents.compare <- function(i, dtm, dateids.x, dateids.y, window, measur
   documents.compare(dtm[dtm.x_indices,], dtm[dtm.y_indices,], measure, min.similarity, n.topsim, return.zeros)
 }
 
+
 #' Delete duplicate (or similar) documents from a document term matrix 
 #' 
-#' Delete duplicate (or similar) documents from a document term matrix 
+#' Delete duplicate (or similar) documents from a document term matrix. 
+#' Duplicates are defined by: having high content similarity, occuring within a given time distance and being published by the same source.
 #' 
-#' @param dtm a document-term matrix in format of the tm package.
-#' @param date a vector of date class, of the same length and order as the documents (rows) of the dtm.
-#' @param source a vector of the same length and order as the documents (rows) of the dtm, indicating what the source of the document is.
+#' Note that this can also be used to delete "updates" of articles (e.g., on news sites, news agencies). 
+#' This should be considered if the temporal order of publications is relevant for the analysis. 
+#' 
+#' @param dtm A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.
+#' @param meta A data.frame where rows are documents and columns are document meta information. 
+#' Should contain 3 columns: the document name/id, date and source. 
+#' The name/id column should match the document names/ids of the edgelist, and its label is specified in the `id.var` argument. 
+#' The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
+#' The source column is specified in the `date.var` argument.  
+#' @param id.var The label for the document name/id column in the `meta` data.frame. Default is "document_id"
+#' @param date.var The label for the document date column in the `meta` data.frame . default is "date"
+#' @param source.var The label for the document date column in the `meta` data.frame . default is "source"
+#' @param hour.window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. By default c(-24,24), which compares each document to all other documents within a 24 hour time distance.
+#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).
 #' @param window.size the timeframe in days within which articles must occur in order to be compared. e.g., if 0, articles are only compared to articles of the same day. If 1, articles are compared to all articles of the previous, same or next day.
-#' @param similarity a threshold for similarity. lower values are deleted
-#' @param keep A character indicating whether to keep the 'first' or 'last' of duplicate documents.
-#' @param tf.idf if True, weight the dtm with tf.idf before comparing documents
+#' @param similarity a threshold for similarity. Documents of which similarity is equal or higher are deleted
+#' @param keep A character indicating whether to keep the 'first' or 'last' published of duplicate documents.
+#' @param tf.idf if TRUE, weight the dtm with tf.idf before comparing documents. The original (non-weighted) DTM is returned.
+#' 
 #' @return A dtm with the duplicate documents deleted
 #' @export
-delete.duplicates <- function(dtm, meta, id.var='document_id', date.var='date', source.var='source', hour.window=c(-24,24), similarity=1, keep='first', tf.idf=F){
+#' 
+#' @examples
+#' data(dtm)
+#' data(meta)
+#' 
+#' ## example with very low similarity (not recommended!) because duplicates have already been deleted from the demo data.
+#' dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = T)
+delete.duplicates <- function(dtm, meta, id.var='document_id', date.var='date', source.var='source', hour.window=c(-24,24), measure='cosine', similarity=1, keep='first', tf.idf=F){
   if(tf.idf) {
-    g = documents.window.compare(weightTfIdf(dtm), meta, min.similarity = similarity, hour.window=hour.window)
+    g = newsflow.compare(weightTfIdf(dtm), meta, measure=measure, min.similarity = similarity, hour.window=hour.window)
   } else {
-    g = documents.window.compare(dtm, meta, min.similarity = similarity, hour.window=hour.window)
+    g = newsflow.compare(dtm, meta, measure=measure, min.similarity = similarity, hour.window=hour.window)
   }
   
   e = get.edges(g, E(g))

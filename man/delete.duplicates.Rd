@@ -5,21 +5,33 @@
 \title{Delete duplicate (or similar) documents from a document term matrix}
 \usage{
 delete.duplicates(dtm, meta, id.var = "document_id", date.var = "date",
-  source.var = "source", hour.window = c(-24, 24), similarity = 1,
-  keep = "first", tf.idf = F)
+  source.var = "source", hour.window = c(-24, 24), measure = "cosine",
+  similarity = 1, keep = "first", tf.idf = F)
 }
 \arguments{
-\item{dtm}{a document-term matrix in format of the tm package.}
+\item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}
 
-\item{similarity}{a threshold for similarity. lower values are deleted}
+\item{meta}{A data.frame where rows are documents and columns are document meta information. 
+Should contain 3 columns: the document name/id, date and source. 
+The name/id column should match the document names/ids of the edgelist, and its label is specified in the `id.var` argument. 
+The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
+The source column is specified in the `date.var` argument.}
 
-\item{keep}{A character indicating whether to keep the 'first' or 'last' of duplicate documents.}
+\item{id.var}{The label for the document name/id column in the `meta` data.frame. Default is "document_id"}
 
-\item{tf.idf}{if True, weight the dtm with tf.idf before comparing documents}
+\item{date.var}{The label for the document date column in the `meta` data.frame . default is "date"}
 
-\item{date}{a vector of date class, of the same length and order as the documents (rows) of the dtm.}
+\item{source.var}{The label for the document date column in the `meta` data.frame . default is "source"}
 
-\item{source}{a vector of the same length and order as the documents (rows) of the dtm, indicating what the source of the document is.}
+\item{hour.window}{A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. By default c(-24,24), which compares each document to all other documents within a 24 hour time distance.}
+
+\item{measure}{the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).}
+
+\item{similarity}{a threshold for similarity. Documents of which similarity is equal or higher are deleted}
+
+\item{keep}{A character indicating whether to keep the 'first' or 'last' published of duplicate documents.}
+
+\item{tf.idf}{if TRUE, weight the dtm with tf.idf before comparing documents. The original (non-weighted) DTM is returned.}
 
 \item{window.size}{the timeframe in days within which articles must occur in order to be compared. e.g., if 0, articles are only compared to articles of the same day. If 1, articles are compared to all articles of the previous, same or next day.}
 }
@@ -27,6 +39,18 @@ delete.duplicates(dtm, meta, id.var = "document_id", date.var = "date",
 A dtm with the duplicate documents deleted
 }
 \description{
-Delete duplicate (or similar) documents from a document term matrix
+Delete duplicate (or similar) documents from a document term matrix. 
+Duplicates are defined by: having high content similarity, occuring within a given time distance and being published by the same source.
+}
+\details{
+Note that this can also be used to delete "updates" of articles (e.g., on news sites, news agencies). 
+This should be considered if the temporal order of publications is relevant for the analysis.
+}
+\examples{
+data(dtm)
+data(meta)
+
+## example with very low similarity (not recommended!) because duplicates have already been deleted from the demo data.
+dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = T)
 }
 

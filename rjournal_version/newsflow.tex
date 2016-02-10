@@ -13,11 +13,11 @@ introduce Newsflow: an R package for analyzing content homogeneity and
 diffusion patterns using computational text analysis. The content of
 news messages is compared using techniques from the field of information
 retrieval, similar to plagiarism detection. By using a sliding window
-approach to only compare messages within a given time distance, it is
-made easy to compare many sources over long periods of time.
-Furthermore, the package introduces an approach for analyzing the news
-similarity data as a network, and includes various functions to analyze
-and visualize this network.
+approach to only compare messages within a given time distance, many
+sources can be compared over long periods of time. Furthermore, the
+package introduces an approach for analyzing the news similarity data as
+a network, and includes various functions to analyze and visualize this
+network.
 }
 
 \section{Introduction}
@@ -44,12 +44,12 @@ occured within a short time distance. By restricting document
 comparisons to a given time distance, it becomes possible to compare
 many documents over a long period of time, but available document
 comparison software generally does not have this feature. We therefore
-offer the \emph{documents.window.compare} function which compares
-documents using a sliding window over time. In addition, this package
-offers tools to aggregate, analyze and visualize the document similarity
-data. By covering all steps of the text and data analysis in a single R
-package, it becomes easier to develop and share methods, and analyses
-become more transparent and replicable.
+offer the \emph{newsflow.compare} function which compares documents
+using a sliding window over time. In addition, this package offers tools
+to aggregate, analyze and visualize the document similarity data. By
+covering all steps of the text and data analysis in a single R package,
+it becomes easier to develop and share methods, and analyses become more
+transparent and replicable.
 
 The primary intended audience of this package is scholars and
 professionals in fields where the impact of news on society is a prime
@@ -81,11 +81,11 @@ The structure of this vignette is as follows. The first part discusses
 the data preparation. There are several choices to be made here that
 determine on what grounds the content of documents is compared. The
 second part shows how the core function of this packages,
-\emph{documents.window.compare}, is used to calculate document
-similarities for many documents over time. The third part demonstrates
-functions for exploring, aggregating and visualizing the document
-similarity data. Finally, conclusions regarding the current version of
-the package and future directions are discussed.
+\emph{newsflow.compare}, is used to calculate document similarities for
+many documents over time. The third part demonstrates functions for
+exploring, aggregating and visualizing the document similarity data.
+Finally, conclusions regarding the current version of the package and
+future directions are discussed.
 
 \section{Preparing the data}
 
@@ -175,7 +175,7 @@ grounds documents are compared.
   computational text analysis approaches, are particularly informative
   for our current purpose, and should be kept.
 \item
-  Third, It is also possible to specifically select or filter out only
+  Third, it is also possible to specifically select or filter out only
   certain types of words by using part-of-speech tagging\footnote{Part-of-speech
     tagging is a technique that identifies types of words, such as
     verbs, nouns and adjectives.}. For instance, to compare whether
@@ -276,16 +276,16 @@ tdd = term.day.dist(dtm, meta)
 tdd[sample(1:nrow(tdd), 4),] # show 4 random rows
 \end{Sinput}
 \begin{Soutput}
-#>                term freq doc.freq days.n days.pct days.entropy
-#> 4393      noun.3384    2        2      1    0.033          1.0
-#> 1954      noun.1050    3        3      1    0.033          1.0
-#> 4284      noun.1429    3        3      2    0.067          1.9
-#> 49   misc_entity.30   86       77     16    0.533         13.3
+#>                  term freq doc.freq days.n days.pct days.entropy
+#> 5178        noun.2445    2        2      1    0.033          1.0
+#> 180  organization.433    3        2      2    0.067          1.9
+#> 1012     location.430    4        4      2    0.067          1.8
+#> 5880       person.383    2        2      1    0.033          1.0
 #>      days.entropy.norm
-#> 4393             0.033
-#> 1954             0.033
-#> 4284             0.063
-#> 49               0.442
+#> 5178             0.033
+#> 180              0.063
+#> 1012             0.058
+#> 5880             0.033
 \end{Soutput}
 \end{Schunk}
 
@@ -307,10 +307,10 @@ dtm = dtm[,select_terms]
 \end{Sinput}
 \end{Schunk}
 
-Instead of deleting terms, we can also weight terms. Turney explains
-that `'The idea of weighting is to give more weight to surprising events
-and less weight to expected events'`, which is important
-because'`surprising events, if shared by two vectors, are more
+In addition to deleting terms, we should also weight terms. Turney
+explains that `'The idea of weighting is to give more weight to
+surprising events and less weight to expected events'`, which is
+important because'`surprising events, if shared by two vectors, are more
 discriminative of the similarity between the vectors than less
 surprising events'' \citep[156]{turney02}. Thus, we want to give more
 weight to rare words than common words. A classic weighting scheme and
@@ -329,7 +329,7 @@ dtm = weightTfIdf(dtm)
 
 Given a DTM and corresponding document meta data, the document
 similarities over time can be calculated with the
-\emph{documents.window.compare} function. The calculation of document
+\emph{newsflow.compare} function. The calculation of document
 similarities is performed using a vector space model
 \textbackslash{}citep\{salton75,salton03{]} approach, but with a sliding
 window over time to only compare document that occur within a given time
@@ -377,7 +377,7 @@ interpretation of similarity (e.g., same event, same theme).
 
 \begin{Schunk}
 \begin{Sinput}
-g = documents.window.compare(dtm, meta,
+g = newsflow.compare(dtm, meta,
                              hour.window = c(0,36), 
                              min.similarity = 0.4)
 \end{Sinput}
@@ -390,14 +390,14 @@ attributes. The edges (or ties) represent the similarity of documents,
 and the similarity score and time difference are stored as edge
 attributes. To avoid confusion, keep in mind that from hereon when we
 talk about vertices or a vertex we are talking about documents, and that
-edges are essentially document pairs. An advantage of using a network
-format is that it combines this data in an efficient way, without
-copying the document meta information for each edge. This network forms
-the basis for all the analysis functions offered in this
-package\footnote{If data about document similarities is imported, then
-  the \emph{document.network} function can be used to create this
-  network. This way the functions of this package for aggregating and
-  visualizing the network can still be used.}.
+edges represent document pairs. An advantage of using a network format
+is that it combines this data in an efficient way, without copying the
+document meta information for each edge. This network forms the basis
+for all the analysis functions offered in this package\footnote{If data
+  about document similarities is imported, then the
+  \emph{document.network} function can be used to create this network.
+  This way the functions of this package for aggregating and visualizing
+  the network can still be used.}.
 
 A full understanding of the \emph{igraph} package is not required to use
 the current package, but one does need some basic understanding of the
@@ -461,8 +461,8 @@ histogram can provide a good first indication of this data.
 
 \begin{Schunk}
 \begin{Sinput}
-hist(E(g)$hourdiff, main='Histogram of time distance between documents in hours', 
-     xlab = 'Time difference in hours', breaks = 35)
+hist(E(g)$hourdiff, main='Time distance of document pairs ', 
+      xlab = 'Time difference in hours', breaks = 150)
 \end{Sinput}
 
 \includegraphics{newsflow_files/figure-latex/unnamed-chunk-11-1} \end{Schunk}
@@ -480,10 +480,11 @@ Websites can adopt news within minutes, but newspapers have a long time between 
 Thus, we have to adjust the window for document pairs. 
 To make it more convenient to adjust and inspect the window settings for different sources, we offer the \emph{filter.window} and \emph{show.window} functions.
 
-The \emph{filter.window} function can be used to filter the document pairs (i.e. edges) using the \emph{hour.window} parameter, which works identical to the \emph{hour.window} parameter in the \emph{documents.window.compare} function. 
+The \emph{filter.window} function can be used to filter the document pairs (i.e. edges) using the \emph{hour.window} parameter, which works identical to the \emph{hour.window} parameter in the \emph{newsflow.compare} function. 
 In addition, the \emph{from.vertices} and \emph{to.vertices} parameters can be used to select the vertices (i.e. documents) for which this filter is applied.
 This makes it easy to tailor the window for different sources, or source types.
-For the current data, we use this to set a minimum time distance of 6 hours for document pairs where the \emph{to} document is from a print newspaper. 
+For the current data, we first set the minimum time distance for all document pairs to 0.1 hours. 
+Then, we set a minimum time distance of 6 hours for document pairs where the \emph{to} document is from a print newspaper.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -499,21 +500,25 @@ g = filter.window(g,  hour.window = c(6, 36),
 For all sources the window has now first been adjusted so that a
 document can only match a document that occured at least 0.1 hours
 later. For print newspapers, this is then set to 6 hours. With the
-\emph{show.window} function we can view the actual window in the data. A
-vertex.attribute can also be given to view the windows grouped by this
-attribute.
+\emph{show.window} function we can view the actual window in the data.
+This function aggregates the edges for all combinations of attributes
+specified in \emph{from.attribute} and \emph{to.attribute}, and shows
+the minimum and maximum hour difference for each combination. We
+specifify the \emph{to.attribute} parameter as ``source'', and leave the
+\emph{from.attribute} parameter empty. This way, we get the window from
+any document to each source.
 
 \begin{Schunk}
 \begin{Sinput}
-show.window(g, vertex.attribute = 'source')
+show.window(g, to.attribute = 'source')
 \end{Sinput}
 \begin{Soutput}
-#>   vertex.attribute window.left window.right
-#> 1       Newsagency        0.12           36
-#> 2      Online NP 1        0.12           36
-#> 3      Online NP 2        0.10           35
-#> 4       Print NP 1        0.18           35
-#> 5       Print NP 2        0.80           35
+#>           from          to window.left window.right
+#> 1 any document  Newsagency        0.15           35
+#> 2 any document Online NP 1        0.10           36
+#> 3 any document Online NP 2        0.12           36
+#> 4 any document  Print NP 1        7.02           36
+#> 5 any document  Print NP 2        7.35           35
 \end{Soutput}
 \end{Schunk}
 
@@ -703,7 +708,7 @@ round(adj.m, 2) # round on 2 decimals
 Alternatively, an intuitive way to present the aggregated network is by
 visualizing it. For this we can use the visualization features of the
 \emph{igraph} package. To make this more convenient, we also offer the
-\emph{plot.aggregate.network} function. This is a wrapper for the
+\emph{plot.directed.network} function. This is a wrapper for the
 plot.igraph function, which makes it easier to use different edge weight
 attributes and to use an edge threshold, and has default plotting
 parameters to work well for directed graphs with edge labels. For this
@@ -712,7 +717,7 @@ example we use the \emph{to.Vprop} edge attribute with a threshold of
 
 \begin{Schunk}
 \begin{Sinput}
-plot.aggregate.network(g.agg, weight.var = 'to.Vprop',
+plot.directed.network(g.agg, weight.var = 'to.Vprop',
                        weight.thres = 0.2)
 \end{Sinput}
 
@@ -730,7 +735,7 @@ edges to the first source that published a document.
 g2 = only.first.match(g)
 g2.agg = aggregate.network(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
-plot.aggregate.network(g2.agg, weight.var = 'to.Vprop',
+plot.directed.network(g2.agg, weight.var = 'to.Vprop',
                        weight.thres = 0.2)
 \end{Sinput}
 
@@ -771,35 +776,45 @@ we also demonstrate the \emph{return.df} parameter in the
 a single data.frame in which relevant edge and vertex information is
 merged.
 
-\begin{Schunk}
-\begin{Sinput}
-V(g)$day = format(as.Date(V(g)$date), '%Y-%m-%d')
-agg.perday = aggregate.network(g, by.from='sourcetype', by.to=c('sourcetype', 'day'), 
-                                  edge.attribute='hourdiff', agg.FUN=median, 
-                                  return.df=T)
+\textbackslash{}begin\{Schunk\} \textbackslash{}begin\{Sinput\}
+V(g)\(day = format(as.Date(V(g)\)date), `\%Y-\%m-\%d') agg.perday =
+aggregate.network(g, by.from=`sourcetype', by.to=c(`sourcetype', `day'),
+edge.attribute=`hourdiff', agg.FUN=median, return.df=T)
 
+head(agg.perday{[}agg.perday\$to.sourcetype == `Online NP',\\
+c(`from.sourcetype', `to.sourcetype', `to.day',`to.Vprop'){]},2)
+\textbackslash{}end\{Sinput\}
 
-head(agg.perday[agg.perday$to.sourcetype == 'Online NP',  
-                c('from.sourcetype', 'to.sourcetype', 'to.day','to.Vprop')],2)
-\end{Sinput}
 \begin{Soutput}
 #>    from.sourcetype to.sourcetype     to.day to.Vprop
 #> 64        Print NP     Online NP 2013-06-01     0.26
 #> 65      Newsagency     Online NP 2013-06-01     0.79
 \end{Soutput}
-\end{Schunk}
 
-Looking at the \emph{to.Vprop} score, we see that on 2013-06-01, 78.95\% of \emph{Online NP} messages match with previously published \emph{Newsagency} messages\footnote{The \emph{from.Vprop} cannot be interpreted in the same way, because it gives the proportion of all messages in the \emph{from} group. If one is interested in the \emph{from.Vprop} score per day, the \emph{by.from} and \emph{by.to} arguments in \emph{aggregate.network} need to be switched. Note that one should not simply aggregate both \emph{by.from} and \emph{by.to} by date, because then only documents that both occured on this date will be aggregated}.
-This way, the aggregated document similarity data can be analyzed as a time-series. 
-For instance, to analyze whether seasonal effects or extra-media developments such as election campaigns affect content homogeneity or intermedia dynamics. 
-The \emph{return.df} feature is convenient for this purpose, because it directly matches all the vertex and edge attributes (as opposed to the \emph{get.data.frame} function).
+\textbackslash{}end\{Schunk\}
 
-Another usefull application of this feature is to only aggregate the \emph{by.to} group, by using the document name in the \emph{by.from} argument. 
-This way, the data in the \emph{by.to} group is aggregated for each individual message. 
-In the following example we use this to see for each individual message whether it matches with later published messages in each sourcetype.
-This could for instance be used to analyze whether certain document level variables (e.g., news factors, sensationalism) make a message more likely to be adopted by other news outlets. 
-We set the \emph{edge.attribute} to "weight" and \emph{agg.FUN} to max, so that for each document we can see how strong the strongest match with each source was. 
+Looking at the \emph{to.Vprop} score, we see that on 2013-06-01, 78.95\%
+of \emph{Online NP} messages match with previously published
+\emph{Newsagency}
+messages\footnote{The \emph{from.Vprop} cannot be interpreted in the same way, because it gives the proportion of all messages in the \emph{from} group. If one is interested in the \emph{from.Vprop} score per day, the \emph{by.from} and \emph{by.to} arguments in \emph{aggregate.network} need to be switched. Note that one should not simply aggregate both \emph{by.from} and \emph{by.to} by date, because then only documents that both occured on this date will be aggregated}.
+This way, the aggregated document similarity data can be analyzed as a
+time-series. For instance, to analyze whether seasonal effects or
+extra-media developments such as election campaigns affect content
+homogeneity or intermedia dynamics. The \emph{return.df} feature is
+convenient for this purpose, because it directly matches all the vertex
+and edge attributes (as opposed to the \emph{get.data.frame} function).
 
+Another usefull application of this feature is to only aggregate the
+\emph{by.to} group, by using the document name in the \emph{by.from}
+argument. This way, the data in the \emph{by.to} group is aggregated for
+each individual message. In the following example we use this to see for
+each individual message whether it matches with later published messages
+in each sourcetype. This could for instance be used to analyze whether
+certain document level variables (e.g., news factors, sensationalism)
+make a message more likely to be adopted by other news outlets. We set
+the \emph{edge.attribute} to ``weight'' and \emph{agg.FUN} to max, so
+that for each document we can see how strong the strongest match with
+each source was.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -817,81 +832,72 @@ head(docXsource,2)
 \end{Soutput}
 \end{Schunk}
 
-Finally, note that we have now only compared documents with future documents. 
-We thereby focus the analysis on news diffusion.
-To focus on content homogeneity, each document can be compared to both past and future documents.
-By measuring content homogeneity aggregated over time, patterns such as longitudinal trends can be analyzed.
+Finally, note that we have now only compared documents with future
+documents. We thereby focus the analysis on news diffusion. To focus on
+content homogeneity, each document can be compared to both past and
+future documents. By measuring content homogeneity aggregated over time,
+patterns such as longitudinal trends can be analyzed.
 
 \section{Conclusion and future improvements}
 
-We have demonstrated how the \emph{newsflow} package can be used to perform a many-to-many comparison of documents.
-The primary focus and most important feature of this package is the \emph{documents.window.compare} function.
-This function compares all documents that occur within a given time distance, which makes it computationally feasible for longitudinal data.
-Using this data, we can analyze to what extent different sources publish the same content and whether there are consistent patterns in who follows whom.
-The secondary focus of this package is to provide functions to organize, visualize and analyze the document similarity data within R. 
-By enabling both the document comparison and analysis to be performed within R, this type of analysis becomes more accesible to scholars less versed in computational text analysis, and it becomes easier to share and replicate this type of research.  
+We have demonstrated how the \emph{newsflow} package can be used to
+perform a many-to-many comparison of documents. The primary focus and
+most important feature of this package is the \emph{newsflow.compare}
+function. This function compares all documents that occur within a given
+time distance, which makes it computationally feasible for longitudinal
+data. Using this data, we can analyze to what extent different sources
+publish the same content and whether there are consistent patterns in
+who follows whom. The secondary focus of this package is to provide
+functions to organize, visualize and analyze the document similarity
+data within R. By enabling both the document comparison and analysis to
+be performed within R, this type of analysis becomes more accesible to
+scholars less versed in computational text analysis, and it becomes
+easier to share and replicate this type of research.
 
-The data input required for this analysis consists solely of textual documents and their corresponding publication date and source.
-Since no human coding is required, the package enables large scale comparative and longitudinal studies.
-Although the demonstration in this vignette used a moderate sized dataset, the \emph{document.window.compare} can handle much larger data and is fast, thanks to the excellent sparse matrix multiplication alghoritm of the \emph{Matrix} package.
+The data input required for this analysis consists solely of textual
+documents and their corresponding publication date and source. Since no
+human coding is required, the package enables large scale comparative
+and longitudinal studies. Although the demonstration in this vignette
+used a moderate sized dataset, the \emph{document.window.compare} can
+handle much larger data and is fast, thanks to the excellent sparse
+matrix multiplication alghoritm of the \emph{Matrix} package.
 
-The validity of the method presented here relies on various factors; most importantly the type of data, the pre-processing and DTM preparation steps and the similarity threshold.
-It is thus recommended to use a gold standard, based on human interpretation, to test its validity. 
-In a recent empirical study (author citation, forthcoming) we obtained good performance for whether documents addressed the same events and whether they contained identical phrases by determining thresholds based on a manually coded gold standard. 
-Also, by using a news website that consistently referred to a news agency by name, we confirmed that we could reliably identify news agency influence for this format. 
-Naturally, there are always limitations to the accuracy with which influence in news diffusion can be measured using only content analysis. 
-However, we generally do not have access to other reliable information. 
-The advantage of a content analysis based approach is that it can be used on a large scale and over long periods of time, without relying on often equally inaccurate self-reports of news workers. 
-The current package contributes to the toolkit for this type of analysis. 
+The validity of the method presented here relies on various factors;
+most importantly the type of data, the pre-processing and DTM
+preparation steps and the similarity threshold. It is thus recommended
+to use a gold standard, based on human interpretation, to test its
+validity. In a recent empirical study (author citation, forthcoming) we
+obtained good performance for whether documents addressed the same
+events and whether they contained identical phrases by determining
+thresholds based on a manually coded gold standard. Also, by using a
+news website that consistently referred to a news agency by name, we
+confirmed that we could reliably identify news agency influence for this
+format. Naturally, there are always limitations to the accuracy with
+which influence in news diffusion can be measured using only content
+analysis. However, we generally do not have access to other reliable
+information. The advantage of a content analysis based approach is that
+it can be used on a large scale and over long periods of time, without
+relying on often equally inaccurate self-reports of news workers. The
+current package contributes to the toolkit for this type of analysis.
 
-Our goal is to continue developing this package as a specialized toolkit for analyzing the homogeneity and diffusion of news content.
-First of all, additional approaches for measuring whether documents are related will be added.
-Currently only a vector space model approach for calculating document similarity is implemented.
-For future versions alternative approaches such as language modeling will also be explored.
-In particular, we want to add measures to express the relation of documents over time in terms of probability and information gain.
-This would also allow us to define a more formal criterion for whether or not a relation exists, other than using a constant threshold for document similarity.
-Secondly, new methods for analyzing and visualizing the network data will be explored. 
-In particular, methods will be implemented for analyzing patterns beyond dyadic ties between news outlets, building on techniques from the field of network analysis.
-To promote the involvement of other scholars and professionals in this development, the package is published entirely open-source. 
-The source code is hosted on GitHub--\emph{https://github.com/kasperwelbers/newsflow}.
-
-\section{Practical code example}
-
-\begin{Schunk}
-\begin{Sinput}
-library(newsflow)
-
-# Prepare DTM and meta data
-data(dtm)
-data(meta)
-
-tdd = term.day.dist(dtm, meta)
-dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.3]]
-
-dtm = weightTfIdf(dtm)
-
-# Prepare document similarity network
-g = documents.window.compare(dtm, meta, hour.window = c(0.1,36), min.similarity = 0.4)
-g = filter.window(g, hour.window = c(6, 36), V(g)$sourcetype == 'Print NP')
-
-g_subcomps = decompose.graph(g)
-plot.document.network(g_subcomps[[2]], dtm=dtm)
-
-# Aggregate network 
-g.agg = aggregate.network(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
-
-get.adjacency(g.agg, attr='to.Vprop')
-plot.aggregate.network(g.agg, weight.var = 'to.Vprop', weight.thres=0.2)
-
-g2 = only.first.match(g)
-g2.agg = aggregate.network(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
-
-get.adjacency(g2.agg, attr='to.Vprop')
-plot.aggregate.network(g2.agg, weight.var = 'to.Vprop', weight.thres=0.2)
-\end{Sinput}
-\end{Schunk}
-
-\section{References}
+Our goal is to continue developing this package as a specialized toolkit
+for analyzing the homogeneity and diffusion of news content. First of
+all, additional approaches for measuring whether documents are related
+will be added. Currently only a vector space model approach for
+calculating document similarity is implemented. For future versions
+alternative approaches such as language modeling will also be explored.
+In particular, we want to add measures to express the relation of
+documents over time in terms of probability and information gain. This
+would also allow us to define a more formal criterion for whether or not
+a relation exists, other than using a constant threshold for document
+similarity. Secondly, new methods for analyzing and visualizing the
+network data will be explored. In particular, methods will be
+implemented for analyzing patterns beyond dyadic ties between news
+outlets, building on techniques from the field of network analysis. To
+promote the involvement of other scholars and professionals in this
+development, the package is published entirely open-source. The source
+code is hosted on
+GitHub--\emph{https://github.com/kasperwelbers/newsflow}.
 
 \bibliography{references}
 

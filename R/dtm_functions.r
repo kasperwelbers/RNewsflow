@@ -1,9 +1,5 @@
 library(tm)
 
-#' Transform a dtm into a sparse matrix.
-#' 
-#' @param dtm a document-term matrix
-#' @return a sparse matrix
 dtmToSparseMatrix <- function(dtm){
   sm = spMatrix(nrow(dtm), ncol(dtm), dtm$i, dtm$j, dtm$v)
   rownames(sm) = rownames(dtm)
@@ -21,6 +17,36 @@ match.dtm.meta <- function(dtm, meta, id.var){
   meta[match(rownames(dtm), meta[,id.var]),]
 }
 
+?term.day.dist
+
+#' Calculate statistics for term occurence across days
+#'
+#' @param dtm A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class or a TsparseMatrix from the Matrix class (\link[Matrix]{spMatrix}) 
+#' @param meta A data.frame where rows are documents and columns are document meta information. 
+#' Should contain 2 columns: the document name/id and date. 
+#' The name/id column should match the rownames (i.e. document names) of the DTM, and its label is specified in the `id.var` argument. 
+#' The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
+#' @param id.var The label for the document name/id column in the `meta` data.frame. Default is "document_id"
+#' @param date.var The label for the document date column in the `meta` data.frame . default is "date"
+#'
+#' @return A data.frame with statistics for each term.
+#' \itemize{
+#'  \item{freq:}{ The number of times a term occurred}
+#'  \item{doc.freq:}{ The number of documents in which a term occured}
+#'  \item{days.n:}{ The number of days on which a term occured}
+#'  \item{days.pct:}{ The percentage of days on which a term occured}
+#'  \item{days.entropy:}{ The entropy of the distribution of term frequency across days}
+#'  \item{days.entropy.norm:}{ The normalized days.entropy, where 1 is a discrete uniform distribution}
+#' }
+#' @export
+#'
+#' @examples
+#' data(dtm)
+#' data(meta)
+#' 
+#' tdd = term.day.dist(dtm, meta)
+#' head(tdd)
+#' tail(tdd)
 term.day.dist <- function(dtm, meta, id.var='document_id', date.var='date'){
   confirm.dtm.meta(meta, id.var, date.var)
   meta = match.dtm.meta(dtm, meta, id.var)

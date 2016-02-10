@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.11.14)  1 FEB 2016 09:46
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.11.14)  10 FEB 2016 18:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1284,88 +1284,87 @@ LaTeX Font Info:    Try loading font information for TS1+ppl on input line 159.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ppl.fd
 File: ts1ppl.fd 2001/06/04 font definitions for TS1/ppl.
 ) [2] [3] [4]
-<newsflow_files/figure-latex/unnamed-chunk-11-1.pdf, id=161, 357.335pt x 177.66
-376pt>
+<newsflow_files/figure-latex/unnamed-chunk-11-1.pdf, id=153, 318.18875pt x 177.
+66376pt>
 File: newsflow_files/figure-latex/unnamed-chunk-11-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-11-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-11-1.pdf use
 d on input line 468.
-(pdftex.def)             Requested size: 357.33412pt x 177.66331pt.
+(pdftex.def)             Requested size: 318.18796pt x 177.66331pt.
  [5] [6 <./newsflow_files/figure-latex/unnamed-chunk-11-1.pdf>]
-<newsflow_files/figure-latex/unnamed-chunk-15-1.pdf, id=183, 378.41376pt x 131.
-49126pt>
+<newsflow_files/figure-latex/unnamed-chunk-15-1.pdf, id=175, 354.32375pt x 132.
+495pt>
 File: newsflow_files/figure-latex/unnamed-chunk-15-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-15-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-15-1.pdf use
-d on input line 547.
-(pdftex.def)             Requested size: 378.41283pt x 131.49092pt.
+d on input line 552.
+(pdftex.def)             Requested size: 354.32288pt x 132.49466pt.
 
-<newsflow_files/figure-latex/unnamed-chunk-16-1.pdf, id=184, 378.41376pt x 218.
-8175pt>
+<newsflow_files/figure-latex/unnamed-chunk-16-1.pdf, id=176, 378.41376pt x 215.
+80624pt>
 File: newsflow_files/figure-latex/unnamed-chunk-16-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-16-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-16-1.pdf use
-d on input line 567.
-(pdftex.def)             Requested size: 378.41283pt x 218.81696pt.
+d on input line 572.
+(pdftex.def)             Requested size: 378.41283pt x 215.80571pt.
  [7 <./newsflow_files/figure-latex/unnamed-chunk-15-1.pdf> <./newsflow_files/fi
 gure-latex/unnamed-chunk-16-1.pdf>]
-<newsflow_files/figure-latex/unnamed-chunk-17-1.pdf, id=205, 378.41376pt x 131.
-49126pt>
+<newsflow_files/figure-latex/unnamed-chunk-17-1.pdf, id=197, 354.32375pt x 132.
+495pt>
 File: newsflow_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-17-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-17-1.pdf use
-d on input line 598.
-(pdftex.def)             Requested size: 378.41283pt x 131.49092pt.
+d on input line 603.
+(pdftex.def)             Requested size: 354.32288pt x 132.49466pt.
  [8 <./newsflow_files/figure-latex/unnamed-chunk-17-1.pdf>]
-<newsflow_files/figure-latex/unnamed-chunk-20-1.pdf, id=219, 213.79875pt x 212.
+<newsflow_files/figure-latex/unnamed-chunk-20-1.pdf, id=211, 213.79875pt x 212.
 795pt>
 File: newsflow_files/figure-latex/unnamed-chunk-20-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-20-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-20-1.pdf use
-d on input line 720.
+d on input line 725.
 (pdftex.def)             Requested size: 213.79822pt x 212.79446pt.
  [9]
-<newsflow_files/figure-latex/unnamed-chunk-21-1.pdf, id=225, 213.79875pt x 212.
+<newsflow_files/figure-latex/unnamed-chunk-21-1.pdf, id=217, 213.79875pt x 212.
 795pt>
 File: newsflow_files/figure-latex/unnamed-chunk-21-1.pdf Graphic file (type pdf
 )
  <use newsflow_files/figure-latex/unnamed-chunk-21-1.pdf>
 Package pdftex.def Info: newsflow_files/figure-latex/unnamed-chunk-21-1.pdf use
-d on input line 738.
+d on input line 743.
 (pdftex.def)             Requested size: 213.79822pt x 212.79446pt.
  [10 <./newsflow_files/figure-latex/unnamed-chunk-20-1.pdf> <./newsflow_files/f
-igure-latex/unnamed-chunk-21-1.pdf>] [11] [12] (./RJwrapper.bbl (./RJwrapper.br
-f)
+igure-latex/unnamed-chunk-21-1.pdf>] [11] (./RJwrapper.bbl (./RJwrapper.brf)
 \tf@brf=\write6
 \openout6 = `RJwrapper.brf'.
 
-) [13])
+ [12]))
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 27.
-
-[14]
+ [13]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 27.
- (./RJwrapper.aux)
+
+(./RJwrapper.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 27.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 27.
 Package rerunfilecheck Info: File `RJwrapper.out' has not changed.
-(rerunfilecheck)             Checksum: B31649628B07AB6FF4D3385A58BB86FB;1299.
+(rerunfilecheck)             Checksum: 1A0503078BE3092BB629BB4D47FC84DB;1171.
 Package rerunfilecheck Info: File `RJwrapper.brf' has not changed.
 (rerunfilecheck)             Checksum: 0B870285317B2AA3D1D650ED074AC9E0;750.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 27.
  ) 
 Here is how much of TeX's memory you used:
- 20333 strings out of 493304
- 344547 string characters out of 6139870
+ 20343 strings out of 493304
+ 344620 string characters out of 6139870
  450082 words of memory out of 5000000
- 23007 multiletter control sequences out of 15000+600000
- 54054 words of font info for 270 fonts, out of 8000000 for 9000
+ 23005 multiletter control sequences out of 15000+600000
+ 55597 words of font info for 281 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 63i,12n,57p,710b,666s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 63i,12n,57p,558b,668s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.13} has been referenced but does not ex
 ist, replaced by a fixed one
 
@@ -1409,13 +1408,14 @@ pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist
 re/texlive/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc}{/usr/share/texli
 ve/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/
 type1/public/inconsolata/Inconsolata-zi4r.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/urw/palatino/uplb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/ur
-w/palatino/uplr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palatino/u
-plri8a.pfb>
-Output written on RJwrapper.pdf (14 pages, 166100 bytes).
+nts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/urw/palatino/uplb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palat
+ino/uplr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/palatino/uplri8a.
+pfb>
+Output written on RJwrapper.pdf (13 pages, 172592 bytes).
 PDF statistics:
- 321 PDF objects out of 1000 (max. 8388607)
- 280 compressed objects within 3 object streams
- 61 named destinations out of 1000 (max. 500000)
- 42659 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 312 PDF objects out of 1000 (max. 8388607)
+ 271 compressed objects within 3 object streams
+ 58 named destinations out of 1000 (max. 500000)
+ 42643 words of extra memory for PDF output out of 42996 (max. 10000000)
 
