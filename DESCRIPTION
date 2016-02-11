@@ -20,6 +20,5 @@ Depends:
     data.table
 RoxygenNote: 5.0.1
 Suggests: knitr,
-    rmarkdown,
-    printr
+    rmarkdown
 VignetteBuilder: knitr

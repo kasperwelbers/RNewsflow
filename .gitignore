@@ -10,7 +10,6 @@
 vignettes/*.html
 vignettes/*.pdf
 .Rproj.user
-inst/doc
 
 ^rjournal_version/*
 ^tex_version/*
