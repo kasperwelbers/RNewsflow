@@ -38,5 +38,5 @@ The vignette containing a step-by-step tutorial for using RNewsflow can be calle
 
 ```{r, message=F, eval=F}
 library(RNewsflow)
-vignette(RNewsflow)
+vignette('RNewsflow')
 ```

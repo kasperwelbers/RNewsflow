@@ -20,5 +20,5 @@ The vignette containing a step-by-step tutorial for using RNewsflow can be calle
 
 ``` r
 library(RNewsflow)
-vignette(RNewsflow)
+vignette('RNewsflow')
 ```
