@@ -1,5 +1,5 @@
 % !TeX root = RJwrapper.tex
-\title{Newsflow: An R package for analyzing content homogeneity and news
+\title{RNewsflow: An R package for analyzing content homogeneity and news
 diffusion using computational text analysis}
 \author{by Kasper Welbers, Wouter van Atteveldt}
 
@@ -8,16 +8,15 @@ diffusion using computational text analysis}
 \abstract{
 Given the sheer amount of news sources in the digital age (e.g.,
 newspapers, blogs, social media) it has become difficult to determine
-where news is first introduced and how it diffuses across sources. We
-introduce Newsflow: an R package for analyzing content homogeneity and
-diffusion patterns using computational text analysis. The content of
-news messages is compared using techniques from the field of information
-retrieval, similar to plagiarism detection. By using a sliding window
-approach to only compare messages within a given time distance, many
-sources can be compared over long periods of time. Furthermore, the
-package introduces an approach for analyzing the news similarity data as
-a network, and includes various functions to analyze and visualize this
-network.
+where news is first introduced and how it diffuses across sources.
+RNewsflow provides tools for analyzing content homogeneity and diffusion
+patterns using computational text analysis. The content of news messages
+is compared using techniques from the field of information retrieval,
+similar to plagiarism detection. By using a sliding window approach to
+only compare messages within a given time distance, many sources can be
+compared over long periods of time. Furthermore, the package introduces
+an approach for analyzing the news similarity data as a network, and
+includes various functions to analyze and visualize this network.
 }
 
 \section{Introduction}
@@ -25,7 +24,7 @@ network.
 The news diffusion process in the digital age involves many
 interdependent sources, ranging from news agencies and traditional
 newspapers to blogs and people on social media
-\citep{meraz11, paterson05, pew10}. We offer the \emph{Newsflow} R
+\citep{meraz11, paterson05, pew10}. We offer the \emph{RNewsflow} R
 package\footnote{R is an open-source statistical software package
   (\url{https://www.r-project.org/}).} as a toolkit to analyze the
 homogeneity and diffusion of news content using computational text
@@ -71,7 +70,7 @@ date information---to analyzing and visualizing the output. It points to
 relevant software within and outside of R for pre-processing written
 texts, and demonstrates how to use the core functions of this package.
 For more advanced users there are additional functions and parameters to
-support versatility. \emph{Newsflow} is completely open-source to
+support versatility. \emph{RNewsflow} is completely open-source to
 promote active involvement in developing and evaluating the methodology.
 The source code is available on Github---\url{https://github.com/masked}
 (repository hidden for review). All data used in this vignette is
@@ -129,15 +128,14 @@ doc3 = 'Therefore, Socrates is mortal'
 dtm = RTextTools::create_matrix(textColumns = c(doc1,doc2,doc3), 
                                 minWordLength = 1, removeStopwords = F)
 
-rownames(dtm) = paste('Document', 1:nrow(dtm))
 as.matrix(dtm)
 \end{Sinput}
 \begin{Soutput}
-#>             Terms
-#> Docs         are human humans is mortal socrates therefore
-#>   Document 1   0     1      0  1      0        1         0
-#>   Document 2   1     0      1  0      1        0         0
-#>   Document 3   0     0      0  1      1        1         1
+#>     Terms
+#> Docs are human humans is mortal socrates therefore
+#>    1   0     1      0  1      0        1         0
+#>    2   1     0      1  0      1        0         0
+#>    3   0     0      0  1      1        1         1
 \end{Soutput}
 \end{Schunk}
 
@@ -241,7 +239,7 @@ offered in this package, it is recommended to label these columns
 ``document\_id'' and ``date''. Any additional columns in the meta
 data.frame can be used in the analysis to aggregate and visualize
 results. Here it is recommended to have at least a column containing the
-source of the document, labeled ``source''.\footnote{``document\_id'',
+source of the document, labeled ``source.''\footnote{``document\_id'',
   ``date'' and ``source'' are the default labels used in several
   functions to interpret the meta information. Note that these defaults
   can always be changed using the function parameters. Using the default
@@ -277,15 +275,15 @@ tdd[sample(1:nrow(tdd), 4),] # show 4 random rows
 \end{Sinput}
 \begin{Soutput}
 #>                  term freq doc.freq days.n days.pct days.entropy
-#> 5178        noun.2445    2        2      1    0.033          1.0
-#> 180  organization.433    3        2      2    0.067          1.9
-#> 1012     location.430    4        4      2    0.067          1.8
-#> 5880       person.383    2        2      1    0.033          1.0
+#> 6379        noun.3057    1        1      1    0.033          1.0
+#> 8            noun.472   12        9      3    0.100          2.8
+#> 2970 organization.183    2        2      2    0.067          2.0
+#> 4318     location.552    1        1      1    0.033          1.0
 #>      days.entropy.norm
-#> 5178             0.033
-#> 180              0.063
-#> 1012             0.058
-#> 5880             0.033
+#> 6379             0.033
+#> 8                0.094
+#> 2970             0.067
+#> 4318             0.033
 \end{Soutput}
 \end{Schunk}
 
@@ -539,14 +537,14 @@ g_subcomps = decompose.graph(g)
 \end{Schunk}
 
 The demo data with the current settings has 685 sub-components. To
-visualize these components, we offer the \emph{plot.document.network}
+visualize these components, we offer the \emph{document.network.plot}
 function. This function draws a network where nodes (i.e.~documents) are
 positioned based on their date (x-axis) and source (y-axis).
 
 \begin{Schunk}
 \begin{Sinput}
 gs = g_subcomps[[2]] # select the second sub-component
-plot.document.network(gs)
+document.network.plot(gs)
 \end{Sinput}
 
 \includegraphics{newsflow_files/figure-latex/unnamed-chunk-15-1} \end{Schunk}
@@ -566,7 +564,7 @@ words of these documents.
 
 \begin{Schunk}
 \begin{Sinput}
-plot.document.network(gs, source.attribute = 'sourcetype', dtm=dtm)
+document.network.plot(gs, source.attribute = 'sourcetype', dtm=dtm)
 \end{Sinput}
 
 \includegraphics{newsflow_files/figure-latex/unnamed-chunk-16-1} \end{Schunk}
@@ -597,14 +595,14 @@ window\footnote{If there are multiple earliest dated documents (that is,
 \begin{Schunk}
 \begin{Sinput}
 gs_onlyfirst = only.first.match(gs)
-plot.document.network(gs_onlyfirst)
+document.network.plot(gs_onlyfirst)
 \end{Sinput}
 
 \includegraphics{newsflow_files/figure-latex/unnamed-chunk-17-1} \end{Schunk}
 
 \subsection{Aggregating the document similarity network}
 
-This package offers the \emph{aggregate.network} function as a versatile
+This package offers the \emph{network.aggregate} function as a versatile
 way to aggregate the edges of the document similarity network based on
 the vertex attributes (i.e.~the document meta information). The first
 argument is the network (in the \emph{igraph} class). The second
@@ -627,7 +625,7 @@ following example we include this to analyze the median of the
 
 \begin{Schunk}
 \begin{Sinput}
-g.agg = aggregate.network(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g.agg = network.aggregate(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
 e = get.data.frame(g.agg, 'edges')
 head(e)
@@ -708,7 +706,7 @@ round(adj.m, 2) # round on 2 decimals
 Alternatively, an intuitive way to present the aggregated network is by
 visualizing it. For this we can use the visualization features of the
 \emph{igraph} package. To make this more convenient, we also offer the
-\emph{plot.directed.network} function. This is a wrapper for the
+\emph{directed.network.plot} function. This is a wrapper for the
 plot.igraph function, which makes it easier to use different edge weight
 attributes and to use an edge threshold, and has default plotting
 parameters to work well for directed graphs with edge labels. For this
@@ -717,7 +715,7 @@ example we use the \emph{to.Vprop} edge attribute with a threshold of
 
 \begin{Schunk}
 \begin{Sinput}
-plot.directed.network(g.agg, weight.var = 'to.Vprop',
+directed.network.plot(g.agg, weight.var = 'to.Vprop',
                        weight.thres = 0.2)
 \end{Sinput}
 
@@ -733,9 +731,9 @@ edges to the first source that published a document.
 \begin{Schunk}
 \begin{Sinput}
 g2 = only.first.match(g)
-g2.agg = aggregate.network(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g2.agg = network.aggregate(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
-plot.directed.network(g2.agg, weight.var = 'to.Vprop',
+directed.network.plot(g2.agg, weight.var = 'to.Vprop',
                        weight.thres = 0.2)
 \end{Sinput}
 
@@ -766,19 +764,19 @@ There are several alternative applications of the functions offered in
 this package that are not covered in this vignette. Here we briefly
 point out some of the more usefull alternatives.
 
-In the aggregate.network function it is possible to use different vertex
+In the network.aggregate function it is possible to use different vertex
 attributes to aggregate the edges for \emph{from} and \emph{to} nodes. A
 particularlly interesting application of this feature is to use the
 publication date in the aggregation. For instance, with the following
 settings, we can get the proportion of matched documents per day. Here
 we also demonstrate the \emph{return.df} parameter in the
-\emph{aggregate.network} function. This way the results are returned as
+\emph{network.aggregate} function. This way the results are returned as
 a single data.frame in which relevant edge and vertex information is
 merged.
 
 \textbackslash{}begin\{Schunk\} \textbackslash{}begin\{Sinput\}
 V(g)\(day = format(as.Date(V(g)\)date), `\%Y-\%m-\%d') agg.perday =
-aggregate.network(g, by.from=`sourcetype', by.to=c(`sourcetype', `day'),
+network.aggregate(g, by.from=`sourcetype', by.to=c(`sourcetype', `day'),
 edge.attribute=`hourdiff', agg.FUN=median, return.df=T)
 
 head(agg.perday{[}agg.perday\$to.sourcetype == `Online NP',\\
@@ -796,7 +794,7 @@ c(`from.sourcetype', `to.sourcetype', `to.day',`to.Vprop'){]},2)
 Looking at the \emph{to.Vprop} score, we see that on 2013-06-01, 78.95\%
 of \emph{Online NP} messages match with previously published
 \emph{Newsagency}
-messages\footnote{The \emph{from.Vprop} cannot be interpreted in the same way, because it gives the proportion of all messages in the \emph{from} group. If one is interested in the \emph{from.Vprop} score per day, the \emph{by.from} and \emph{by.to} arguments in \emph{aggregate.network} need to be switched. Note that one should not simply aggregate both \emph{by.from} and \emph{by.to} by date, because then only documents that both occured on this date will be aggregated}.
+messages\footnote{The \emph{from.Vprop} cannot be interpreted in the same way, because it gives the proportion of all messages in the \emph{from} group. If one is interested in the \emph{from.Vprop} score per day, the \emph{by.from} and \emph{by.to} arguments in \emph{network.aggregate} need to be switched. Note that one should not simply aggregate both \emph{by.from} and \emph{by.to} by date, because then only documents that both occured on this date will be aggregated}.
 This way, the aggregated document similarity data can be analyzed as a
 time-series. For instance, to analyze whether seasonal effects or
 extra-media developments such as election campaigns affect content
@@ -818,7 +816,7 @@ each source was.
 
 \begin{Schunk}
 \begin{Sinput}
-agg.perdoc = aggregate.network(g, by.from='name', by.to='sourcetype', 
+agg.perdoc = network.aggregate(g, by.from='name', by.to='sourcetype', 
                                   edge.attribute='weight', agg.FUN=max, 
                                   return.df=T)
 docXsource = xtabs(agg.weight ~ from.name + to.sourcetype, agg.perdoc, sparse = F)
@@ -840,7 +838,7 @@ patterns such as longitudinal trends can be analyzed.
 
 \section{Conclusion and future improvements}
 
-We have demonstrated how the \emph{newsflow} package can be used to
+We have demonstrated how the \emph{RNewsflow} package can be used to
 perform a many-to-many comparison of documents. The primary focus and
 most important feature of this package is the \emph{newsflow.compare}
 function. This function compares all documents that occur within a given
@@ -897,7 +895,7 @@ outlets, building on techniques from the field of network analysis. To
 promote the involvement of other scholars and professionals in this
 development, the package is published entirely open-source. The source
 code is hosted on
-GitHub--\emph{https://github.com/kasperwelbers/newsflow}.
+GitHub--\emph{https://github.com/kasperwelbers/RNewsflow}.
 
 \bibliography{references}
 

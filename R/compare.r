@@ -109,7 +109,6 @@ documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=
   results[!as.character(results$x) == as.character(results$y),]
 }
 
-#' @export
 unlistWindow <- function(list_object, i, window){
   indices = i + window
   indices = indices[indices > 0 & indices <= length(list_object)]

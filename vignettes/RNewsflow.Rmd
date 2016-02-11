@@ -1,5 +1,5 @@
 ---
-title: "Newsflow: An R package for analyzing content homogeneity and news diffusion using computational text analysis"
+title: "RNewsflow: Tools for analyzing content homogeneity and news diffusion using computational text analysis"
 author: "by Kasper Welbers and Wouter van Atteveldt"
 bibliography: references.bib
 date: ""
@@ -8,28 +8,27 @@ output:
     toc: false
     keep_tex: TRUE
 vignette: >
-  %\VignetteIndexEntry{Newsflow}
+  %\VignetteIndexEntry{RNewsflow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 abstract: |
   Given the sheer amount of news sources in the digital age (e.g., newspapers, blogs, social media) it has become difficult to determine where news is first introduced and how it diffuses across sources.
-  We introduce Newsflow: an R package for analyzing content homogeneity and diffusion patterns using computational text analysis. 
+  RNewsflow provides tools for analyzing content homogeneity and diffusion patterns using computational text analysis. 
   The content of news messages is compared using techniques from the field of information retrieval, similar to plagiarism detection.
   By using a sliding window approach to only compare messages within a given time distance, many sources can be compared over long periods of time.
   Furthermore, the package introduces an approach for analyzing the news similarity data as a network, and includes various functions to analyze and visualize this network.
-  
 ---
 
 ```{r, include=FALSE}
 options(digits=3)
-library(newsflow)
-library(printr)
+library(RNewsflow)
+library(knitr)
 ```
 
 # Introduction
 
 The news diffusion process in the digital age involves many interdependent sources, ranging from news agencies and traditional newspapers to blogs and people on social media [@meraz11; @paterson05; @pew10].
-We offer the `Newsflow` R package[^reviewernote] as a toolkit to analyze the homogeneity and diffusion of news content using computational text analysis.
+We offer the `RNewsflow` R package[^reviewernote] as a toolkit to analyze the homogeneity and diffusion of news content using computational text analysis.
 This analysis consists of two steps.
 First, techniques from the field of information retrieval are used to measure the similarity of news messages (e.g., addressing the same event, containing identical phrases).
 Second, the temporal order in which messages are published is used to analyze consistent patterns in who follows whom.
@@ -53,7 +52,7 @@ The package is designed to appeal to scholars and professionals without prior ex
 This vignette covers the entire chain from processing raw data---written text with source and date information---to analyzing and visualizing the output.
 It points to relevant software within and outside of R for pre-processing written texts, and demonstrates how to use the core functions of this package.
 For more advanced users there are additional functions and parameters to support versatility.
-`Newsflow` is completely open-source to promote active involvement in developing and evaluating the methodology.
+`RNewsflow` is completely open-source to promote active involvement in developing and evaluating the methodology.
 The source code is available on Github---https://github.com/masked (repository hidden for review).
 All data used in this vignette is included in the package for easy replication.
 
@@ -135,6 +134,7 @@ By focusing on these elements, the analysis in this study focused on whether doc
 This data is also made available in the package as demo data, in which the actual nouns and proper names have been substituded with indexed word types (e.g., the third organization in the vocabulary is referred to as organization.3, the 20th noun as noun.20).
 
 ```{r}
+library(RNewsflow)
 data(dtm)
 as.matrix(dtm[1:3,1:5])
 ```
@@ -312,12 +312,12 @@ g_subcomps = decompose.graph(g)
 ```
 
 The demo data with the current settings has `r length(g_subcomps)` sub-components. 
-To visualize these components, we offer the `plot.document.network` function.
+To visualize these components, we offer the `document.network.plot` function.
 This function draws a network where nodes (i.e. documents) are positioned based on their date (x-axis) and source (y-axis).
 
 ```{r, fig.width = 7, fig.height = 3}
 gs = g_subcomps[[2]] # select the second sub-component
-plot.document.network(gs)
+document.network.plot(gs)
 ```
 
 The visualization shows that a news message was first published by the news agency on June 5th at 9:21 AM. 
@@ -328,8 +328,9 @@ By default, the "source" attribute is used for the y-axis, but this can be chang
 If a DTM is also provided, the visualization will also include a word cloud with the most frequent words of these documents.
 
 ```{r, fig.width = 7, fig.height = 4}
-plot.document.network(gs, source.attribute = 'sourcetype', dtm=dtm)
+document.network.plot(gs, source.attribute = 'sourcetype', dtm=dtm)
 ```
+
 
 These visualizations and the corresponding subcomponents help us to qualitatively investigate specific cases. 
 This also helps to evaluate whether the document similarity measures are valid given the goal of the analysis.
@@ -347,12 +348,12 @@ Here we demonstrate the `only.first.match` function, which transforms the networ
 
 ```{r, fig.width = 7, fig.height = 3}
 gs_onlyfirst = only.first.match(gs)
-plot.document.network(gs_onlyfirst)
+document.network.plot(gs_onlyfirst)
 ```
 
 ## Aggregating the document similarity network
 
-This package offers the  `aggregate.network` function as a versatile way to aggregate the edges of the document similarity network based on the vertex attributes (i.e. the document meta information).
+This package offers the  `network.aggregate` function as a versatile way to aggregate the edges of the document similarity network based on the vertex attributes (i.e. the document meta information).
 The first argument is the network (in the `igraph` class). 
 The second argument, for the `by` parameter, is a character vector to indicate one or more vertex attributes based on which the edges are aggregated.
 Optionally, the `by` characteristics can also be specified separately for `by.from` and `by.to`. 
@@ -364,7 +365,7 @@ In addition, if an `edge.attribute` is given, this attribute will be aggregated 
 For the following example we include this to analyze the median of the `hourdiff` attribute.
 
 ```{r}
-g.agg = aggregate.network(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g.agg = network.aggregate(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
 e = get.data.frame(g.agg, 'edges')
 head(e)
@@ -399,12 +400,12 @@ round(adj.m, 2) # round on 2 decimals
 
 Alternatively, an intuitive way to present the aggregated network is by visualizing it.
 For this we can use the visualization features of the `igraph` package.
-To make this more convenient, we also offer the `plot.directed.network` function. 
+To make this more convenient, we also offer the `directed.network.plot` function. 
 This is a wrapper for the plot.igraph function, which makes it easier to use different edge weight attributes and to use an edge threshold, and has default plotting parameters to work well for directed graphs with edge labels.
 For this example we use the `to.Vprop` edge attribute with a threshold of 0.2.
 
 ```{r, fig.align='center', fig.width=7, fig.height=5}
-plot.directed.network(g.agg, weight.var = 'to.Vprop',
+directed.network.plot(g.agg, weight.var = 'to.Vprop',
                        weight.thres = 0.2)
 ```
 
@@ -412,9 +413,9 @@ For illustration, we can now see how the results change if we transform the netw
 
 ```{r, fig.align='center', fig.width=7, fig.height=5}
 g2 = only.first.match(g)
-g2.agg = aggregate.network(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g2.agg = network.aggregate(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
-plot.directed.network(g2.agg, weight.var = 'to.Vprop',
+directed.network.plot(g2.agg, weight.var = 'to.Vprop',
                        weight.thres = 0.2)
 ```
 
@@ -434,15 +435,15 @@ One of the goals of creating this package is to facilitate a platform for schola
 There are several alternative applications of the functions offered in this package that are not covered in this vignette. 
 Here we briefly point out some of the more usefull alternatives.
 
-In the aggregate.network function it is possible to use different vertex attributes to aggregate the edges for `from` and `to` nodes.
+In the network.aggregate function it is possible to use different vertex attributes to aggregate the edges for `from` and `to` nodes.
 A particularlly interesting application of this feature is to use the publication date in the aggregation.
 For instance, with the following settings, we can get the proportion of matched documents per day.
-Here we also demonstrate the `return.df` parameter in the `aggregate.network` function.
+Here we also demonstrate the `return.df` parameter in the `network.aggregate` function.
 This way the results are returned as a single data.frame in which relevant edge and vertex information is merged.
 
 ```{r}
 V(g)$day = format(as.Date(V(g)$date), '%Y-%m-%d')
-agg.perday = aggregate.network(g, by.from='sourcetype', by.to=c('sourcetype', 'day'), 
+agg.perday = network.aggregate(g, by.from='sourcetype', by.to=c('sourcetype', 'day'), 
                                   edge.attribute='hourdiff', agg.FUN=median, 
                                   return.df=T)
 
@@ -457,7 +458,7 @@ This way, the aggregated document similarity data can be analyzed as a time-seri
 For instance, to analyze whether seasonal effects or extra-media developments such as election campaigns affect content homogeneity or intermedia dynamics. 
 The `return.df` feature is convenient for this purpose, because it directly matches all the vertex and edge attributes (as opposed to the `get.data.frame` function).
 
-[^notfrom]: The *from.Vprop* cannot be interpreted in the same way, because it gives the proportion of all messages in the `from` group. If one is interested in the *from.Vprop* score per day, the *by.from* and *by.to* arguments in *aggregate.network* need to be switched. Note that one should not simply aggregate both *by.from* and *by.to* by date, because then only documents that both occured on this date will be aggregated. 
+[^notfrom]: The *from.Vprop* cannot be interpreted in the same way, because it gives the proportion of all messages in the `from` group. If one is interested in the *from.Vprop* score per day, the *by.from* and *by.to* arguments in *network.aggregate* need to be switched. Note that one should not simply aggregate both *by.from* and *by.to* by date, because then only documents that both occured on this date will be aggregated. 
 
 Another usefull application of this feature is to only aggregate the `by.to` group, by using the document name in the `by.from` argument. 
 This way, the data in the *by.to* group is aggregated for each individual message. 
@@ -467,7 +468,7 @@ We set the `edge.attribute` to "weight" and `agg.FUN` to max, so that for each d
 
 
 ```{r}
-agg.perdoc = aggregate.network(g, by.from='name', by.to='sourcetype', 
+agg.perdoc = network.aggregate(g, by.from='name', by.to='sourcetype', 
                                   edge.attribute='weight', agg.FUN=max, 
                                   return.df=T)
 docXsource = xtabs(agg.weight ~ from.name + to.sourcetype, agg.perdoc, sparse = F)
@@ -481,7 +482,7 @@ By measuring content homogeneity aggregated over time, patterns such as longitud
 
 # Conclusion and future improvements
 
-We have demonstrated how the *newsflow* package can be used to perform a many-to-many comparison of documents.
+We have demonstrated how the *RNewsflow* package can be used to perform a many-to-many comparison of documents.
 The primary focus and most important feature of this package is the `newsflow.compare` function.
 This function compares all documents that occur within a given time distance, which makes it computationally feasible for longitudinal data.
 Using this data, we can analyze to what extent different sources publish the same content and whether there are consistent patterns in who follows whom.
@@ -510,12 +511,12 @@ This would also allow us to define a more formal criterion for whether or not a 
 Secondly, new methods for analyzing and visualizing the network data will be explored. 
 In particular, methods will be implemented for analyzing patterns beyond dyadic ties between news outlets, building on techniques from the field of network analysis.
 To promote the involvement of other scholars and professionals in this development, the package is published entirely open-source. 
-The source code is hosted on GitHub--*https://github.com/kasperwelbers/newsflow*.
+The source code is hosted on GitHub--*https://github.com/kasperwelbers/RNewsflow*.
 
 # Practical code example
 
 ```{r eval=FALSE}
-library(newsflow)
+library(RNewsflow)
 
 # Prepare DTM and meta data
 data(dtm)
@@ -533,19 +534,19 @@ g = filter.window(g, hour.window = c(6, 36), V(g)$sourcetype == 'Print NP')
 show.window(g, vertex.attribute = 'source', direction = 'to')
 
 g_subcomps = decompose.graph(g)
-plot.document.network(g_subcomps[[2]], dtm=dtm)
+document.network.plot(g_subcomps[[2]], dtm=dtm)
 
 # Aggregate network 
-g.agg = aggregate.network(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g.agg = network.aggregate(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
 get.adjacency(g.agg, attr='to.Vprop')
-plot.directed.network(g.agg, weight.var = 'to.Vprop', weight.thres=0.2)
+directed.network.plot(g.agg, weight.var = 'to.Vprop', weight.thres=0.2)
 
 g2 = only.first.match(g)
-g2.agg = aggregate.network(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g2.agg = network.aggregate(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
 
 get.adjacency(g2.agg, attr='to.Vprop')
-plot.directed.network(g2.agg, weight.var = 'to.Vprop', weight.thres=0.2)
+directed.network.plot(g2.agg, weight.var = 'to.Vprop', weight.thres=0.2)
 
 ```
 

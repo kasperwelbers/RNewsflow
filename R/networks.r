@@ -85,10 +85,10 @@ document.network <- function(d, meta, id.var='document_id', date.var='date', min
 #' data(dtm)
 #' 
 #' docnet_comps = decompose.graph(docnet) # get subcomponents
-#' plot.document.network(docnet_comps[[1]]) # subcomponent 1
-#' plot.document.network(docnet_comps[[2]], dtm=dtm) # subcomponent 2 with wordcloud
-#' plot.document.network(docnet_comps[[3]], dtm=dtm, vertex.color='red') # subcomponent 3 with additional arguments to plot.igraph 
-plot.document.network <- function(g, date.attribute='date', source.attribute='source', subcomp_i=NULL, dtm=NULL, sources=NULL, only.outer.date=F, date.format='%Y-%m-%d %H:%M', margins=c(5,8,1,13), isolate.color=NULL, source.loops=T, ...){
+#' document.network.plot(docnet_comps[[1]]) # subcomponent 1
+#' document.network.plot(docnet_comps[[2]], dtm=dtm) # subcomponent 2 with wordcloud
+#' document.network.plot(docnet_comps[[3]], dtm=dtm, vertex.color='red') # subcomponent 3 with additional arguments to plot.igraph 
+document.network.plot <- function(g, date.attribute='date', source.attribute='source', subcomp_i=NULL, dtm=NULL, sources=NULL, only.outer.date=F, date.format='%Y-%m-%d %H:%M', margins=c(5,8,1,13), isolate.color=NULL, source.loops=T, ...){
   g = set.vertex.attribute(g, 'date', value= get.vertex.attribute(g, date.attribute))
   g = set.vertex.attribute(g, 'source', value= get.vertex.attribute(g, source.attribute))
   
@@ -275,8 +275,8 @@ filter.window <- function(g, hour.window, to.vertices=NULL, from.vertices=NULL){
 #' get.data.frame(subcomp2)
 #' 
 #' par(mfrow=c(2,1))
-#' plot.document.network(subcomp1, main='All matches')
-#' plot.document.network(subcomp2, main='Only first match')
+#' document.network.plot(subcomp1, main='All matches')
+#' document.network.plot(subcomp2, main='Only first match')
 #' par(mfrow=c(1,1))
 only.first.match <- function(g){
   e = data.frame(get.edges(g, E(g)))
@@ -331,12 +331,12 @@ only.first.match <- function(g){
 #'
 #' @examples
 #' data(docnet)
-#' aggdocnet = aggregate.network(docnet, by='sourcetype')
+#' aggdocnet = network.aggregate(docnet, by='sourcetype')
 #' get.data.frame(aggdocnet, 'both')
 #' 
-#' aggdocdf = aggregate.network(docnet, by.from='sourcetype', by.to='source', return.df = T)
+#' aggdocdf = network.aggregate(docnet, by.from='sourcetype', by.to='source', return.df = T)
 #' head(aggdocdf)
-aggregate.network <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='weight', agg.FUN=mean, return.df=F){
+network.aggregate <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='weight', agg.FUN=mean, return.df=F){
   V(g)$any_vertex = '---'
   if(is.null(by.from)) by.from = 'any_vertex'
   if(is.null(by.to)) by.to = 'any_vertex'
@@ -370,7 +370,7 @@ aggregate.network <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='
   e$to.Vprop = e$to.V / e$to.N
   
   if(!return.df) {
-    e = return.aggregate.network(e)
+    e = return.network.aggregate(e)
     if('any_vertex' %in% names(vertex.attributes(e))) e = delete_vertex_attr(e, 'any_vertex')
     return(e)
   }
@@ -383,7 +383,7 @@ aggregate.network <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='
   }
 }
 
-return.aggregate.network <- function(g.df){
+return.network.aggregate <- function(g.df){
   vnames = colnames(g.df)[1:(grep('^edges$', colnames(g.df))-1)]
   
   # create network
@@ -444,14 +444,14 @@ graph.plot.presets <- function(g){
 #' @param delete.isolates If TRUE, isolates (i.e. vertices without edges) are ignored.
 #' @param ... Arguments to be passed to the \link[igraph]{plot.igraph} function. 
 #'
-#' @return 
+#' @return Nothing
 #' @export
 #'
 #' @examples
 #' data(docnet)
-#' aggdocnet = aggregate.network(docnet, by='source')
-#' plot.directed.network(aggdocnet, weight.var = 'to.Vprop', weight.thres = 0.2)
-plot.directed.network <- function(g, weight.var='from.Vprop', weight.thres=NULL, delete.isolates=F, 
+#' aggdocnet = network.aggregate(docnet, by='source')
+#' directed.network.plot(aggdocnet, weight.var = 'to.Vprop', weight.thres = 0.2)
+directed.network.plot <- function(g, weight.var='from.Vprop', weight.thres=NULL, delete.isolates=F, 
                                    vertex.size=30, vertex.color='lightblue', vertex.label.color='black', vertex.label.cex=0.7, 
                                    edge.color = 'grey', show.edge.labels=T, edge.label.color = 'black', edge.label.cex = 0.6, edge.arrow.size=1, 
                                    layout=layout.davidson.harel, ...){

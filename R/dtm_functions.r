@@ -1,5 +1,3 @@
-library(tm)
-
 dtmToSparseMatrix <- function(dtm){
   sm = spMatrix(nrow(dtm), ncol(dtm), dtm$i, dtm$j, dtm$v)
   rownames(sm) = rownames(dtm)
