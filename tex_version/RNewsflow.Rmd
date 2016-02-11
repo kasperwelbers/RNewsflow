@@ -3,6 +3,10 @@ title: "RNewsflow: Tools for analyzing content homogeneity and news diffusion us
 author: "by Kasper Welbers and Wouter van Atteveldt"
 bibliography: references.bib
 date: ""
+output:
+  pdf_document:
+    toc: false
+    keep_tex: TRUE
 vignette: >
   %\VignetteIndexEntry{RNewsflow}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,6 +23,7 @@ abstract: |
 options(digits=3)
 library(RNewsflow)
 library(knitr)
+library(printr)
 ```
 
 # Introduction
