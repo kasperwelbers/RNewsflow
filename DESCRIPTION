@@ -19,6 +19,7 @@ Depends:
     wordcloud,
     data.table
 RoxygenNote: 5.0.1
-Suggests: knitr,
+Suggests: 
+    knitr,
     rmarkdown
 VignetteBuilder: knitr
