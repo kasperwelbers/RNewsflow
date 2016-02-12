@@ -3,3 +3,5 @@
 
 vignette('RNewsflow')
 
+tools::buildVignettes('RNewsflow')
+
