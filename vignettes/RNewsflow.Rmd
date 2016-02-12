@@ -4,26 +4,26 @@ author: "by Kasper Welbers and Wouter van Atteveldt"
 bibliography: references.bib
 date: ""
 output:
-  pdf_document:
-    toc: false
-    keep_tex: TRUE
+  rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{RNewsflow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-abstract: |
-  Given the sheer amount of news sources in the digital age (e.g., newspapers, blogs, social media) it has become difficult to determine where news is first introduced and how it diffuses across sources.
-  RNewsflow provides tools for analyzing content homogeneity and diffusion patterns using computational text analysis. 
-  The content of news messages is compared using techniques from the field of information retrieval, similar to plagiarism detection.
-  By using a sliding window approach to only compare messages within a given time distance, many sources can be compared over long periods of time.
-  Furthermore, the package introduces an approach for analyzing the news similarity data as a network, and includes various functions to analyze and visualize this network.
+  
 ---
+
 
 ```{r, include=FALSE}
 options(digits=3)
-library(RNewsflow)
 library(knitr)
 ```
+
+## Abstract
+> Given the sheer amount of news sources in the digital age (e.g., newspapers, blogs, social media) it has become difficult to determine where news is first introduced and how it diffuses across sources.
+> RNewsflow provides tools for analyzing content homogeneity and diffusion patterns using computational text analysis. 
+> The content of news messages is compared using techniques from the field of information retrieval, similar to plagiarism detection.
+> By using a sliding window approach to only compare messages within a given time distance, many sources can be compared over long periods of time.
+> Furthermore, the package introduces an approach for analyzing the news similarity data as a network, and includes various functions to analyze and visualize this network.
 
 # Introduction
 
@@ -65,30 +65,32 @@ Finally, conclusions regarding the current version of the package and future dir
 
 # Preparing the data
 
-To analyse content homogeneity and news diffusion using computational text analysis, we need to know *who* said *what* at *what time*. 
+To analyze content homogeneity and news diffusion using computational text analysis, we need to know *who* said *what* at *what time*. 
 Thus, our data consists of messages in text form, including meta information for the source and publication date of each message.
 The texts furthermore need to be pre-processed and represented as a *document-term matrix* (DTM).
 This section first discusses techniques and refers to existing software to pre-process texts and create the DTM, and reflects on how certain choices influence the analysis.
 Second, it shows how the source and date information should be organized.
 Third, it discusses several ways to filter and weight the DTM based on word statistics.
 
+
 ## Pre-processing texts and creating the DTM
 A DTM is a matrix in which rows represent documents, columns represent terms, and cells indicate how often each term occurred in each document.
-This is referred to as a *bag of words* respresentation of texts, since we ignore the order of words. 
+This is referred to as a *bag of words* representation of texts, since we ignore the order of words. 
 This simplified representation makes analysis much easier and less computationally demanding, and as research has shown: ``a simple list of words, which we call unigrams, is often sufficient to convey the general meaning of a text'' [@grimmer13: 6].
 
-As input for this package, the DTM has to be in the `DocumentTermMarix` class of the  `tm` package.
+As input for this package, the DTM has to be in the `DocumentTermMarix` class of the  `tm` package [@feinerer08].
 This is a popular R package for text mining, or computational text analysis, which also contains functions to create a DTM based on raw text in various formats.
-We also recommend the `RTextTools` package, which has the `create_matrix` function that wraps various `tm` functions for creating a DTM into a single convenient function.
+We also recommend the `RTextTools` package [@jurka13], which has the `create_matrix` function that wraps various `tm` functions for creating a DTM into a single convenient function.
 For example, see the following DTM, created with the `create_matrix` function.
 
 
-```{r, echo=T}
+```{r, message=F, warning=F, echo=T}
 doc1 = 'Socrates is human'
 doc2 = 'Humans are mortal'
 doc3 = 'Therefore, Socrates is mortal'
-dtm = RTextTools::create_matrix(textColumns = c(doc1,doc2,doc3), 
-                                minWordLength = 1, removeStopwords = F)
+dtm = RTextTools::create_matrix(
+  textColumns = c(doc1,doc2,doc3), 
+  minWordLength = 1, removeStopwords = F)
 
 rownames(dtm) = paste('Document', 1:nrow(dtm))
 as.matrix(dtm)
@@ -131,10 +133,11 @@ For this vignette, data is used that has been preprocessed with the Dutch gramma
 The data is based on a recent study on the influence of a Dutch news agency on the print and online editions of Dutch newspapers in political news coverage (Author citation, forthcoming).
 The terms have been lemmatized, and only the nouns and proper names of the headline and first five sentences (that generally contain the essential who, what and where of news) are used.
 By focusing on these elements, the analysis in this study focused on whether documents address the same events.
-This data is also made available in the package as demo data, in which the actual nouns and proper names have been substituded with indexed word types (e.g., the third organization in the vocabulary is referred to as organization.3, the 20th noun as noun.20).
+This data is also made available in the package as demo data, in which the actual nouns and proper names have been substituted with indexed word types (e.g., the third organization in the vocabulary is referred to as organization.3, the 20th noun as noun.20).
 
-```{r}
+```{r, message=F, warning=F, echo=T}
 library(RNewsflow)
+
 data(dtm)
 as.matrix(dtm[1:3,1:5])
 ```
@@ -185,7 +188,7 @@ In addition to deleting terms, we should also weight terms.
 Turney explains that ''The idea of weighting is to give more weight to surprising events and less weight to expected events'', which is important because ''surprising events, if shared by two vectors, are more discriminative of the similarity between the vectors than less surprising events'' [@turney02: 156]. 
 Thus, we want to give more weight to rare words than common words.
 A classic weighting scheme and recommended standard in information retrieval is the term-frequency inverse document frequency (tf.idf) [@sparck72,@monroe08].
-This and other weighting schemes can easily be applied using the `tm` pacakge, for instance using the `weightTfIdf` function.
+This and other weighting schemes can easily be applied using the `tm` package, for instance using the `weightTfIdf` function.
 
 ```{r}
 dtm = weightTfIdf(dtm)
@@ -210,7 +213,7 @@ In the current example we use a minimum similarity of 0.4, because a validity te
 Whether or not a threshold should be used and what the value should be depends on the goal of the analysis and the data.
 We recommend a manual validation to verify that the similarity threshold matches human interpretation of whether or not two documents are similar, given a pre-defined interpretation of similarity (e.g., same event, same theme). 
 
-[^alternativemeasure]: Alternatively, the current version also supports *percentage.from* and *percentage.to*, which are measures giving the percentage of overlapping term occurences. This is an assymetrical measures: the overlap percentage of document 1 to document 2 can be different from the overlap percentage of document 2 to document 1. Therefore, *from* and *to* indicate whether the percentage is based on the document *from* which we compare or the article *to* which we compare. When using an assymetrical measure, the direction should be carefully taken into account in the analysis.
+[^alternativemeasure]: Alternatively, the current version also supports *percentage.from* and *percentage.to*, which are measures giving the percentage of overlapping term occurences. This is an asymmetrical measures: the overlap percentage of document 1 to document 2 can be different from the overlap percentage of document 2 to document 1. Therefore, *from* and *to* indicate whether the percentage is based on the document *from* which we compare or the article *to* which we compare. When using an asymmetrical measure, the direction should be carefully taken into account in the analysis.
 
 [^cosine_exception]: If the DTM contains negative values, the cosine similarity score can range from -1 to 1. Note that for the other similarity measures there can be no negative values in the DTM. 
 
@@ -220,7 +223,7 @@ g = newsflow.compare(dtm, meta,
                              min.similarity = 0.4)
 ```
 
-The output `g` is a network, or graph, in the format of the `igraph` package.
+The output `g` is a network, or graph, in the format of the `igraph` package [@csardi06}.
 The vertices (or nodes) of this network represent documents, and the date and source of each document are stored as vertex attributes.
 The edges (or ties) represent the similarity of documents, and the similarity score and time difference are stored as edge attributes.
 To avoid confusion, keep in mind that from hereon when we talk about vertices or a vertex we are talking about documents, and that edges represent document pairs.
@@ -286,19 +289,21 @@ g = filter.window(g,  hour.window = c(0.1, 36))
 
 # set window for print newspapers
 g = filter.window(g,  hour.window = c(6, 36), 
-                  to.vertices = V(g)$sourcetype == 'Print NP')
+           to.vertices = V(g)$sourcetype == 'Print NP')
 ```
 
 For all sources the window has now first been adjusted so that a document can only match a document that occured at least 0.1 hours later.
 For print newspapers, this is then set to 6 hours.
 With the `show.window` function we can view the actual window in the data. 
 This function aggregates the edges for all combinations of attributes specified in `from.attribute` and `to.attribute`, and shows the minimum and maximum hour difference for each combination.
-We specifify the `to.attribute` parameter as "source", and leave the `from.attribute` parameter empty. 
-This way, we get the window from any document to each source. 
+We set the `to.attribute` parameter to "source", and leave the `from.attribute` parameter empty. 
+This way, we get the window for edges *from* any document *towards* each source. 
 
 ```{r}
 show.window(g, to.attribute = 'source')
 ```
+
+We see here that edges towards "Print NP 2" have a time distance of at least 7.4 hours and at most 35.1 hours. This falls within the defined window of at least 6 and at most 36 hours. 
 
 # Analyzing the document similarity network
 
@@ -328,7 +333,8 @@ By default, the "source" attribute is used for the y-axis, but this can be chang
 If a DTM is also provided, the visualization will also include a word cloud with the most frequent words of these documents.
 
 ```{r, fig.width = 7, fig.height = 4}
-document.network.plot(gs, source.attribute = 'sourcetype', dtm=dtm)
+document.network.plot(gs, source.attribute = 'sourcetype', 
+                      dtm=dtm)
 ```
 
 
@@ -338,7 +344,7 @@ Furthermore, they illustrate how we can analyze homogeneity and news diffusion p
 For each source we can count what proportion of its publications is similar to earlier publications by specific other sources.
 We can also analyze the average time between publications.
 
-Another usefull application is that we can use them to see whether certain transformations of the network might be required.
+Another useful application is that we can use them to see whether certain transformations of the network might be required.
 Depending on the purpose of the analysis it can be relevant to add or delete certain edges.
 For instance, in the previous visualizations we see that the print newspaper message matched both the newsagency message and two online newspaper messages.
 If we are specifically interested in who the original source of the message is, then it makes sense to only count the edge to the newsagency.
@@ -365,7 +371,9 @@ In addition, if an `edge.attribute` is given, this attribute will be aggregated 
 For the following example we include this to analyze the median of the `hourdiff` attribute.
 
 ```{r}
-g.agg = network.aggregate(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g.agg = network.aggregate(g, by='source', 
+                          edge.attribute='hourdiff', 
+                          agg.FUN=median)
 
 e = get.data.frame(g.agg, 'edges')
 head(e)
@@ -413,7 +421,9 @@ For illustration, we can now see how the results change if we transform the netw
 
 ```{r, fig.align='center', fig.width=7, fig.height=5}
 g2 = only.first.match(g)
-g2.agg = network.aggregate(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g2.agg = network.aggregate(g2, by='source', 
+                           edge.attribute='hourdiff', 
+                           agg.FUN=median)
 
 directed.network.plot(g2.agg, weight.var = 'to.Vprop',
                        weight.thres = 0.2)
@@ -421,31 +431,32 @@ directed.network.plot(g2.agg, weight.var = 'to.Vprop',
 
 The first network is much more dense compared to the second.
 In particular, we see stronger edges between the print and online editions of the newspapers.
-In the second network almost only the ties to the news agency remain.
-This implies that many of the edges between newspapers in the first network resulted from cases where both newspapers adopt the same news agency articles.
+In the second network only the edges from the news agency towards the print and online newspapers remain, meaning that edges between newspapers all score less than 0.2. 
+This implies that many of the edges between newspapers that could be observed in the first network resulted from cases where both newspapers adopt the same news agency articles.
 
 Note that the second network is not better per se.
 It is possible that the initial source of a message is not the direct source.
-For example, a blog might not have acces to the news agency feed, and therefore only receive news agency messages if they are published by another source.
+For example, a blog might not have access to the news agency feed, and therefore only receive news agency messages if they are published by another source.
 Thus, the most suitable approach depends on the purpose of the analysis.
-One of the goals of creating this package is to facilitate a platform for scholars and professionals to develop best practises for different occasions.
+One of the goals of creating this package is to facilitate a platform for scholars and professionals to develop best practices for different occasions.
 
 ## Alternative applications of this package
 
 There are several alternative applications of the functions offered in this package that are not covered in this vignette. 
-Here we briefly point out some of the more usefull alternatives.
+Here we briefly point out some of the more useful alternatives.
 
 In the network.aggregate function it is possible to use different vertex attributes to aggregate the edges for `from` and `to` nodes.
-A particularlly interesting application of this feature is to use the publication date in the aggregation.
+A particularly interesting application of this feature is to use the publication date in the aggregation.
 For instance, with the following settings, we can get the proportion of matched documents per day.
 Here we also demonstrate the `return.df` parameter in the `network.aggregate` function.
 This way the results are returned as a single data.frame in which relevant edge and vertex information is merged.
 
 ```{r}
 V(g)$day = format(as.Date(V(g)$date), '%Y-%m-%d')
-agg.perday = network.aggregate(g, by.from='sourcetype', by.to=c('sourcetype', 'day'), 
-                                  edge.attribute='hourdiff', agg.FUN=median, 
-                                  return.df=T)
+agg.perday = network.aggregate(g, 
+              by.from='sourcetype', by.to=c('sourcetype', 'day'), 
+              edge.attribute='hourdiff', agg.FUN=median, 
+              return.df=T)
 
 
 head(agg.perday[agg.perday$to.sourcetype == 'Online NP',  
@@ -460,7 +471,7 @@ The `return.df` feature is convenient for this purpose, because it directly matc
 
 [^notfrom]: The *from.Vprop* cannot be interpreted in the same way, because it gives the proportion of all messages in the `from` group. If one is interested in the *from.Vprop* score per day, the *by.from* and *by.to* arguments in *network.aggregate* need to be switched. Note that one should not simply aggregate both *by.from* and *by.to* by date, because then only documents that both occured on this date will be aggregated. 
 
-Another usefull application of this feature is to only aggregate the `by.to` group, by using the document name in the `by.from` argument. 
+Another useful application of this feature is to only aggregate the `by.to` group, by using the document name in the `by.from` argument. 
 This way, the data in the *by.to* group is aggregated for each individual message. 
 In the following example we use this to see for each individual message whether it matches with later published messages in each sourcetype.
 This could for instance be used to analyze whether certain document level variables (e.g., news factors, sensationalism) make a message more likely to be adopted by other news outlets. 
@@ -468,10 +479,12 @@ We set the `edge.attribute` to "weight" and `agg.FUN` to max, so that for each d
 
 
 ```{r}
-agg.perdoc = network.aggregate(g, by.from='name', by.to='sourcetype', 
-                                  edge.attribute='weight', agg.FUN=max, 
-                                  return.df=T)
-docXsource = xtabs(agg.weight ~ from.name + to.sourcetype, agg.perdoc, sparse = F)
+agg.perdoc = network.aggregate(g, 
+                  by.from='name', by.to='sourcetype', 
+                  edge.attribute='weight', agg.FUN=max,
+                  return.df=T)
+docXsource = xtabs(agg.weight ~ from.name + to.sourcetype, 
+                   agg.perdoc, sparse = F)
 head(docXsource)
 ```
 
@@ -487,7 +500,7 @@ The primary focus and most important feature of this package is the `newsflow.co
 This function compares all documents that occur within a given time distance, which makes it computationally feasible for longitudinal data.
 Using this data, we can analyze to what extent different sources publish the same content and whether there are consistent patterns in who follows whom.
 The secondary focus of this package is to provide functions to organize, visualize and analyze the document similarity data within R. 
-By enabling both the document comparison and analysis to be performed within R, this type of analysis becomes more accesible to scholars less versed in computational text analysis, and it becomes easier to share and replicate this type of research.  
+By enabling both the document comparison and analysis to be performed within R, this type of analysis becomes more accesible to scholars less versed in computational text analysis, and it becomes easier to share and replicate methods at a very detailed level.  
 
 The data input required for this analysis consists solely of textual documents and their corresponding publication date and source.
 Since no human coding is required, the package enables large scale comparative and longitudinal studies.
@@ -528,8 +541,10 @@ dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.3]]
 dtm = weightTfIdf(dtm)
 
 # Prepare document similarity network
-g = newsflow.compare(dtm, meta, hour.window = c(0.1,36), min.similarity = 0.4)
-g = filter.window(g, hour.window = c(6, 36), V(g)$sourcetype == 'Print NP')
+g = newsflow.compare(dtm, meta, hour.window = c(0.1,36), 
+                     min.similarity = 0.4)
+g = filter.window(g, hour.window = c(6, 36), 
+                  V(g)$sourcetype == 'Print NP')
 
 show.window(g, vertex.attribute = 'source', direction = 'to')
 
@@ -537,16 +552,20 @@ g_subcomps = decompose.graph(g)
 document.network.plot(g_subcomps[[2]], dtm=dtm)
 
 # Aggregate network 
-g.agg = network.aggregate(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g.agg = network.aggregate(g, by='source', 
+                          edge.attribute='hourdiff', agg.FUN=median)
 
 get.adjacency(g.agg, attr='to.Vprop')
-directed.network.plot(g.agg, weight.var = 'to.Vprop', weight.thres=0.2)
+directed.network.plot(g.agg, weight.var = 'to.Vprop', 
+                      weight.thres=0.2)
 
 g2 = only.first.match(g)
-g2.agg = network.aggregate(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g2.agg = network.aggregate(g2, by='source', 
+                           edge.attribute='hourdiff', agg.FUN=median)
 
 get.adjacency(g2.agg, attr='to.Vprop')
-directed.network.plot(g2.agg, weight.var = 'to.Vprop', weight.thres=0.2)
+directed.network.plot(g2.agg, weight.var = 'to.Vprop', 
+                      weight.thres=0.2)
 
 ```
 

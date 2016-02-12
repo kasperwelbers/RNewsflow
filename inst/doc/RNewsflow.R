@@ -1,20 +1,21 @@
 ## ---- include=FALSE------------------------------------------------------
 options(digits=3)
-library(RNewsflow)
 library(knitr)
 
-## ---- echo=T-------------------------------------------------------------
+## ---- message=F, warning=F, echo=T---------------------------------------
 doc1 = 'Socrates is human'
 doc2 = 'Humans are mortal'
 doc3 = 'Therefore, Socrates is mortal'
-dtm = RTextTools::create_matrix(textColumns = c(doc1,doc2,doc3), 
-                                minWordLength = 1, removeStopwords = F)
+dtm = RTextTools::create_matrix(
+  textColumns = c(doc1,doc2,doc3), 
+  minWordLength = 1, removeStopwords = F)
 
 rownames(dtm) = paste('Document', 1:nrow(dtm))
 as.matrix(dtm)
 
-## ------------------------------------------------------------------------
+## ---- message=F, warning=F, echo=T---------------------------------------
 library(RNewsflow)
+
 data(dtm)
 as.matrix(dtm[1:3,1:5])
 
@@ -62,7 +63,7 @@ g = filter.window(g,  hour.window = c(0.1, 36))
 
 # set window for print newspapers
 g = filter.window(g,  hour.window = c(6, 36), 
-                  to.vertices = V(g)$sourcetype == 'Print NP')
+           to.vertices = V(g)$sourcetype == 'Print NP')
 
 ## ------------------------------------------------------------------------
 show.window(g, to.attribute = 'source')
@@ -75,14 +76,17 @@ gs = g_subcomps[[2]] # select the second sub-component
 document.network.plot(gs)
 
 ## ---- fig.width = 7, fig.height = 4--------------------------------------
-document.network.plot(gs, source.attribute = 'sourcetype', dtm=dtm)
+document.network.plot(gs, source.attribute = 'sourcetype', 
+                      dtm=dtm)
 
 ## ---- fig.width = 7, fig.height = 3--------------------------------------
 gs_onlyfirst = only.first.match(gs)
 document.network.plot(gs_onlyfirst)
 
 ## ------------------------------------------------------------------------
-g.agg = network.aggregate(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g.agg = network.aggregate(g, by='source', 
+                          edge.attribute='hourdiff', 
+                          agg.FUN=median)
 
 e = get.data.frame(g.agg, 'edges')
 head(e)
@@ -97,16 +101,19 @@ directed.network.plot(g.agg, weight.var = 'to.Vprop',
 
 ## ---- fig.align='center', fig.width=7, fig.height=5----------------------
 g2 = only.first.match(g)
-g2.agg = network.aggregate(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
+g2.agg = network.aggregate(g2, by='source', 
+                           edge.attribute='hourdiff', 
+                           agg.FUN=median)
 
 directed.network.plot(g2.agg, weight.var = 'to.Vprop',
                        weight.thres = 0.2)
 
 ## ------------------------------------------------------------------------
 V(g)$day = format(as.Date(V(g)$date), '%Y-%m-%d')
-agg.perday = network.aggregate(g, by.from='sourcetype', by.to=c('sourcetype', 'day'), 
-                                  edge.attribute='hourdiff', agg.FUN=median, 
-                                  return.df=T)
+agg.perday = network.aggregate(g, 
+              by.from='sourcetype', by.to=c('sourcetype', 'day'), 
+              edge.attribute='hourdiff', agg.FUN=median, 
+              return.df=T)
 
 
 head(agg.perday[agg.perday$to.sourcetype == 'Online NP',  
@@ -114,10 +121,12 @@ head(agg.perday[agg.perday$to.sourcetype == 'Online NP',
 
 
 ## ------------------------------------------------------------------------
-agg.perdoc = network.aggregate(g, by.from='name', by.to='sourcetype', 
-                                  edge.attribute='weight', agg.FUN=max, 
-                                  return.df=T)
-docXsource = xtabs(agg.weight ~ from.name + to.sourcetype, agg.perdoc, sparse = F)
+agg.perdoc = network.aggregate(g, 
+                  by.from='name', by.to='sourcetype', 
+                  edge.attribute='weight', agg.FUN=max,
+                  return.df=T)
+docXsource = xtabs(agg.weight ~ from.name + to.sourcetype, 
+                   agg.perdoc, sparse = F)
 head(docXsource)
 
 ## ----eval=FALSE----------------------------------------------------------
@@ -133,8 +142,10 @@ head(docXsource)
 #  dtm = weightTfIdf(dtm)
 #  
 #  # Prepare document similarity network
-#  g = newsflow.compare(dtm, meta, hour.window = c(0.1,36), min.similarity = 0.4)
-#  g = filter.window(g, hour.window = c(6, 36), V(g)$sourcetype == 'Print NP')
+#  g = newsflow.compare(dtm, meta, hour.window = c(0.1,36),
+#                       min.similarity = 0.4)
+#  g = filter.window(g, hour.window = c(6, 36),
+#                    V(g)$sourcetype == 'Print NP')
 #  
 #  show.window(g, vertex.attribute = 'source', direction = 'to')
 #  
@@ -142,15 +153,19 @@ head(docXsource)
 #  document.network.plot(g_subcomps[[2]], dtm=dtm)
 #  
 #  # Aggregate network
-#  g.agg = network.aggregate(g, by='source', edge.attribute='hourdiff', agg.FUN=median)
+#  g.agg = network.aggregate(g, by='source',
+#                            edge.attribute='hourdiff', agg.FUN=median)
 #  
 #  get.adjacency(g.agg, attr='to.Vprop')
-#  directed.network.plot(g.agg, weight.var = 'to.Vprop', weight.thres=0.2)
+#  directed.network.plot(g.agg, weight.var = 'to.Vprop',
+#                        weight.thres=0.2)
 #  
 #  g2 = only.first.match(g)
-#  g2.agg = network.aggregate(g2, by='source', edge.attribute='hourdiff', agg.FUN=median)
+#  g2.agg = network.aggregate(g2, by='source',
+#                             edge.attribute='hourdiff', agg.FUN=median)
 #  
 #  get.adjacency(g2.agg, attr='to.Vprop')
-#  directed.network.plot(g2.agg, weight.var = 'to.Vprop', weight.thres=0.2)
+#  directed.network.plot(g2.agg, weight.var = 'to.Vprop',
+#                        weight.thres=0.2)
 #  
 
