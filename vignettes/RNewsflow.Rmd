@@ -544,9 +544,9 @@ dtm = weightTfIdf(dtm)
 g = newsflow.compare(dtm, meta, hour.window = c(0.1,36), 
                      min.similarity = 0.4)
 g = filter.window(g, hour.window = c(6, 36), 
-                  V(g)$sourcetype == 'Print NP')
+                  to.vertices = V(g)$sourcetype == 'Print NP')
 
-show.window(g, vertex.attribute = 'source', direction = 'to')
+show.window(g, to.attribute = 'source')
 
 g_subcomps = decompose.graph(g)
 document.network.plot(g_subcomps[[2]], dtm=dtm)
