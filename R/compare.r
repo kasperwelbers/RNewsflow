@@ -248,7 +248,7 @@ ldply_documents.compare <- function(i, dtm, dateids.x, dateids.y, window, measur
 #' data(dtm)
 #' data(meta)
 #' 
-#' ## example with very low similarity (not recommended!) because duplicates have already been deleted from the demo data.
+#' ## example with very low similarity threshold (normally not recommended!)
 #' dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = TRUE)
 delete.duplicates <- function(dtm, meta, id.var='document_id', date.var='date', source.var='source', hour.window=c(-24,24), measure='cosine', similarity=1, keep='first', tf.idf=FALSE){
   if(tf.idf) {

@@ -48,7 +48,7 @@ This should be considered if the temporal order of publications is relevant for 
 data(dtm)
 data(meta)
 
-## example with very low similarity (not recommended!) because duplicates have already been deleted from the demo data.
+## example with very low similarity threshold (normally not recommended!)
 dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = TRUE)
 }
 

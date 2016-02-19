@@ -46,8 +46,14 @@ data(docnet)
 data(dtm)
 
 docnet_comps = igraph::decompose.graph(docnet) # get subcomponents
-document.network.plot(docnet_comps[[1]]) # subcomponent 1
-document.network.plot(docnet_comps[[2]], dtm=dtm) # subcomponent 2 with wordcloud
-document.network.plot(docnet_comps[[3]], dtm=dtm, vertex.color='red') # subcomponent 3 with additional arguments to plot.igraph 
+
+# subcomponent 1
+document.network.plot(docnet_comps[[1]]) 
+
+# subcomponent 2 with wordcloud
+document.network.plot(docnet_comps[[2]], dtm=dtm) 
+
+# subcomponent 3 with additional arguments passed to plot.igraph 
+document.network.plot(docnet_comps[[3]], dtm=dtm, vertex.color='red') 
 }
 

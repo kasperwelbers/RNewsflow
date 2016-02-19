@@ -12,7 +12,6 @@ vignette: >
   
 ---
 
-
 ```{r, include=FALSE}
 options(digits=3)
 library(knitr)
@@ -53,7 +52,7 @@ This vignette covers the entire chain from processing raw data---written text wi
 It points to relevant software within and outside of R for pre-processing written texts, and demonstrates how to use the core functions of this package.
 For more advanced users there are additional functions and parameters to support versatility.
 `RNewsflow` is completely open-source to promote active involvement in developing and evaluating the methodology.
-The source code is available on Github---https://github.com/masked (repository hidden for review).
+The source code is available on Github---https://github.com/kasperwelbers.
 All data used in this vignette is included in the package for easy replication.
 
 The structure of this vignette is as follows.
