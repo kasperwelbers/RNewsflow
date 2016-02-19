@@ -72,7 +72,6 @@ This section first discusses techniques and refers to existing software to pre-p
 Second, it shows how the source and date information should be organized.
 Third, it discusses several ways to filter and weight the DTM based on word statistics.
 
-
 ## Pre-processing texts and creating the DTM
 A DTM is a matrix in which rows represent documents, columns represent terms, and cells indicate how often each term occurred in each document.
 This is referred to as a *bag of words* representation of texts, since we ignore the order of words. 
@@ -84,13 +83,13 @@ We also recommend the `RTextTools` package [@jurka13], which has the `create_mat
 For example, see the following DTM, created with the `create_matrix` function.
 
 
-```{r, message=F, warning=F, echo=T}
+```{r, message=FALSE, warning=FALSE, echo=TRUE}
 doc1 = 'Socrates is human'
 doc2 = 'Humans are mortal'
 doc3 = 'Therefore, Socrates is mortal'
 dtm = RTextTools::create_matrix(
   textColumns = c(doc1,doc2,doc3), 
-  minWordLength = 1, removeStopwords = F)
+  minWordLength = 1, removeStopwords = FALSE)
 
 rownames(dtm) = paste('Document', 1:nrow(dtm))
 as.matrix(dtm)
@@ -135,7 +134,7 @@ The terms have been lemmatized, and only the nouns and proper names of the headl
 By focusing on these elements, the analysis in this study focused on whether documents address the same events.
 This data is also made available in the package as demo data, in which the actual nouns and proper names have been substituted with indexed word types (e.g., the third organization in the vocabulary is referred to as organization.3, the 20th noun as noun.20).
 
-```{r, message=F, warning=F, echo=T}
+```{r, message=FALSE, warning=FALSE, echo=TRUE}
 library(RNewsflow)
 
 data(dtm)
@@ -402,7 +401,7 @@ Alternatively, `igraph` has the `get.adjacency` function to return the values fo
 This is a good way to present the scores of the aggregated network.
 
 ```{r}
-adj.m = get.adjacency(g.agg, attr= 'to.Vprop', sparse = F)
+adj.m = get.adjacency(g.agg, attr= 'to.Vprop', sparse = FALSE)
 round(adj.m, 2) # round on 2 decimals
 ```
 
@@ -456,7 +455,7 @@ V(g)$day = format(as.Date(V(g)$date), '%Y-%m-%d')
 agg.perday = network.aggregate(g, 
               by.from='sourcetype', by.to=c('sourcetype', 'day'), 
               edge.attribute='hourdiff', agg.FUN=median, 
-              return.df=T)
+              return.df=TRUE)
 
 
 head(agg.perday[agg.perday$to.sourcetype == 'Online NP',  
@@ -482,9 +481,9 @@ We set the `edge.attribute` to "weight" and `agg.FUN` to max, so that for each d
 agg.perdoc = network.aggregate(g, 
                   by.from='name', by.to='sourcetype', 
                   edge.attribute='weight', agg.FUN=max,
-                  return.df=T)
+                  return.df=TRUE)
 docXsource = xtabs(agg.weight ~ from.name + to.sourcetype, 
-                   agg.perdoc, sparse = F)
+                   agg.perdoc, sparse = FALSE)
 head(docXsource)
 ```
 
@@ -544,9 +543,9 @@ dtm = weightTfIdf(dtm)
 g = newsflow.compare(dtm, meta, hour.window = c(0.1,36), 
                      min.similarity = 0.4)
 g = filter.window(g, hour.window = c(6, 36), 
-                  V(g)$sourcetype == 'Print NP')
+                  to.vertices = V(g)$sourcetype == 'Print NP')
 
-show.window(g, vertex.attribute = 'source', direction = 'to')
+show.window(g, to.attribute = 'source')
 
 g_subcomps = decompose.graph(g)
 document.network.plot(g_subcomps[[2]], dtm=dtm)
@@ -566,7 +565,6 @@ g2.agg = network.aggregate(g2, by='source',
 get.adjacency(g2.agg, attr='to.Vprop')
 directed.network.plot(g2.agg, weight.var = 'to.Vprop', 
                       weight.thres=0.2)
-
 ```
 
 # References

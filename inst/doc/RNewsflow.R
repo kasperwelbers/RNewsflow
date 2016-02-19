@@ -2,18 +2,18 @@
 options(digits=3)
 library(knitr)
 
-## ---- message=F, warning=F, echo=T---------------------------------------
+## ---- message=FALSE, warning=FALSE, echo=TRUE----------------------------
 doc1 = 'Socrates is human'
 doc2 = 'Humans are mortal'
 doc3 = 'Therefore, Socrates is mortal'
 dtm = RTextTools::create_matrix(
   textColumns = c(doc1,doc2,doc3), 
-  minWordLength = 1, removeStopwords = F)
+  minWordLength = 1, removeStopwords = FALSE)
 
 rownames(dtm) = paste('Document', 1:nrow(dtm))
 as.matrix(dtm)
 
-## ---- message=F, warning=F, echo=T---------------------------------------
+## ---- message=FALSE, warning=FALSE, echo=TRUE----------------------------
 library(RNewsflow)
 
 data(dtm)
@@ -92,7 +92,7 @@ e = get.data.frame(g.agg, 'edges')
 head(e)
 
 ## ------------------------------------------------------------------------
-adj.m = get.adjacency(g.agg, attr= 'to.Vprop', sparse = F)
+adj.m = get.adjacency(g.agg, attr= 'to.Vprop', sparse = FALSE)
 round(adj.m, 2) # round on 2 decimals
 
 ## ---- fig.align='center', fig.width=7, fig.height=5----------------------
@@ -113,7 +113,7 @@ V(g)$day = format(as.Date(V(g)$date), '%Y-%m-%d')
 agg.perday = network.aggregate(g, 
               by.from='sourcetype', by.to=c('sourcetype', 'day'), 
               edge.attribute='hourdiff', agg.FUN=median, 
-              return.df=T)
+              return.df=TRUE)
 
 
 head(agg.perday[agg.perday$to.sourcetype == 'Online NP',  
@@ -124,9 +124,9 @@ head(agg.perday[agg.perday$to.sourcetype == 'Online NP',
 agg.perdoc = network.aggregate(g, 
                   by.from='name', by.to='sourcetype', 
                   edge.attribute='weight', agg.FUN=max,
-                  return.df=T)
+                  return.df=TRUE)
 docXsource = xtabs(agg.weight ~ from.name + to.sourcetype, 
-                   agg.perdoc, sparse = F)
+                   agg.perdoc, sparse = FALSE)
 head(docXsource)
 
 ## ----eval=FALSE----------------------------------------------------------
@@ -145,9 +145,9 @@ head(docXsource)
 #  g = newsflow.compare(dtm, meta, hour.window = c(0.1,36),
 #                       min.similarity = 0.4)
 #  g = filter.window(g, hour.window = c(6, 36),
-#                    V(g)$sourcetype == 'Print NP')
+#                    to.vertices = V(g)$sourcetype == 'Print NP')
 #  
-#  show.window(g, vertex.attribute = 'source', direction = 'to')
+#  show.window(g, to.attribute = 'source')
 #  
 #  g_subcomps = decompose.graph(g)
 #  document.network.plot(g_subcomps[[2]], dtm=dtm)
@@ -167,5 +167,4 @@ head(docXsource)
 #  get.adjacency(g2.agg, attr='to.Vprop')
 #  directed.network.plot(g2.agg, weight.var = 'to.Vprop',
 #                        weight.thres=0.2)
-#  
 

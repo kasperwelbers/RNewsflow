@@ -7,7 +7,7 @@ output:
   rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{RNewsflow}
-  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   
 ---
@@ -565,7 +565,6 @@ g2.agg = network.aggregate(g2, by='source',
 get.adjacency(g2.agg, attr='to.Vprop')
 directed.network.plot(g2.agg, weight.var = 'to.Vprop', 
                       weight.thres=0.2)
-
 ```
 
 # References
