@@ -5,11 +5,11 @@
 \title{A wrapper for \link[igraph]{plot.igraph} for visualizing directed networks.}
 \usage{
 directed.network.plot(g, weight.var = "from.Vprop", weight.thres = NULL,
-  delete.isolates = F, vertex.size = 30, vertex.color = "lightblue",
+  delete.isolates = FALSE, vertex.size = 30, vertex.color = "lightblue",
   vertex.label.color = "black", vertex.label.cex = 0.7,
-  edge.color = "grey", show.edge.labels = T, edge.label.color = "black",
-  edge.label.cex = 0.6, edge.arrow.size = 1,
-  layout = layout.davidson.harel, ...)
+  edge.color = "grey", show.edge.labels = TRUE,
+  edge.label.color = "black", edge.label.cex = 0.6, edge.arrow.size = 1,
+  layout = igraph::layout.davidson.harel, ...)
 }
 \arguments{
 \item{g}{A network/graph in the \link[igraph]{igraph} class}
@@ -20,6 +20,26 @@ directed.network.plot(g, weight.var = "from.Vprop", weight.thres = NULL,
 
 \item{delete.isolates}{If TRUE, isolates (i.e. vertices without edges) are ignored.}
 
+\item{vertex.size}{The size of the verticex/nodes. Defaults to 30. Can be a vector with values per vertex.}
+
+\item{vertex.color}{Color of vertices/nodes. Default is lightblue. Can be a vector with values per vertex.}
+
+\item{vertex.label.color}{Color of labels for vertices/nodes. Defaults to black. Can be a vector with values per vertex.}
+
+\item{vertex.label.cex}{Size of the labels for vertices/nodes. Defaults to 0.7. Can be a vector with values per vertex.}
+
+\item{edge.color}{Color of the edges. Defaults to grey. Can be a vector with values per edge.}
+
+\item{show.edge.labels}{Logical. Should edge labels be displayed? Default is TRUE.}
+
+\item{edge.label.color}{Color of the edge labels. Defaults to black. Can be a vector with values per edge.}
+
+\item{edge.label.cex}{Size of the edge labels. Defaults to 0.6. Can be a vector with values per edge.}
+
+\item{edge.arrow.size}{Size of the edge arrows. Defaults to 1. Can only be set globally (igraph might update this at some point)}
+
+\item{layout}{The igraph layout used to plot the network. Defaults to \link[igraph]{layout.davidson.harel}}
+
 \item{...}{Arguments to be passed to the \link[igraph]{plot.igraph} function.}
 }
 \value{
@@ -27,7 +47,7 @@ Nothing
 }
 \description{
 This is a convenience function for visualizing directed networks with edge labels using \link[igraph]{plot.igraph}. 
-It was designed specifically for visualizing aggregated document similarity networks in the \link[rNewsflow]{rNewsflow} package, but works with any network in the \link[igraph]{igraph} class.
+It was designed specifically for visualizing aggregated document similarity networks in the RNewsflow package, but works with any network in the \link[igraph]{igraph} class.
 }
 \examples{
 data(docnet)

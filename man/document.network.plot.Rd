@@ -6,12 +6,12 @@
 \usage{
 document.network.plot(g, date.attribute = "date",
   source.attribute = "source", subcomp_i = NULL, dtm = NULL,
-  sources = NULL, only.outer.date = F,
+  sources = NULL, only.outer.date = FALSE,
   date.format = "\%Y-\%m-\%d \%H:\%M", margins = c(5, 8, 1, 13),
-  isolate.color = NULL, source.loops = T, ...)
+  isolate.color = NULL, source.loops = TRUE, ...)
 }
 \arguments{
-\item{g}{A document similarity network, as created with \link[rNewsflow]{newsflow.compare} or \link[rNewsflow]{document.network}}
+\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}}
 
 \item{date.attribute}{The label of the vertex/document date attribute. Default is "date"}
 
@@ -25,7 +25,7 @@ document.network.plot(g, date.attribute = "date",
 
 \item{only.outer.date}{If TRUE, only the labels for the first and last date are reported on the x-axis}
 
-\item{date.format}{The date format of the date labels (see \link[strptime]{format.POSIXct})}
+\item{date.format}{The date format of the date labels (see \link[base]{format.POSIXct})}
 
 \item{margins}{The margins of the network plot. The four values represent bottom, left, top and right margin.}
 
@@ -45,7 +45,7 @@ Visualize (a subcomponent) of the document similarity network
 data(docnet)
 data(dtm)
 
-docnet_comps = decompose.graph(docnet) # get subcomponents
+docnet_comps = igraph::decompose.graph(docnet) # get subcomponents
 document.network.plot(docnet_comps[[1]]) # subcomponent 1
 document.network.plot(docnet_comps[[2]], dtm=dtm) # subcomponent 2 with wordcloud
 document.network.plot(docnet_comps[[3]], dtm=dtm, vertex.color='red') # subcomponent 3 with additional arguments to plot.igraph 

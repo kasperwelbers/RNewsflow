@@ -7,7 +7,7 @@
 filter.window(g, hour.window, to.vertices = NULL, from.vertices = NULL)
 }
 \arguments{
-\item{g}{A document similarity network, as created with \link[rNewsflow]{newsflow.compare} or \link[rNewsflow]{document.network}}
+\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}}
 
 \item{hour.window}{A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.}
 
@@ -25,14 +25,14 @@ The `filter.window` function can be used to filter the document pairs (i.e. edge
 In addition, the `from.vertices` and `to.vertices` parameters can be used to select the vertices (i.e. documents) for which this filter is applied.
 }
 \details{
-It is recommended to use the \link[rNewsflow]{show.window} function to verify whether the hour windows are correct according to the assumptions and focus of the study.
+It is recommended to use the \link[RNewsflow]{show.window} function to verify whether the hour windows are correct according to the assumptions and focus of the study.
 }
 \examples{
 data(docnet)
 show.window(docnet, to.attribute = 'source') # before filtering
 
 docnet = filter.window(docnet, hour.window = c(0.1,24))
-docnet = filter.window(docnet, hour.window = c(6,36), to.vertices = V(g)$sourcetype == 'Print NP')
+docnet = filter.window(docnet, hour.window = c(6,36), to.vertices = V(docnet)$sourcetype == 'Print NP')
 
 show.window(docnet, to.attribute = 'sourcetype') # after filtering per sourcetype
 show.window(docnet, to.attribute = 'source') # after filtering per source

@@ -7,17 +7,17 @@ Author: Kasper Welbers & Wouter van Atteveldt
 Maintainer: Kasper Welbers <kasperwelbers@gmail.com>
 Description: A collection of tools for tracing the flow of news messages over
     time and across media based on content analysis.
-License: MIT
-Depends: 
-    plyr,
-    reshape2,
-    Matrix,
+License: MIT + file LICENSE
+Depends:
     tm,
-    slam,
     igraph,
-    scales,
-    wordcloud,
+    Matrix,
     data.table
+Imports: 
+    plyr,
+    slam,
+    scales,
+    wordcloud
 RoxygenNote: 5.0.1
 Suggests: 
     knitr,

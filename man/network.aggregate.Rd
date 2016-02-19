@@ -5,7 +5,7 @@
 \title{Aggregate the edges of a network by vertex attributes}
 \usage{
 network.aggregate(g, by = NULL, by.from = by, by.to = by,
-  edge.attribute = "weight", agg.FUN = mean, return.df = F)
+  edge.attribute = "weight", agg.FUN = mean, return.df = FALSE)
 }
 \arguments{
 \item{g}{A network/graph in the \link[igraph]{igraph} class}
@@ -47,9 +47,9 @@ These are specified in the `edge.attribute` and `agg.FUN` parameters.
 \examples{
 data(docnet)
 aggdocnet = network.aggregate(docnet, by='sourcetype')
-get.data.frame(aggdocnet, 'both')
+igraph::get.data.frame(aggdocnet, 'both')
 
-aggdocdf = network.aggregate(docnet, by.from='sourcetype', by.to='source', return.df = T)
+aggdocdf = network.aggregate(docnet, by.from='sourcetype', by.to='source', return.df = TRUE)
 head(aggdocdf)
 }
 

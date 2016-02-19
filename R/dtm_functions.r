@@ -1,5 +1,5 @@
 dtmToSparseMatrix <- function(dtm){
-  sm = spMatrix(nrow(dtm), ncol(dtm), dtm$i, dtm$j, dtm$v)
+  sm = Matrix::spMatrix(nrow(dtm), ncol(dtm), dtm$i, dtm$j, dtm$v)
   rownames(sm) = rownames(dtm)
   colnames(sm) = colnames(dtm)
   sm
@@ -15,7 +15,6 @@ match.dtm.meta <- function(dtm, meta, id.var){
   meta[match(rownames(dtm), meta[,id.var]),]
 }
 
-?term.day.dist
 
 #' Calculate statistics for term occurence across days
 #'
@@ -54,14 +53,14 @@ term.day.dist <- function(dtm, meta, id.var='document_id', date.var='date'){
   cs = Matrix::colSums(dtm)
   if(sum(cs == 0) > 0) {
     message("dtm contains empty columns/terms. These will be ignored (and won't appear in the output)")
-    dtm = dtm[,col_sums(dtm) > 0]
+    dtm = dtm[,slam::col_sums(dtm) > 0]
   } 
-  
+
   document.date = as.Date(meta[,date.var])
   dateseq = seq.Date(min(document.date), max(document.date), by='days')
   i = document.date[dtm@i+1]
   i = match(i, dateseq)
-  m = spMatrix(length(dateseq), ncol(dtm), i, dtm@j+1, dtm@x)
+  m = Matrix::spMatrix(length(dateseq), ncol(dtm), i, dtm@j+1, dtm@x)
   
   m = as(m, 'dgCMatrix')
   days.entropy = columnEntropy(m)

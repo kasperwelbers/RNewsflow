@@ -6,8 +6,8 @@
 \usage{
 newsflow.compare(dtm, meta, id.var = "document_id", date.var = "date",
   hour.window = c(-24, 24), measure = "cosine", min.similarity = 0,
-  n.topsim = NULL, only.from = NULL, only.to = NULL, return.zeros = F,
-  only.complete.window = T)
+  n.topsim = NULL, only.from = NULL, only.to = NULL,
+  return.zeros = FALSE, only.complete.window = TRUE)
 }
 \arguments{
 \item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}
@@ -56,13 +56,13 @@ It is recommended to weight the DTM beforehand, for instance using Term frequenc
 data(dtm)
 data(meta)
 
-dtm = weightTfIdf(dtm)
+dtm = tm::weightTfIdf(dtm)
 g = newsflow.compare(dtm, meta, hour.window = c(0.1, 36))
 
 vcount(g) # number of documents, or vertices
 ecount(g) # number of document pairs, or edges
 
-head(get.data.frame(g, 'vertices'))
-head(get.data.frame(g, 'edges'))
+head(igraph::get.data.frame(g, 'vertices'))
+head(igraph::get.data.frame(g, 'edges'))
 }
 

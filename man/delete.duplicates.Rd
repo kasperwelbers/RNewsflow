@@ -6,7 +6,7 @@
 \usage{
 delete.duplicates(dtm, meta, id.var = "document_id", date.var = "date",
   source.var = "source", hour.window = c(-24, 24), measure = "cosine",
-  similarity = 1, keep = "first", tf.idf = F)
+  similarity = 1, keep = "first", tf.idf = FALSE)
 }
 \arguments{
 \item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}
@@ -32,8 +32,6 @@ The source column is specified in the `date.var` argument.}
 \item{keep}{A character indicating whether to keep the 'first' or 'last' published of duplicate documents.}
 
 \item{tf.idf}{if TRUE, weight the dtm with tf.idf before comparing documents. The original (non-weighted) DTM is returned.}
-
-\item{window.size}{the timeframe in days within which articles must occur in order to be compared. e.g., if 0, articles are only compared to articles of the same day. If 1, articles are compared to all articles of the previous, same or next day.}
 }
 \value{
 A dtm with the duplicate documents deleted
@@ -51,6 +49,6 @@ data(dtm)
 data(meta)
 
 ## example with very low similarity (not recommended!) because duplicates have already been deleted from the demo data.
-dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = T)
+dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = TRUE)
 }
 

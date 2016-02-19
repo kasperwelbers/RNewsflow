@@ -16,7 +16,7 @@ termOverlap <- function(m1, m2=m1){
   Matrix::crossprod(m1,m2)
 }
 
-termOverlap_pct <- function(m1, m2=m1, reverse=F){
+termOverlap_pct <- function(m1, m2=m1, reverse=FALSE){
   totalterms = if(!reverse) Matrix::colSums(as(m1, 'dgCMatrix')) else Matrix::colSums(as(m2, 'dgCMatrix'))
   m2@x[Matrix::which(m2@x > 0)] = 1
   Matrix::crossprod(m1,m2) / totalterms
@@ -45,16 +45,16 @@ filterResults <- function(results, min.similarity, n.topsim){
 calculate.similarity <- function(m.x, m.y, measure){
   if(measure == 'cosine') results = cosineSimilarity(m.x, m.y)
   if(measure == 'percentage.from') results = termOverlap_pct(m.x, m.y)
-  if(measure == 'percentage.to') results = termOverlap_pct(m.x, m.y, reverse = T)
+  if(measure == 'percentage.to') results = termOverlap_pct(m.x, m.y, reverse = TRUE)
   results
 }
 
 reindexTerms <- function(dtm, terms){
   dtm = dtmToSparseMatrix(dtm)
   documents = rownames(dtm)
-  dtm = spMatrix(nrow(dtm), length(terms), dtm@i+1, match(colnames(dtm)[dtm@j+1], terms), dtm@x)
+  dtm = Matrix::spMatrix(nrow(dtm), length(terms), dtm@i+1, match(colnames(dtm)[dtm@j+1], terms), dtm@x)
   dimnames(dtm) = list(documents, terms)
-  as.DocumentTermMatrix(dtm, weighting = weightTf)
+  tm::as.DocumentTermMatrix(dtm, weighting = tm::weightTf)
 }
 
 #' Compare the documents in two corpora/dtms
@@ -75,12 +75,14 @@ reindexTerms <- function(dtm, terms){
 #' @return A data frame with pairs of documents and their similarities. 
 #' @export
 #' 
+#' @import tm
+#' 
 #' @examples
 #' data(dtm)
 #' 
 #' comp = documents.compare(dtm, min.similarity=0.4)
 #' head(comp)
-documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL, return.zeros=F) {  
+documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL, return.zeros=FALSE) {  
   if(!is.null(dtm.y)){
     if(mean(colnames(dtm) == colnames(dtm.y)) < 1){
       ## if colnames do not match, reindex them.
@@ -99,7 +101,7 @@ documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=
   
   results = as(results, 'dgTMatrix')
   if(return.zeros) {
-    results = Matrix(Matrix::which(!is.na(results), arr.ind=T))
+    results = Matrix::Matrix(Matrix::which(!is.na(results), arr.ind=TRUE))
     results = data.frame(x=colnames(m.x)[results[,1]], y=colnames(m.y)[results[,2]], similarity=as.vector(results))
   } else{
     if(sum(results) == 0) return(NULL)
@@ -112,17 +114,17 @@ documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=
 unlistWindow <- function(list_object, i, window){
   indices = i + window
   indices = indices[indices > 0 & indices <= length(list_object)]
-  unlist(list_object[indices], use.names=F)
+  unlist(list_object[indices], use.names=FALSE)
 }
 
 getDateIds <- function(date, row_filter=NULL){
-  if(is.null(row_filter)) row_filter = rep(T, length(date))
+  if(is.null(row_filter)) row_filter = rep(TRUE, length(date))
   
   datetime = as.Date(date)
   datetimeseq = seq.Date(min(datetime), max(datetime), by='days')
   
   nonempty = which(datetimeseq %in% unique(datetime))
-  nonempty_datetime_ids = llply(datetimeseq[nonempty], function(dtime) which(datetime == dtime & row_filter))
+  nonempty_datetime_ids = plyr::llply(datetimeseq[nonempty], function(dtime) which(datetime == dtime & row_filter))
   datetime_ids = vector("list", length(datetimeseq))
   datetime_ids[nonempty] = nonempty_datetime_ids
   datetime_ids
@@ -163,15 +165,15 @@ getDateIds <- function(date, row_filter=NULL){
 #' data(dtm)
 #' data(meta)
 #' 
-#' dtm = weightTfIdf(dtm)
+#' dtm = tm::weightTfIdf(dtm)
 #' g = newsflow.compare(dtm, meta, hour.window = c(0.1, 36))
 #' 
 #' vcount(g) # number of documents, or vertices
 #' ecount(g) # number of document pairs, or edges
 #' 
-#' head(get.data.frame(g, 'vertices'))
-#' head(get.data.frame(g, 'edges'))
-newsflow.compare <- function(dtm, meta, id.var='document_id', date.var='date', hour.window=c(-24,24), measure='cosine', min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, return.zeros=F, only.complete.window=T){
+#' head(igraph::get.data.frame(g, 'vertices'))
+#' head(igraph::get.data.frame(g, 'edges'))
+newsflow.compare <- function(dtm, meta, id.var='document_id', date.var='date', hour.window=c(-24,24), measure='cosine', min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, return.zeros=FALSE, only.complete.window=TRUE){
   confirm.dtm.meta(meta, id.var, date.var)
   meta = match.dtm.meta(dtm, meta, id.var)
   
@@ -179,8 +181,8 @@ newsflow.compare <- function(dtm, meta, id.var='document_id', date.var='date', h
   if(is.null(only.from) & is.null(only.to)){
     dateids.x = dateids.y = getDateIds(meta[,date.var])
   } else{ 
-    if(is.null(only.from)) only.from = rep(T, nrow(dtm))
-    if(is.null(only.to)) only.to = rep(T, nrow(dtm))
+    if(is.null(only.from)) only.from = rep(TRUE, nrow(dtm))
+    if(is.null(only.to)) only.to = rep(TRUE, nrow(dtm))
     if(!class(only.from) == 'logical') only.from = rownames(dtm) %in% only.from
     if(!class(only.to) == 'logical') only.to = rownames(dtm) %in% only.to
     dateids.x = getDateIds(meta[,date.var], only.from)
@@ -195,14 +197,14 @@ newsflow.compare <- function(dtm, meta, id.var='document_id', date.var='date', h
   }
   
   message('Comparing documents')
-  output = ldply(dateindex, function(i) ldply_documents.compare(i, dtm, dateids.x, dateids.y, window, measure, min.similarity, n.topsim, return.zeros), .progress='text')
+  output = plyr::ldply(dateindex, function(i) ldply_documents.compare(i, dtm, dateids.x, dateids.y, window, measure, min.similarity, n.topsim, return.zeros), .progress='text')
   output = output[,!colnames(output) == '.id']
   
   message('Matching document meta')
   g = document.network(output, meta, id.var, date.var)
   
-  delete.pairs = which(E(g)$hourdiff < hour.window[1] | E(g)$hourdiff > hour.window[2])
-  g = delete.edges(g, delete.pairs)
+  delete.pairs = which(igraph::E(g)$hourdiff < hour.window[1] | igraph::E(g)$hourdiff > hour.window[2])
+  g = igraph::delete.edges(g, delete.pairs)
   g
 }
 
@@ -235,7 +237,6 @@ ldply_documents.compare <- function(i, dtm, dateids.x, dateids.y, window, measur
 #' @param source.var The label for the document date column in the `meta` data.frame . default is "source"
 #' @param hour.window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. By default c(-24,24), which compares each document to all other documents within a 24 hour time distance.
 #' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).
-#' @param window.size the timeframe in days within which articles must occur in order to be compared. e.g., if 0, articles are only compared to articles of the same day. If 1, articles are compared to all articles of the previous, same or next day.
 #' @param similarity a threshold for similarity. Documents of which similarity is equal or higher are deleted
 #' @param keep A character indicating whether to keep the 'first' or 'last' published of duplicate documents.
 #' @param tf.idf if TRUE, weight the dtm with tf.idf before comparing documents. The original (non-weighted) DTM is returned.
@@ -248,18 +249,18 @@ ldply_documents.compare <- function(i, dtm, dateids.x, dateids.y, window, measur
 #' data(meta)
 #' 
 #' ## example with very low similarity (not recommended!) because duplicates have already been deleted from the demo data.
-#' dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = T)
-delete.duplicates <- function(dtm, meta, id.var='document_id', date.var='date', source.var='source', hour.window=c(-24,24), measure='cosine', similarity=1, keep='first', tf.idf=F){
+#' dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = TRUE)
+delete.duplicates <- function(dtm, meta, id.var='document_id', date.var='date', source.var='source', hour.window=c(-24,24), measure='cosine', similarity=1, keep='first', tf.idf=FALSE){
   if(tf.idf) {
-    g = newsflow.compare(weightTfIdf(dtm), meta, measure=measure, min.similarity = similarity, hour.window=hour.window)
+    g = newsflow.compare(tm::weightTfIdf(dtm), meta, measure=measure, min.similarity = similarity, hour.window=hour.window)
   } else {
     g = newsflow.compare(dtm, meta, measure=measure, min.similarity = similarity, hour.window=hour.window)
   }
   
-  e = get.edges(g, E(g))
-  d = get.data.frame(g, 'edges')  
-  d$med.x = V(g)$source[e[,1]]
-  d$med.y = V(g)$source[e[,2]]
+  e = igraph::get.edges(g, igraph::E(g))
+  d = igraph::get.data.frame(g, 'edges')  
+  d$med.x = igraph::V(g)$source[e[,1]]
+  d$med.y = igraph::V(g)$source[e[,2]]
   d = d[d$med.x == d$med.y,]
   
   duplicates = c()

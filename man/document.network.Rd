@@ -30,7 +30,7 @@ A network/graph in the \link[igraph]{igraph} class
 Combines document similarity data (d) with document meta data (meta) into an \link[igraph]{igraph} network/graph.
 }
 \details{
-This function is mainly offered to mimic the output of the \link[rNewsflow]{newsflow.compare} function when using imported document similarity data.
+This function is mainly offered to mimic the output of the \link[RNewsflow]{newsflow.compare} function when using imported document similarity data.
 This way the functions for transforming, aggregating and visualizing the document similarity data can be used.
 }
 \examples{
@@ -44,7 +44,7 @@ meta = data.frame(document_id = 1:8,
 
 g = document.network(d, meta)
 
-get.data.frame(g, 'both')
+igraph::get.data.frame(g, 'both')
 plot(g)
 }
 

@@ -5,7 +5,7 @@
 \title{Compare the documents in two corpora/dtms}
 \usage{
 documents.compare(dtm, dtm.y = NULL, measure = "cosine",
-  min.similarity = 0, n.topsim = NULL, return.zeros = F)
+  min.similarity = 0, n.topsim = NULL, return.zeros = FALSE)
 }
 \arguments{
 \item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}

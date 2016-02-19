@@ -7,7 +7,7 @@
 only.first.match(g)
 }
 \arguments{
-\item{g}{A document similarity network, as created with \link[rNewsflow]{newsflow.compare} or \link[rNewsflow]{document.network}}
+\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}}
 }
 \value{
 A network/graph in the \link[igraph]{igraph} class
@@ -21,11 +21,11 @@ If there are multiple earliest dated documents (that is, having the same publica
 \examples{
 data(docnet)
 
-subcomp1 = decompose.graph(docnet)[[2]]
+subcomp1 = igraph::decompose.graph(docnet)[[2]]
 subcomp2 = only.first.match(subcomp1)
 
-get.data.frame(subcomp1)
-get.data.frame(subcomp2)
+igraph::get.data.frame(subcomp1)
+igraph::get.data.frame(subcomp2)
 
 par(mfrow=c(2,1))
 document.network.plot(subcomp1, main='All matches')
