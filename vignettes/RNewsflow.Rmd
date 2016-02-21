@@ -6,7 +6,7 @@ date: ""
 output:
   rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{RNewsflow}
+  %\VignetteIndexEntry{Introduction to RNewsflow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   
