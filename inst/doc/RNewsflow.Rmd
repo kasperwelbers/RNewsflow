@@ -52,7 +52,7 @@ This vignette covers the entire chain from processing raw data---written text wi
 It points to relevant software within and outside of R for pre-processing written texts, and demonstrates how to use the core functions of this package.
 For more advanced users there are additional functions and parameters to support versatility.
 `RNewsflow` is completely open-source to promote active involvement in developing and evaluating the methodology.
-The source code is available on Github---https://github.com/kasperwelbers.
+The source code is available on Github---https://github.com/kasperwelbers/RNewsflow.
 All data used in this vignette is included in the package for easy replication.
 
 The structure of this vignette is as follows.
@@ -522,7 +522,7 @@ This would also allow us to define a more formal criterion for whether or not a 
 Secondly, new methods for analyzing and visualizing the network data will be explored. 
 In particular, methods will be implemented for analyzing patterns beyond dyadic ties between news outlets, building on techniques from the field of network analysis.
 To promote the involvement of other scholars and professionals in this development, the package is published entirely open-source. 
-The source code is hosted on GitHub--*https://github.com/kasperwelbers/RNewsflow*.
+The source code is hosted on GitHub---https://github.com/kasperwelbers/RNewsflow.
 
 # Practical code example
 
