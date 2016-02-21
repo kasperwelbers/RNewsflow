@@ -22,5 +22,5 @@ NULL
 #' @keywords datasets
 #' @name docnet
 #' @usage data(docnet)
-#' @format docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[rNewsflow]{document.network} or \link[rNewsflow]{newsflow.compare}.
+#' @format docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[RNewsflow]{document.network} or \link[RNewsflow]{newsflow.compare}.
 NULL

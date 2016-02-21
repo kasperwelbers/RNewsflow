@@ -4,7 +4,7 @@
 \name{docnet}
 \alias{docnet}
 \title{Document similarity network for one news agency, and the print and online editions of two newspapers}
-\format{docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[rNewsflow]{document.network} or \link[rNewsflow]{newsflow.compare}.}
+\format{docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[RNewsflow]{document.network} or \link[RNewsflow]{newsflow.compare}.}
 \usage{
 data(docnet)
 }
