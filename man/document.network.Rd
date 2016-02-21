@@ -46,6 +46,6 @@ meta = data.frame(document_id = 1:8,
 g = document.network(d, meta)
 
 igraph::get.data.frame(g, 'both')
-plot(g)
+igraph::plot.igraph(g)
 }
 

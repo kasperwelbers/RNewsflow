@@ -1,5 +1,6 @@
 ## FUNCTIONS FOR COMPARING DOCUMENTS
 
+
 cosineSimilarity <- function(m1, m2=NULL){
   norm = sqrt(Matrix::colSums(m1^2))
   m1@x = m1@x / norm[m1@j+1]  
@@ -17,14 +18,14 @@ termOverlap <- function(m1, m2=m1){
 }
 
 termOverlap_pct <- function(m1, m2=m1, reverse=FALSE){
-  totalterms = if(!reverse) Matrix::colSums(as(m1, 'dgCMatrix')) else Matrix::colSums(as(m2, 'dgCMatrix'))
+  totalterms = if(!reverse) Matrix::colSums(methods::as(m1, 'dgCMatrix')) else Matrix::colSums(methods::as(m2, 'dgCMatrix'))
   m2@x[Matrix::which(m2@x > 0)] = 1
   Matrix::crossprod(m1,m2) / totalterms
 }
 
 termIndex <- function(m1, m2=m1){
   m2@x[Matrix::which(m2@x > 0)] = 1
-  totalterms = Matrix::colSums(as(m1, 'dgCMatrix'))
+  totalterms = Matrix::colSums(methods::as(m1, 'dgCMatrix'))
   Matrix::crossprod(m1,m2) / totalterms
 }
 
@@ -95,11 +96,11 @@ documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=
   } else {
     m.x = m.y = Matrix::t(dtmToSparseMatrix(dtm))
   }
-    
+  
   results = calculate.similarity(m.x, m.y, measure)
   results = filterResults(results, min.similarity, n.topsim)
   
-  results = as(results, 'dgTMatrix')
+  results = methods::as(results, 'dgTMatrix')
   if(return.zeros) {
     results = Matrix::Matrix(Matrix::which(!is.na(results), arr.ind=TRUE))
     results = data.frame(x=colnames(m.x)[results[,1]], y=colnames(m.y)[results[,2]], similarity=as.vector(results))

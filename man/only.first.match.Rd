@@ -27,9 +27,9 @@ subcomp2 = only.first.match(subcomp1)
 igraph::get.data.frame(subcomp1)
 igraph::get.data.frame(subcomp2)
 
-par(mfrow=c(2,1))
+graphics::par(mfrow=c(2,1))
 document.network.plot(subcomp1, main='All matches')
 document.network.plot(subcomp2, main='Only first match')
-par(mfrow=c(1,1))
+graphics::par(mfrow=c(1,1))
 }
 

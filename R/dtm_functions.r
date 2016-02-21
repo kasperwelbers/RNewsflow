@@ -62,7 +62,7 @@ term.day.dist <- function(dtm, meta, id.var='document_id', date.var='date'){
   i = match(i, dateseq)
   m = Matrix::spMatrix(length(dateseq), ncol(dtm), i, dtm@j+1, dtm@x)
   
-  m = as(m, 'dgCMatrix')
+  m = methods::as(m, 'dgCMatrix')
   days.entropy = columnEntropy(m)
   days.n = Matrix::colSums(m>0)
 

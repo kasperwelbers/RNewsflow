@@ -17,7 +17,8 @@ Imports:
     slam,
     scales,
     wordcloud,
-    data.table
+    data.table,
+    methods
 RoxygenNote: 5.0.1
 Suggests: 
     knitr,

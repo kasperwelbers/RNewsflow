@@ -32,7 +32,7 @@
 #' g = document.network(d, meta)
 #' 
 #' igraph::get.data.frame(g, 'both')
-#' plot(g)
+#' igraph::plot.igraph(g)
 document.network <- function(d, meta, id.var='document_id', date.var='date', min.similarity=0){
   confirm.dtm.meta(meta, id.var, date.var)
   
@@ -109,26 +109,26 @@ document.network.plot <- function(g, date.attribute='date', source.attribute='so
   cluster = igraph::delete.vertices(cluster, which(!igraph::V(cluster)$source %in% sources))
   
   if(!is.null(dtm)){
-    layout(matrix(c(1, 1, 2, 2), 2, 2, byrow = TRUE), widths = c(1.5, 2.5), heights = c(1, 2))  
+    graphics::layout(matrix(c(1, 1, 2, 2), 2, 2, byrow = TRUE), widths = c(1.5, 2.5), heights = c(1, 2))  
     topwords = slam::col_sums(dtm[rownames(dtm) %in% igraph::V(cluster)$name,])
     topwords = topwords[topwords > 0, drop=FALSE]
     topwords = head(topwords[order(-topwords)], 10)
-    par(mar = c(0,0,0,0))
+    graphics::par(mar = c(0,0,0,0))
     suppressWarnings(
     wordcloud::wordcloud(names(topwords), sqrt(as.numeric(topwords)), scale=c(2,0.7))
     )
   } 
   
   plotDocNet(cluster, sources, only.outer.date, date.format, margins, isolate.color=NULL, source.loops=TRUE, ...)
-  if(!is.null(dtm)) layout(matrix(c(1, 1, 1, 1), 2, 2, byrow = TRUE))
+  if(!is.null(dtm)) graphics::layout(matrix(c(1, 1, 1, 1), 2, 2, byrow = TRUE))
 }
 
 plotDocNet <- function(cluster, sources=NULL, only.outer.date=FALSE, date.format='%Y-%m-%d %H:%M', margins=c(5,8,1,13), isolate.color=NULL, source.loops=TRUE, ...){
-  par(mar = margins)
+  graphics::par(mar = margins)
   if(is.null(sources)) sources = sort(unique(igraph::V(cluster)$source))
   igraph::E(cluster)$width = scales::rescale(igraph::E(cluster)$weight, c(2,4), from = c(0,1))
   igraph::E(cluster)$arrow.size = 0.45
-  igraph::E(cluster)$color = grey(scales::rescale(igraph::E(cluster)$weight, c(0.8,0.2), from = c(0,1)))
+  igraph::E(cluster)$color = grDevices::grey(scales::rescale(igraph::E(cluster)$weight, c(0.8,0.2), from = c(0,1)))
   
   if(!source.loops){
     edgelist = igraph::get.edgelist(cluster)
@@ -157,7 +157,7 @@ plotDocNet <- function(cluster, sources=NULL, only.outer.date=FALSE, date.format
 
   for(source in sources){
     ycoord = cluster$layout[igraph::V(cluster)$source == source,2][1]
-    text(1.1, ycoord, source, adj=0)
+    graphics::text(1.1, ycoord, source, adj=0)
   }
   
   ## determine inner vertical lines (to indicate date)
@@ -166,8 +166,8 @@ plotDocNet <- function(cluster, sources=NULL, only.outer.date=FALSE, date.format
   inner_date = inner_date[as.numeric(inner_date) > min(igraph::V(cluster)$x) & as.numeric(inner_date) < max(igraph::V(cluster)$x)]
   inner_date_i = scales::rescale(as.numeric(inner_date), to=c(-1,1), from=as.numeric(c(min(igraph::V(cluster)$x), max(igraph::V(cluster)$x))))
   
-  clip(-1.05,1,ymin,1.05)
-  abline(h=unique(cluster$layout[,2]), col="grey10", lty='dotted')
+  graphics::clip(-1.05,1,ymin,1.05)
+  graphics::abline(h=unique(cluster$layout[,2]), col="grey10", lty='dotted')
   
   ## determine outer vertical lines
   outer_date_i = c(-1,1)
@@ -177,16 +177,16 @@ plotDocNet <- function(cluster, sources=NULL, only.outer.date=FALSE, date.format
     outer_date = outer_date[1]
   }
   ## draw lines, add text
-  abline(v=outer_date_i, col="grey10", lty='dotted')
-  abline(v=inner_date_i, col="grey10", lty='dotted')
+  graphics::abline(v=outer_date_i, col="grey10", lty='dotted')
+  graphics::abline(v=inner_date_i, col="grey10", lty='dotted')
   
-  clip(-2,2,-100,2)
+  graphics::clip(-2,2,-100,2)
   outer_date_print = format(as.POSIXct(outer_date), date.format)
   if(!only.outer.date & length(inner_date) > 0){
-    text(x=outer_date_i, y=ymin-0.2, label=outer_date_print, srt=30, adj=1) 
+    graphics::text(x=outer_date_i, y=ymin-0.2, label=outer_date_print, srt=30, adj=1) 
     inner_date_print = format(as.POSIXct(inner_date), date.format)
-    text(x=inner_date_i, y=ymin-0.2, label=inner_date_print, srt=30, adj=1) 
-  } else text(x=outer_date_i, y=ymin-0.2, label=outer_date_print, srt=30, adj=1) 
+    graphics::text(x=inner_date_i, y=ymin-0.2, label=inner_date_print, srt=30, adj=1) 
+  } else graphics::text(x=outer_date_i, y=ymin-0.2, label=outer_date_print, srt=30, adj=1) 
 }
 
 #' Show time window of document pairs 
@@ -212,7 +212,7 @@ show.window <- function(g, to.attribute=NULL, from.attribute=NULL){
   to.vertices = if(is.null(to.attribute)) rep('any document', igraph::vcount(g)) else igraph::get.vertex.attribute(g, to.attribute)
   
   e = data.frame(igraph::get.edges(g, igraph::E(g)))
-  medwindow = aggregate(igraph::E(g)$hourdiff, by=list(from=from.vertices[e$X1], to=to.vertices[e$X2]), FUN = function(x) cbind(min(x), max(x)))
+  medwindow = stats::aggregate(igraph::E(g)$hourdiff, by=list(from=from.vertices[e$X1], to=to.vertices[e$X2]), FUN = function(x) cbind(min(x), max(x)))
   d = data.frame(from = medwindow$from, to=medwindow$to, window.left=medwindow$x[,1], window.right=medwindow$x[,2])
   d
 }
@@ -282,10 +282,10 @@ filter.window <- function(g, hour.window, to.vertices=NULL, from.vertices=NULL){
 #' igraph::get.data.frame(subcomp1)
 #' igraph::get.data.frame(subcomp2)
 #' 
-#' par(mfrow=c(2,1))
+#' graphics::par(mfrow=c(2,1))
 #' document.network.plot(subcomp1, main='All matches')
 #' document.network.plot(subcomp2, main='Only first match')
-#' par(mfrow=c(1,1))
+#' graphics::par(mfrow=c(1,1))
 only.first.match <- function(g){
   e = data.frame(igraph::get.edges(g, igraph::E(g)))
   
@@ -508,6 +508,6 @@ directed.network.plot <- function(g, weight.var='from.Vprop', weight.thres=NULL,
   if(!'vertex.frame.color' %in% argnames) igraph::V(g)$frame.color = igraph::V(g)$color
   
   g$layout = layout
-  plot(g, ...)
+  igraph::plot.igraph(g, ...)
 }
 
