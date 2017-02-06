@@ -5,3 +5,4 @@
 
 #vignette('RNewsflow')
 #vignette(package='RNewsflow')
+

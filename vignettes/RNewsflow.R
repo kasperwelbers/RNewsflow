@@ -142,7 +142,7 @@ head(docXsource)
 #  dtm = weightTfIdf(dtm)
 #  
 #  # Prepare document similarity network
-#  g = newsflow.compare(dtm, meta, hour.window = c(0.1,36),
+#  g = newsflow.compare(dtm, meta, hour.window = c(-0.1,60),
 #                       min.similarity = 0.4)
 #  g = filter.window(g, hour.window = c(6, 36),
 #                    to.vertices = V(g)$sourcetype == 'Print NP')
@@ -152,7 +152,6 @@ head(docXsource)
 #  g_subcomps = decompose.graph(g)
 #  document.network.plot(g_subcomps[[2]], dtm=dtm)
 #  
-#  # Aggregate network
 #  g.agg = network.aggregate(g, by='source',
 #                            edge.attribute='hourdiff', agg.FUN=median)
 #  

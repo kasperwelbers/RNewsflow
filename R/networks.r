@@ -346,7 +346,7 @@ only.first.match <- function(g){
 #' 
 #' aggdocdf = network.aggregate(docnet, by.from='sourcetype', by.to='source', return.df = TRUE)
 #' head(aggdocdf)
-network.aggregate <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='weight', agg.FUN=mean, return.df=FALSE){
+network.aggregate <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='weight', agg.FUN=mean, return.df=FALSE, keep_isolates=T){
   igraph::V(g)$any_vertex = '---'
   if(is.null(by.from)) by.from = 'any_vertex'
   if(is.null(by.to)) by.to = 'any_vertex'
@@ -371,8 +371,6 @@ network.aggregate <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='
                by= eval(paste(aggvars, collapse=','))]
   e = as.data.frame(e)
   
-
-  
   colnames(e)[colnames(e) == 'edge.attribute'] = paste('agg',edge.attribute, sep='.')
   
   # match total vertices
@@ -386,7 +384,7 @@ network.aggregate <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='
   e$to.Vprop = e$to.V / e$to.N
   
   if(!return.df) {
-    e = return.network.aggregate(e)
+    e = return.network.aggregate(e, from.totals, to.totals, keep_isolates)
     if('any_vertex' %in% names(igraph::vertex.attributes(e))) e = igraph::delete_vertex_attr(e, 'any_vertex')
     return(e)
   }
@@ -399,7 +397,7 @@ network.aggregate <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='
   }
 }
 
-return.network.aggregate <- function(g.df){
+return.network.aggregate <- function(g.df, from.totals, to.totals, keep_isolates){
   vnames = colnames(g.df)[1:(grep('^edges$', colnames(g.df))-1)]
   
   # create network
@@ -433,6 +431,28 @@ return.network.aggregate <- function(g.df){
   for(metavar in metavars[!metavars == 'name']){
     g.agg = igraph::set.vertex.attribute(g.agg, metavar, value=meta[meta_i,metavar])
   }
+  
+  if(keep_isolates){
+    v = get.data.frame(g.agg, 'vertices')
+    colnames(from.totals) = gsub('from.N', 'N', colnames(from.totals), fixed=T)
+    missing_from = merge(from.totals, v, by=colnames(from.totals), all.x=T)
+    missing_from = data.frame(missing_from[is.na(missing_from$name),,drop=F])
+    if(nrow(missing_from) > 0){
+      namecols = colnames(from.totals)[!colnames(from.totals) == 'N']
+      missing_from$name = if(ncol(missing_from[,namecols,drop=F]) > 1) apply(missing_from[,namecols,drop=F], MARGIN = 1, paste, collapse='; ') else missing_from[,1]
+      g.agg = add.vertices(g.agg, nrow(missing_from), attr=as.list(missing_from))
+    } 
+    v = get.data.frame(g.agg, 'vertices')
+    colnames(from.totals) = gsub('from.N', 'N', colnames(from.totals), fixed=T)
+    missing_from = merge(from.totals, v, by=colnames(from.totals), all.x=T)
+    missing_from = data.frame(missing_from[is.na(missing_from$name),,drop=F])
+    if(nrow(missing_from) > 0){
+      namecols = colnames(from.totals)[!colnames(from.totals) == 'N']
+      missing_from$name = if(ncol(missing_from[,namecols,drop=F]) > 1) apply(missing_from[,namecols,drop=F], MARGIN = 1, paste, collapse='; ') else missing_from[,1]
+      g.agg = add.vertices(g.agg, nrow(missing_from), attr=as.list(missing_from))
+    }
+  }
+  
   g.agg
 }
 

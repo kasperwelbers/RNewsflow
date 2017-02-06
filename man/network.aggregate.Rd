@@ -5,7 +5,8 @@
 \title{Aggregate the edges of a network by vertex attributes}
 \usage{
 network.aggregate(g, by = NULL, by.from = by, by.to = by,
-  edge.attribute = "weight", agg.FUN = mean, return.df = FALSE)
+  edge.attribute = "weight", agg.FUN = mean, return.df = FALSE,
+  keep_isolates = T)
 }
 \arguments{
 \item{g}{A network/graph in the \link[igraph]{igraph} class}

@@ -27,12 +27,10 @@ library(knitr)
 # Introduction
 
 The news diffusion process in the digital age involves many interdependent sources, ranging from news agencies and traditional newspapers to blogs and people on social media [@meraz11; @paterson05; @pew10].
-We offer the `RNewsflow` R package[^reviewernote] as a toolkit to analyze the homogeneity and diffusion of news content using computational text analysis.
+We offer the `RNewsflow` R package as a toolkit to analyze the homogeneity and diffusion of news content using computational text analysis.
 This analysis consists of two steps.
 First, techniques from the field of information retrieval are used to measure the similarity of news messages (e.g., addressing the same event, containing identical phrases).
 Second, the temporal order in which messages are published is used to analyze consistent patterns in who follows whom.
-
-[^reviewernote]: R is an open-source statistical software package (https://www.r-project.org/).
 
 The main contribution of this package lies in the specialized application of document similarity measures for the purpose of comparing news messages.
 News is a special type of information in the sense that it has a time dimension---it quickly loses its relevance.
@@ -539,7 +537,7 @@ dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.3]]
 dtm = weightTfIdf(dtm)
 
 # Prepare document similarity network
-g = newsflow.compare(dtm, meta, hour.window = c(0.1,36), 
+g = newsflow.compare(dtm, meta, hour.window = c(-0.1,60), 
                      min.similarity = 0.4)
 g = filter.window(g, hour.window = c(6, 36), 
                   to.vertices = V(g)$sourcetype == 'Print NP')
@@ -549,7 +547,6 @@ show.window(g, to.attribute = 'source')
 g_subcomps = decompose.graph(g)
 document.network.plot(g_subcomps[[2]], dtm=dtm)
 
-# Aggregate network 
 g.agg = network.aggregate(g, by='source', 
                           edge.attribute='hourdiff', agg.FUN=median)
 
