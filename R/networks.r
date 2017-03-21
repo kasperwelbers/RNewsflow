@@ -35,6 +35,7 @@
 #' igraph::plot.igraph(g)
 document.network <- function(d, meta, id.var='document_id', date.var='date', min.similarity=0){
   confirm.dtm.meta(meta, id.var, date.var)
+  if (nrow(d) == 0) d = data.frame(x=numeric(), y=numeric(), similarity=numeric())
   
   colnames(d) = c('x','y','similarity')
   d = d[d$similarity >= min.similarity, c('x','y','similarity')]
@@ -43,7 +44,8 @@ document.network <- function(d, meta, id.var='document_id', date.var='date', min
   g = igraph::graph.data.frame(d[,c('x','y')])
   igraph::E(g)$weight = d$similarity
   
-  if(mean(igraph::V(g)$name %in% meta[,id.var]) < 1) stop("Not all documents in d match with an 'id' in the meta information")
+  if (nrow(d) > 0)
+    if (mean(igraph::V(g)$name %in% meta[,id.var]) < 1) stop("Not all documents in d match with an 'id' in the meta information")
   
   ## add documents in meta data.frame that do not appear in the edgelist (in other words, isolates)
   missingmeta = as.character(meta[!meta[,id.var] %in% igraph::V(g)$name, id.var])
@@ -353,7 +355,7 @@ network.aggregate <- function(g, by=NULL, by.from=by, by.to=by, edge.attribute='
   
   e = data.frame(igraph::get.edges(g, igraph::E(g)))
   v = igraph::get.data.frame(g, 'vertices')  
-  
+
   e = cbind(e, v[e$X1, by.from, drop=FALSE])
   e = cbind(e, v[e$X2, by.to, drop=FALSE])
   colnames(e) = c('from','to', paste('from', by.from, sep='.'), paste('to', by.to, sep='.'))
