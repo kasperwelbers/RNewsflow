@@ -7,8 +7,8 @@
 tcrossprod_sparse(m, m2 = NULL, min_value = NULL, only_upper = F,
   diag = T, top_n = NULL, rowsum_div = F, l2norm = F,
   crossfun = "prod", group = NULL, group2 = NULL, date = NULL,
-  date2 = NULL, lwindow = 1, rwindow = 1, date_unit = c("days", "hours",
-  "minutes", "seconds"), batchsize = 1000, verbose = F)
+  date2 = NULL, lwindow = -1, rwindow = 1, date_unit = c("days",
+  "hours", "minutes", "seconds"), batchsize = 1000, verbose = F)
 }
 \arguments{
 \item{m}{A dgCMatrix}
@@ -25,7 +25,7 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, only_upper = F,
 
 \item{rowsum_div}{if true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering)}
 
-\item{l2norm}{if true, use l2norm (l2norm + rowsum_div is cosine similarity)}
+\item{l2norm}{if true, use l2 Norm}
 
 \item{crossfun}{The function used in the vector operations. Normally this is the "prod", for product (dot product). Here we also allow (currently only) the "min", for minimum value. We use this in our document overlap_pct score.}
 
@@ -37,9 +37,9 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, only_upper = F,
 
 \item{date2}{If m2 and date are used, date2 has to be used to specify the date for the rows in m2 (otherwise date will be ignored)}
 
-\item{lwindow}{If date (and date2) are used, lwindow determines the left side of the date window. Also see date_unit.}
+\item{lwindow}{If date (and date2) are used, lwindow determines the left side of the date window. e.g. -10 means that rows are only matched with rows for which date is within 10 [date_units] before.}
 
-\item{rwindow}{Like lwindow, but for the right side.}
+\item{rwindow}{Like lwindow, but for the right side. e.g. an lwindow of -1 and rwindow of 1, with date_unit is "days", means that only rows are matched for which the dates are within a 1 day distance}
 
 \item{date_unit}{The date unit used in lwindow and rwindow. Supports "days", "hours", "minutes" and "seconds". Note that refers to the time distance between two rows ("days" doesn't refer to calendar days, but to a time of 24 hours)}
 

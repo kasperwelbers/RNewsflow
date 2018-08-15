@@ -42,12 +42,12 @@ document.network <- function(d, meta, id.var='document_id', date.var='date', min
   colnames(d) = c('x','y','similarity')
   d = d[d$similarity >= min.similarity, c('x','y','similarity')]
   d = d[order(-d$similarity),]
-  
+
   g = igraph::graph.data.frame(d[,c('x','y')])
   igraph::E(g)$weight = d$similarity
   
   if (nrow(d) > 0)
-    if (mean(igraph::V(g)$name %in% meta[,id.var]) < 1) stop("Not all documents in d match with an 'id' in the meta information")
+    if (!all(igraph::V(g)$name %in% meta[,id.var])) stop("Not all documents in d match with an 'id' in the meta information")
   
   ## add documents in meta data.frame that do not appear in the edgelist (in other words, isolates)
   missingmeta = as.character(meta[!meta[,id.var] %in% igraph::V(g)$name, id.var])

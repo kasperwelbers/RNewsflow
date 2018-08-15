@@ -27,6 +27,10 @@ test_that("Matrix multiplication", {
   tcrossprod_sparse(m, min_value = 0.2, only_upper = T, diag = F)
   tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F, top_n = 1)
   
+  ## heavy lifting
+  #m = abs(Matrix::rsparsematrix(1000000,20000,0.001))
+  #date = seq.Date(as.Date('1000-01-01'), as.Date('4010-01-10'), by=1)[1:nrow(m)] ## just to make 1,000,000 days
+  #cp = tcrossprod_sparse(m, date=date, lwindow = 15, rwindow=15, verbose=T)
   
   ## using two matrices
   
@@ -59,8 +63,7 @@ test_that("Matrix multiplication", {
   cp = tcrossprod_sparse(m, date = date, lwindow = -1, rwindow = 1, batchsize = 1, verbose = F)
   cp_correct = Matrix::tcrossprod(m)
   is_same_m1nonzero(cp,cp_correct) 
-  
-  
+
   ## using jacard
   m = abs(Matrix::rsparsematrix(10,10,0.5))
   m[m>0] = 1

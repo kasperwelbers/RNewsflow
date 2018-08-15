@@ -4,8 +4,8 @@
 \alias{documents.compare}
 \title{Compare the documents in two corpora/dtms}
 \usage{
-documents.compare(dtm, dtm.y = NULL, measure = "cosine",
-  min.similarity = 0, n.topsim = NULL, return.zeros = FALSE)
+documents.compare(dtm, dtm.y = NULL, measure = c("cosine", "overlap_pct"),
+  min.similarity = 0, n.topsim = NULL)
 }
 \arguments{
 \item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}
@@ -17,8 +17,6 @@ documents.compare(dtm, dtm.y = NULL, measure = "cosine",
 \item{min.similarity}{a threshold for similarity. lower values are deleted. Set to 0 by default.}
 
 \item{n.topsim}{An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.}
-
-\item{return.zeros}{If true, all comparison results are returned, including those with zero similarity (rarely usefull and problematic with large data)}
 }
 \value{
 A data frame with pairs of documents and their similarities.

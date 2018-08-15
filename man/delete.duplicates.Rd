@@ -4,24 +4,16 @@
 \alias{delete.duplicates}
 \title{Delete duplicate (or similar) documents from a document term matrix}
 \usage{
-delete.duplicates(dtm, meta, id.var = "document_id", date.var = "date",
-  source.var = "source", hour.window = c(-24, 24), measure = "cosine",
+delete.duplicates(dtm, date.var = "date", group.var = NULL,
+  hour.window = c(-24, 24), measure = c("cosine", "overlap_pct"),
   similarity = 1, keep = "first", tf.idf = FALSE)
 }
 \arguments{
 \item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}
 
-\item{meta}{A data.frame where rows are documents and columns are document meta information. 
-Should contain 3 columns: the document name/id, date and source. 
-The name/id column should match the document names/ids of the edgelist, and its label is specified in the `id.var` argument. 
-The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
-The source column is specified in the `date.var` argument.}
+\item{date.var}{Optionally, the name of the dfm docvar containing the document date. If given, only documents within the given hour.window will be compared. default is "date". The values should be of type POSIXlt or POSIXct}
 
-\item{id.var}{The label for the document name/id column in the `meta` data.frame. Default is "document_id"}
-
-\item{date.var}{The label for the document date column in the `meta` data.frame . default is "date"}
-
-\item{source.var}{The label for the document date column in the `meta` data.frame . default is "source"}
+\item{group.var}{Optionally, the name of the dfm docvar containing a group of documents (e.g. of the same source). If given, only documents of the same group are compared.}
 
 \item{hour.window}{A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. By default c(-24,24), which compares each document to all other documents within a 24 hour time distance.}
 
@@ -46,8 +38,7 @@ This should be considered if the temporal order of publications is relevant for 
 }
 \examples{
 data(dtm)
-data(meta)
 
 ## example with very low similarity threshold (normally not recommended!)
-dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = TRUE)
+dtm2 = delete.duplicates(dtm, similarity = 0.5, keep='first', tf.idf = TRUE)
 }

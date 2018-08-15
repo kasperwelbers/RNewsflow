@@ -83,7 +83,9 @@ reindexTerms <- function(dtm, terms){
 #' 
 #' comp = documents.compare(dtm, min.similarity=0.4)
 #' head(comp)
-documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL) {  
+documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct'), min.similarity=0, n.topsim=NULL) {  
+  measure = match.arg(measure)
+  
   out = vector('list')
 
   if(!is.null(dtm.y)){
@@ -117,6 +119,7 @@ documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=
 #' @param dtm A quanteda \link[quanteda{dfm}]
 #' @param date.var The name of the dfm docvar containing the document date. default is "date". The values should be of type POSIXlt or POSIXct
 #' @param hour.window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.
+#' @param group.var Optionally, the name of a dfm docvar to specify groups (e.g., document of the same source). If given, only documents within the same group will be compared.
 #' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).
 #' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0.1 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
@@ -140,26 +143,39 @@ documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=
 #' 
 #' head(igraph::get.data.frame(g, 'vertices'))
 #' head(igraph::get.data.frame(g, 'edges'))
-newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), measure='cosine', min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, only.complete.window=TRUE, verbose=FALSE){
-  if (!date.var %in% colnames(quanteda::docvars(dtm))) stop('The name specified in date.var is not a valid dfm docvar')
+newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.var=NULL, measure=c('cosine','overlap_pct'), 
+                             min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, only.complete.window=TRUE, verbose=FALSE){
+  measure = match.arg(measure)
+  meta = quanteda::docvars(dtm)
+
+  if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a valid dfm docvar')
   date = quanteda::docvars(dtm, date.var)
   if (!is(date, 'POSIXlt') && !is(date, 'POSIXct')) stop("Date has to be of type POSIXlt or POSIXct (use as.POSIXlt or strptime)")
-    
+  
+  if (!is.null(group.var)) {
+    if (!group.var %in% colnames(quanteda::docvars(dtm))) stop('The name specified in group.var is not a valid dfm docvar')
+    group = quanteda::docvars(dtm, group.var)
+  } else group = NULL
+  
   if (is.null(only.from) && is.null(only.to)) {
     dtm.y = NULL
     date.y = NULL
+    group.y = NULL
   }
   if (!is.null(only.from)) {
     if(!class(only.from) == 'logical') only.from = rownames(dtm) %in% only.from
     dtm.y = dtm
     date.y = date
+    group.y = group
     dtm = dtm[only.from,]
     date = date[only.from]
+    if (!is.null(group)) group = group[only.from]
   }
   if (!is.null(only.to)) {
     if(!class(only.to) == 'logical') only.to = rownames(dtm) %in% only.to
     dtm.y = dtm.y[only.to,]
     date.y = date.y[only.to]
+    if (!is.null(group)) group.y = group.y[only.from]
   }
   
   if (only.complete.window) {
@@ -170,16 +186,15 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), measur
   }
   
   diag = !is.null(dtm.y)
-  if (measure == 'cosine') cp = tcrossprod_sparse(dtm, dtm.y, l2norm = T, min_value = min.similarity, top_n = n.topsim, diag=diag, 
+  if (measure == 'cosine') cp = tcrossprod_sparse(dtm, dtm.y, l2norm = T, min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2=group.y,
                                                   date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', verbose=verbose)
-  if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag,
+  if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
                                                        date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', verbose=verbose)
   cp = as(cp, 'dgTMatrix')
   cp = data.frame(x=rownames(cp)[cp@i+1], y=colnames(cp)[cp@j+1], similarity=cp@x)
   cp = cp[!as.character(cp$x) == as.character(cp$y),]
   
   if (verbose) message('Matching document meta')
-  meta = quanteda::docvars(dtm)
   meta$document_id = rownames(meta)
   rownames(meta) = NULL
   g = document.network(cp, meta, 'document_id', date.var)
@@ -194,14 +209,8 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), measur
 #' This should be considered if the temporal order of publications is relevant for the analysis. 
 #' 
 #' @param dtm A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.
-#' @param meta A data.frame where rows are documents and columns are document meta information. 
-#' Should contain 3 columns: the document name/id, date and source. 
-#' The name/id column should match the document names/ids of the edgelist, and its label is specified in the `id.var` argument. 
-#' The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
-#' The source column is specified in the `date.var` argument.  
-#' @param id.var The label for the document name/id column in the `meta` data.frame. Default is "document_id"
-#' @param date.var The label for the document date column in the `meta` data.frame . default is "date"
-#' @param source.var The label for the document date column in the `meta` data.frame . default is "source"
+#' @param date.var Optionally, the name of the dfm docvar containing the document date. If given, only documents within the given hour.window will be compared. default is "date". The values should be of type POSIXlt or POSIXct
+#' @param group.var Optionally, the name of the dfm docvar containing a group of documents (e.g. of the same source). If given, only documents of the same group are compared.
 #' @param hour.window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. By default c(-24,24), which compares each document to all other documents within a 24 hour time distance.
 #' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).
 #' @param similarity a threshold for similarity. Documents of which similarity is equal or higher are deleted
@@ -213,22 +222,15 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), measur
 #' 
 #' @examples
 #' data(dtm)
-#' data(meta)
 #' 
 #' ## example with very low similarity threshold (normally not recommended!)
-#' dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = TRUE)
-delete.duplicates <- function(dtm, meta, id.var='document_id', date.var='date', source.var='source', hour.window=c(-24,24), measure='cosine', similarity=1, keep='first', tf.idf=FALSE){
-  if(tf.idf) {
-    g = newsflow.compare(tm::weightTfIdf(dtm), meta, id.var=id.var, date.var=date.var, measure=measure, min.similarity = similarity, hour.window=hour.window)
-  } else {
-    g = newsflow.compare(dtm, meta, id.var=id.var, date.var=date.var, measure=measure, min.similarity = similarity, hour.window=hour.window)
-  }
+#' dtm2 = delete.duplicates(dtm, similarity = 0.5, keep='first', tf.idf = TRUE)
+delete.duplicates <- function(dtm, date.var='date', group.var=NULL, hour.window=c(-24,24), measure=c('cosine','overlap_pct'), similarity=1, keep='first', tf.idf=FALSE){
+  if(tf.idf) dtm = quanteda::dfm_tfidf(dtm)
+  g = newsflow.compare(dtm, date.var, hour.window, group.var, measure=measure, min.similarity=similarity, only.complete.window = F)
   
   e = igraph::get.edges(g, igraph::E(g))
   d = igraph::get.data.frame(g, 'edges')  
-  d$med.x = igraph::V(g)$source[e[,1]]
-  d$med.y = igraph::V(g)$source[e[,2]]
-  d = d[d$med.x == d$med.y,]
   
   duplicates = c()
   if(keep == 'first') {
