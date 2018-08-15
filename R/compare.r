@@ -50,12 +50,13 @@ calculate.similarity <- function(m.x, m.y, measure){
   results
 }
 
+
 reindexTerms <- function(dtm, terms){
-  dtm = dtmToSparseMatrix(dtm)
+  dtm = as(dtm, 'dgTMatrix')
   documents = rownames(dtm)
   dtm = Matrix::spMatrix(nrow(dtm), length(terms), dtm@i+1, match(colnames(dtm)[dtm@j+1], terms), dtm@x)
   dimnames(dtm) = list(documents, terms)
-  tm::as.DocumentTermMatrix(dtm, weighting = tm::weightTf)
+  dtm
 }
 
 #' Compare the documents in two corpora/dtms
@@ -71,7 +72,6 @@ reindexTerms <- function(dtm, terms){
 #' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine", for cosine similarity. Also supports assymetrical measures "percentage.from" and "percentage.to" for the percentage of overlapping terms (term scores taken into account). Here "percentage.from" gives the percentage of the document that is compared to the other, whereas "percentage.to" gives the percentage of the document to which is compared.
 #' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
-#' @param return.zeros If true, all comparison results are returned, including those with zero similarity (rarely usefull and problematic with large data)
 #' 
 #' @return A data frame with pairs of documents and their similarities. 
 #' @export
@@ -83,108 +83,45 @@ reindexTerms <- function(dtm, terms){
 #' 
 #' comp = documents.compare(dtm, min.similarity=0.4)
 #' head(comp)
-documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL, return.zeros=FALSE) {  
-  if (is.null(groups))
+documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL) {  
   out = vector('list')
-  documents.compare.batch(dtm, dtm.y, measure, min.similarity, n.topsim, return.zeros)
-}
 
-documents.compare.batch <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL, return.zeros=FALSE) {  
   if(!is.null(dtm.y)){
-    if(mean(colnames(dtm) == colnames(dtm.y)) < 1){
+    if(!all(colnames(dtm) == colnames(dtm.y))){
       ## if colnames do not match, reindex them.
       terms = unique(c(colnames(dtm), colnames(dtm.y)))
       dtm = reindexTerms(dtm, terms)
       dtm.y = reindexTerms(dtm.y, terms)
     }
-    m.x = Matrix::t(dtmToSparseMatrix(dtm))
-    m.y = Matrix::t(dtmToSparseMatrix(dtm.y))
-  } else {
-    m.x = m.y = Matrix::t(dtmToSparseMatrix(dtm))
   }
+  dtm = as(dtm, 'dgCMatrix')
+  if (!is.null(dtm.y)) dtm.y = as(dtm.y, 'dgCMatrix')
   
-  results = calculate.similarity(m.x, m.y, measure)
-  results = filterResults(results, min.similarity, n.topsim)
-  
-  results = methods::as(results, 'dgTMatrix')
-  if(return.zeros) {
-    results = Matrix::Matrix(Matrix::which(!is.na(results), arr.ind=TRUE))
-    results = data.frame(x=colnames(m.x)[results[,1]], y=colnames(m.y)[results[,2]], similarity=as.vector(results))
-  } else{
-    if(sum(results) == 0) return(NULL)
-    results = data.frame(x=colnames(m.x)[results@i+1], y=colnames(m.y)[results@j+1], similarity=results@x)
-    results = results[results$similarity > 0 & !is.na(results$similarity),]
-  }
-  results[!as.character(results$x) == as.character(results$y),]
+  diag = !is.null(dtm.y)
+  if (measure == 'cosine') cp = tcrossprod_sparse(dtm, dtm.y, l2norm = T, min_value = min.similarity, top_n = n.topsim, diag=diag)
+  if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag)
+  cp = as(cp, 'dgTMatrix')
+  cp = data.frame(x=rownames(cp)[cp@i+1], y=colnames(cp)[cp@j+1], similarity=cp@x)
+  cp[!as.character(cp$x) == as.character(cp$y),]
 }
 
-
-
-unlistWindow <- function(list_object, i, window){
-  indices = i + window
-  indices = indices[indices > 0 & indices <= length(list_object)]
-  unlist(list_object[indices], use.names=FALSE)
-}
-
-getDateIds <- function(date, row_filter=NULL){
-  if(is.null(row_filter)) row_filter = rep(TRUE, length(date))
-  
-  datetime = as.Date(date)
-  datetimeseq = seq.Date(min(datetime), max(datetime), by='days')
-  
-  nonempty = which(datetimeseq %in% unique(datetime))
-  nonempty_datetime_ids = plyr::llply(datetimeseq[nonempty], function(dtime) which(datetime == dtime & row_filter))
-  datetime_ids = vector("list", length(datetimeseq))
-  datetime_ids[nonempty] = nonempty_datetime_ids
-  datetime_ids
-}
-
-getBatchIds <- function(date, meta.vars=NULL, row_filter=NULL){
-  if(is.null(row_filter)) row_filter = rep(TRUE, length(date))
-  
-  datetime = as.Date(date)
-  datetimeseq = seq.Date(min(datetime), max(datetime), by='days')
-  
-  nonempty = which(datetimeseq %in% unique(datetime))
-  nonempty_datetime_ids = plyr::llply(datetimeseq[nonempty], function(dtime) which(datetime == dtime & row_filter))
-  datetime_ids = vector("list", length(datetimeseq))
-  datetime_ids[nonempty] = nonempty_datetime_ids
-  datetime_ids
-}
-
-split_meta <- function(meta, meta.vars) {
-  meta = data.table::as.data.table(meta)
-  meta[,.ID := 1:nrow(meta)]
-  subsets = split(meta, by=meta.vars, drop = T, keep.by = F)
-  sapply(subsets, function(x) x$.ID, simplify = F)
-}
 
 #' Compare the documents in a dtm with a sliding window over time
 #' 
-#' Given a document-term matrix (DTM) and corresponding document meta data, calculates the document similarities over time using with a sliding window.
-#'  
-#' The meta data.frame should have a column containing document id's that match the rownames of the DTM (i.e. document names) and should have a column indicating the publication time. 
-#' By default these columns should be labeled "document_id" and "date", but the column labels can also be set using the `id.var` and `date.var` parameters.
-#' Any other columns will automatically be included as document meta information in the output. 
+#' Given a document-term matrix (DTM) with dates for each document, calculates the document similarities over time using with a sliding window.
 #' 
 #' The calculation of document similarity is performed using a vector space model approach. 
 #' Inner-product based similarity measures are used, such as cosine similarity.
 #' It is recommended to weight the DTM beforehand, for instance using Term frequency-inverse document frequency (tf.idf)
 #' 
-#' @param dtm A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.
-#' @param meta A data.frame where rows are documents and columns are document meta information. 
-#' Should at least contain 2 columns: the document name/id and date. 
-#' The name/id column should match the document names/ids of the edgelist, and its label is specified in the `id.var` argument. 
-#' The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
-#' @param id.var The label for the document name/id column in the `meta` data.frame. Default is "document_id"
-#' @param date.var The label for the document date column in the `meta` data.frame . default is "date"
+#' @param dtm A quanteda \link[quanteda{dfm}]
+#' @param date.var The name of the dfm docvar containing the document date. default is "date". The values should be of type POSIXlt or POSIXct
 #' @param hour.window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.
 #' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).
 #' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0.1 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
 #' @param only.from A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare only these documents to other documents. 
 #' @param only.to A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare other documents to only these documents.
-#' @param return.zeros If true, all comparison results are returned, including those with zero similarity (rarely usefull and problematic with large data)
 #' @param only.complete.window if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.
 #' @param verbose If TRUE, report progress
 #' 
@@ -203,54 +140,50 @@ split_meta <- function(meta, meta.vars) {
 #' 
 #' head(igraph::get.data.frame(g, 'vertices'))
 #' head(igraph::get.data.frame(g, 'edges'))
-newsflow.compare <- function(dtm, meta, id.var='document_id', date.var='date', hour.window=c(-24,24), measure='cosine', min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, return.zeros=FALSE, only.complete.window=TRUE){
-  confirm.dtm.meta(meta, id.var, date.var)
-  meta = match.dtm.meta(dtm, meta, id.var)
-  
-  if (verbose) message('Indexing articles by date/time')
-  if(is.null(only.from) & is.null(only.to)){
-    dateids.x = dateids.y = getDateIds(meta[,date.var])
-  } else{ 
-    if(is.null(only.from)) only.from = rep(TRUE, nrow(dtm))
-    if(is.null(only.to)) only.to = rep(TRUE, nrow(dtm))
+newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), measure='cosine', min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, only.complete.window=TRUE, verbose=FALSE){
+  if (!date.var %in% colnames(quanteda::docvars(dtm))) stop('The name specified in date.var is not a valid dfm docvar')
+  date = quanteda::docvars(dtm, date.var)
+  if (!is(date, 'POSIXlt') && !is(date, 'POSIXct')) stop("Date has to be of type POSIXlt or POSIXct (use as.POSIXlt or strptime)")
+    
+  if (is.null(only.from) && is.null(only.to)) {
+    dtm.y = NULL
+    date.y = NULL
+  }
+  if (!is.null(only.from)) {
     if(!class(only.from) == 'logical') only.from = rownames(dtm) %in% only.from
+    dtm.y = dtm
+    date.y = date
+    dtm = dtm[only.from,]
+    date = date[only.from]
+  }
+  if (!is.null(only.to)) {
     if(!class(only.to) == 'logical') only.to = rownames(dtm) %in% only.to
-    dateids.x = getDateIds(meta[,date.var], only.from)
-    dateids.y = getDateIds(meta[,date.var], only.to)
-  }
-  dateindex = which(lapply(dateids.x, length) > 0)
-  
-  window = floor(hour.window[1]/24):ceiling(hour.window[2]/24)
-  if(only.complete.window){
-    if(window[1] < 0) dateindex = dateindex[dateindex > window[1]]
-    if(rev(window)[1] > 0) dateindex = dateindex[dateindex <= length(dateids.x) - rev(window)[1]]  
+    dtm.y = dtm.y[only.to,]
+    date.y = date.y[only.to]
   }
   
-  progress = if (verbose) 'text' else 'none'
-  if (verbose) message('Comparing documents')
+  if (only.complete.window) {
+    left_out = date + as.difftime(hour.window[1], units = 'hours') < min(date)
+    right_out = date + as.difftime(hour.window[2], units = 'hours') > max(date)
+    dtm = dtm[!left_out & !right_out,]
+    date = date[!left_out & !right_out]
+  }
   
-  
-  output = plyr::ldply(dateindex, function(i) ldply_documents.compare(i, dtm, dateids.x, dateids.y, window, measure, min.similarity, n.topsim, return.zeros), .progress='text')
-  output = output[,!colnames(output) == '.id']
+  diag = !is.null(dtm.y)
+  if (measure == 'cosine') cp = tcrossprod_sparse(dtm, dtm.y, l2norm = T, min_value = min.similarity, top_n = n.topsim, diag=diag, 
+                                                  date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', verbose=verbose)
+  if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag,
+                                                       date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', verbose=verbose)
+  cp = as(cp, 'dgTMatrix')
+  cp = data.frame(x=rownames(cp)[cp@i+1], y=colnames(cp)[cp@j+1], similarity=cp@x)
+  cp = cp[!as.character(cp$x) == as.character(cp$y),]
   
   if (verbose) message('Matching document meta')
-  g = document.network(output, meta, id.var, date.var)
-  
-  delete.pairs = which(igraph::E(g)$hourdiff < hour.window[1] | igraph::E(g)$hourdiff > hour.window[2])
-  g = igraph::delete.edges(g, delete.pairs)
-  g
+  meta = quanteda::docvars(dtm)
+  meta$document_id = rownames(meta)
+  rownames(meta) = NULL
+  g = document.network(cp, meta, 'document_id', date.var)
 }
-
-ldply_documents.compare <- function(i, dtm, dateids.x, dateids.y, window, measure, min.similarity, n.topsim, return.zeros){
-  ## special function to be used in ldply in document.window.compare
-  dtm.x_indices = unique(dateids.x[[i]])
-  dtm.y_indices = unique(unlistWindow(dateids.y,i,window))
-  if(length(dtm.y_indices) == 0) return(NULL)
-
-  
-  documents.compare(dtm[dtm.x_indices,], dtm[dtm.y_indices,], measure, min.similarity, n.topsim, return.zeros)
-}
-
 
 #' Delete duplicate (or similar) documents from a document term matrix 
 #' 

@@ -13,8 +13,8 @@
 #' @param group2 If m2 and group are used, group2 has to be used to specify the groups for the rows in m2 (otherwise group will be ignored)
 #' @param date Optionally, a character vector that specifies a date for each row in m. If given, only pairs of rows within a given date range (see lwindow, rwindow and date_unit) are calculated. 
 #' @param date2 If m2 and date are used, date2 has to be used to specify the date for the rows in m2 (otherwise date will be ignored)
-#' @param lwindow If date (and date2) are used, lwindow determines the left side of the date window. Also see date_unit.
-#' @param rwindow Like lwindow, but for the right side. 
+#' @param lwindow If date (and date2) are used, lwindow determines the left side of the date window. e.g. -10 means that rows are only matched with rows for which date is within 10 [date_units] before.
+#' @param rwindow Like lwindow, but for the right side. e.g. an lwindow of -1 and rwindow of 1, with date_unit is "days", means that only rows are matched for which the dates are within a 1 day distance
 #' @param date_unit The date unit used in lwindow and rwindow. Supports "days", "hours", "minutes" and "seconds". Note that refers to the time distance between two rows ("days" doesn't refer to calendar days, but to a time of 24 hours)
 #' @param batchsize experimental 
 #' @param verbose if TRUE, report progress
@@ -30,7 +30,7 @@
 #' tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F)
 #' tcrossprod_sparse(m, min_value = 0.2, only_upper = T, diag = F)
 #' tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F, top_n = 1)
-tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, only_upper=F, diag=T, top_n=NULL, rowsum_div=F, l2norm=F, crossfun='prod', group=NULL, group2=NULL, date=NULL, date2=NULL, lwindow=1, rwindow=1, date_unit=c('days','hours','minutes','seconds'), batchsize=1000, verbose=F) {
+tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, only_upper=F, diag=T, top_n=NULL, rowsum_div=F, l2norm=F, crossfun='prod', group=NULL, group2=NULL, date=NULL, date2=NULL, lwindow=-1, rwindow=1, date_unit=c('days','hours','minutes','seconds'), batchsize=1000, verbose=F) {
   date_unit = match.arg(date_unit)
   if (is.null(top_n)) top_n = 0
   if (is.null(m2)) {

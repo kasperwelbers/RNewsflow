@@ -87,7 +87,7 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
       if (i_end > rows) i_end = rows - 1;
       batch_indices = find_positions(index2, std::get<0>(index1[i]),
                                      std::get<0>(index1[i_end]),
-                                     std::get<1>(index1[i]) - lwindow,
+                                     std::get<1>(index1[i]) + lwindow,
                                      std::get<1>(index1[i_end]) + rwindow);
       m2_batch = m2.middleRows(batch_indices.first, batch_indices.second - batch_indices.first);
       offset = batch_indices.first;
@@ -104,7 +104,7 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
       group2_val = std::get<0>(index2[j + offset]);
       if (group2_val != group1_val) continue;
       order2_val = std::get<1>(index2[j + offset]);
-      if (order2_val < order1_val-lwindow) continue;
+      if (order2_val < order1_val+lwindow) continue;
       if (order2_val > order1_val+rwindow) continue;
       if (!diag) if (i == j + offset) continue;
       if (only_upper) if (i > j + offset) continue;

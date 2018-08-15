@@ -34,7 +34,9 @@
 #' igraph::get.data.frame(g, 'both')
 #' igraph::plot.igraph(g)
 document.network <- function(d, meta, id.var='document_id', date.var='date', min.similarity=0){
-  confirm.dtm.meta(meta, id.var, date.var)
+  if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a column in meta')
+  if (!id.var %in% colnames(meta)) stop('The name specified in id.var is not a column in meta')
+  
   if (nrow(d) == 0) d = data.frame(x=numeric(), y=numeric(), similarity=numeric())
   
   colnames(d) = c('x','y','similarity')

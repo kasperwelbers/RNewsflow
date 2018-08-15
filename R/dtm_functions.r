@@ -5,26 +5,16 @@ dtmToSparseMatrix <- function(dtm){
   sm
 }
 
-confirm.dtm.meta <- function(meta, id.var, date.var){
-  if(!id.var %in% colnames(meta)) stop(sprintf('Meta data.frame should contain a column that matches the id.var parameter (currently set to "%s")', id.var))
-  if(!date.var %in% colnames(meta)) stop(sprintf('Meta data.frame should contain a column that matches the id.var parameter (currently set to "%s")', date.var))
-}
 
 match.dtm.meta <- function(dtm, meta, id.var){
   if(mean(rownames(dtm) %in% meta[,id.var]) < 1) stop('Not all documents in DTM match with a document in the meta data.frame')
   meta[match(rownames(dtm), meta[,id.var]),]
 }
 
-
 #' Calculate statistics for term occurence across days
 #'
-#' @param dtm A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class or a TsparseMatrix from the Matrix class (\link[Matrix]{spMatrix}) 
-#' @param meta A data.frame where rows are documents and columns are document meta information. 
-#' Should contain 2 columns: the document name/id and date. 
-#' The name/id column should match the rownames (i.e. document names) of the DTM, and its label is specified in the `id.var` argument. 
-#' The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
-#' @param id.var The label for the document name/id column in the `meta` data.frame. Default is "document_id"
-#' @param date.var The label for the document date column in the `meta` data.frame . default is "date"
+#' @param dtm A quanteda \link[quanteda{dfm}]
+#' @param date.var The name of the dfm docvar containing the document date. default is "date". The values should be of type POSIXlt or POSIXct
 #'
 #' @return A data.frame with statistics for each term.
 #' \itemize{
@@ -39,16 +29,12 @@ match.dtm.meta <- function(dtm, meta, id.var){
 #'
 #' @examples
 #' data(dtm)
-#' data(meta)
 #' 
-#' tdd = term.day.dist(dtm, meta)
+#' tdd = term.day.dist(dtm, 'date')
 #' head(tdd)
 #' tail(tdd)
-term.day.dist <- function(dtm, meta, id.var='document_id', date.var='date'){
-  confirm.dtm.meta(meta, id.var, date.var)
-  meta = match.dtm.meta(dtm, meta, id.var)
-  
-  if('DocumentTermMatrix' %in% class(dtm)) dtm = dtmToSparseMatrix(dtm)
+term.day.dist <- function(dtm, date.var='date'){
+  if (!date.var %in% names(docvars(dtm))) stop('The name specified in date.var is not a valid dfm docvar')
   
   cs = Matrix::colSums(dtm)
   if(sum(cs == 0) > 0) {

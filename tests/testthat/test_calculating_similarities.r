@@ -18,7 +18,7 @@ test_that("Matrix multiplication", {
   set.seed(1)
   m = Matrix::rsparsematrix(5,10,0.5)
   
-  cp = tcrossprod_sparse(m, min_value = NULL, only_upper = F, diag = T)
+  cp = tcrossprod_sparse(m, min_value = NULL)
   cp_correct = Matrix::tcrossprod(m)
   is_same(cp,cp_correct)
   
@@ -43,20 +43,20 @@ test_that("Matrix multiplication", {
   tcrossprod_sparse(m, group = c(1,1,1,2,2,2,3,3,3,3))
   
   date = seq.Date(as.Date('2010-01-01'), as.Date('2010-01-10'), by=1)
-  tcrossprod_sparse(m, date = date, lwindow = 1, rwindow = 1)
-  tcrossprod_sparse(m, date = date, lwindow = 2, rwindow = 2)
+  tcrossprod_sparse(m, date = date, lwindow = -1, rwindow = 1)
+  tcrossprod_sparse(m, date = date, lwindow = -2, rwindow = 2)
   
-  cp = tcrossprod_sparse(m, date = date, lwindow = 1, rwindow = 1)
+  cp = tcrossprod_sparse(m, date = date, lwindow = -1, rwindow = 1)
   cp_correct = Matrix::tcrossprod(m)
   is_same_m1nonzero(cp,cp_correct) 
   
-  cp = tcrossprod_sparse(m, date = date, lwindow = 2, rwindow = 3)
+  cp = tcrossprod_sparse(m, date = date, lwindow = -2, rwindow = 3)
   cp_correct = Matrix::tcrossprod(m)
   is_same_m1nonzero(cp,cp_correct) 
   
   
   ## with batches
-  cp = tcrossprod_sparse(m, date = date, lwindow = 1, rwindow = 1, batchsize = 1, verbose = F)
+  cp = tcrossprod_sparse(m, date = date, lwindow = -1, rwindow = 1, batchsize = 1, verbose = F)
   cp_correct = Matrix::tcrossprod(m)
   is_same_m1nonzero(cp,cp_correct) 
   
