@@ -12,4 +12,3 @@ data(docnet)
 Document similarity network for one news agency, and the print and online editions of two newspapers
 }
 \keyword{datasets}
-

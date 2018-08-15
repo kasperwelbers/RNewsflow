@@ -32,4 +32,3 @@ document.network.plot(subcomp1, main='All matches')
 document.network.plot(subcomp2, main='Only first match')
 graphics::par(mfrow=c(1,1))
 }
-

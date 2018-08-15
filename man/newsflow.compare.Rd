@@ -36,6 +36,8 @@ The date column should be intepretable with \link[base]{as.POSIXct}, and its lab
 \item{return.zeros}{If true, all comparison results are returned, including those with zero similarity (rarely usefull and problematic with large data)}
 
 \item{only.complete.window}{if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.}
+
+\item{verbose}{If TRUE, report progress}
 }
 \value{
 A network/graph in the \link[igraph]{igraph} class
@@ -65,4 +67,3 @@ ecount(g) # number of document pairs, or edges
 head(igraph::get.data.frame(g, 'vertices'))
 head(igraph::get.data.frame(g, 'edges'))
 }
-

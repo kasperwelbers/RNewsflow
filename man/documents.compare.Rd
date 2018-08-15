@@ -37,4 +37,3 @@ data(dtm)
 comp = documents.compare(dtm, min.similarity=0.4)
 head(comp)
 }
-

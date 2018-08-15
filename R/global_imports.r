@@ -4,5 +4,7 @@
 #' @import tm 
 #' @import Matrix
 #' @import igraph
+#' @importFrom Rcpp evalCpp
+#' @useDynLib RNewsflow
 importglobals <- function(x) NULL
 

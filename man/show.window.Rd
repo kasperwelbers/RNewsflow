@@ -28,4 +28,3 @@ show.window(docnet, to.attribute = 'source')
 show.window(docnet, to.attribute = 'sourcetype')
 show.window(docnet, to.attribute = 'sourcetype', from.attribute = 'sourcetype')
 }
-

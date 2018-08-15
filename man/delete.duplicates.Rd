@@ -51,4 +51,3 @@ data(meta)
 ## example with very low similarity threshold (normally not recommended!)
 dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = TRUE)
 }
-

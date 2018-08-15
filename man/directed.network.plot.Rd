@@ -54,4 +54,3 @@ data(docnet)
 aggdocnet = network.aggregate(docnet, by='source')
 directed.network.plot(aggdocnet, weight.var = 'to.Vprop', weight.thres = 0.2)
 }
-

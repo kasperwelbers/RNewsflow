@@ -48,4 +48,3 @@ g = document.network(d, meta)
 igraph::get.data.frame(g, 'both')
 igraph::plot.igraph(g)
 }
-

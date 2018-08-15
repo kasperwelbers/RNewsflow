@@ -39,4 +39,3 @@ docnet = filter.window(docnet, hour.window = c(6,36),
 show.window(docnet, to.attribute = 'sourcetype') # after filtering per sourcetype
 show.window(docnet, to.attribute = 'source') # after filtering per source
 }
-

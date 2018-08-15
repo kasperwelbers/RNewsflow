@@ -40,4 +40,3 @@ tdd = term.day.dist(dtm, meta)
 head(tdd)
 tail(tdd)
 }
-

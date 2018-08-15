@@ -12,4 +12,3 @@ data(dtm)
 Document Term Matrix for one news agency, and the print and online editions of two newspapers
 }
 \keyword{datasets}
-

@@ -56,4 +56,3 @@ document.network.plot(docnet_comps[[2]], dtm=dtm)
 # subcomponent 3 with additional arguments passed to plot.igraph 
 document.network.plot(docnet_comps[[3]], dtm=dtm, vertex.color='red') 
 }
-

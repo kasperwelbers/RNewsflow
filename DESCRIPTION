@@ -8,18 +8,23 @@ Maintainer: Kasper Welbers <kasperwelbers@gmail.com>
 Description: A collection of tools for measuring the similarity of news content and tracing the flow of (news) messages over
     time and across media. 
 License: MIT + file LICENSE
-Depends:
-    tm,
+Depends: 
+    R (>= 3.2.0), 
     igraph,
-    Matrix
+    tm,
+    Matrix (>= 1.2),
+    RcppProgress (>= 0.1)
 Imports: 
     plyr,
     slam,
     scales,
     wordcloud,
     data.table,
-    methods
-RoxygenNote: 5.0.1
+    methods,
+    Rcpp (>= 0.12.12),
+    RcppEigen (>= 0.3.3.4.0)
+LinkingTo: Rcpp, RcppEigen, RcppProgress
+RoxygenNote: 6.0.1
 Suggests: 
     knitr,
     rmarkdown,
