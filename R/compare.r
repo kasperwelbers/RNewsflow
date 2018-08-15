@@ -84,6 +84,12 @@ reindexTerms <- function(dtm, terms){
 #' comp = documents.compare(dtm, min.similarity=0.4)
 #' head(comp)
 documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL, return.zeros=FALSE) {  
+  if (is.null(groups))
+  out = vector('list')
+  documents.compare.batch(dtm, dtm.y, measure, min.similarity, n.topsim, return.zeros)
+}
+
+documents.compare.batch <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=0, n.topsim=NULL, return.zeros=FALSE) {  
   if(!is.null(dtm.y)){
     if(mean(colnames(dtm) == colnames(dtm.y)) < 1){
       ## if colnames do not match, reindex them.
@@ -112,6 +118,8 @@ documents.compare <- function(dtm, dtm.y=NULL, measure='cosine', min.similarity=
   results[!as.character(results$x) == as.character(results$y),]
 }
 
+
+
 unlistWindow <- function(list_object, i, window){
   indices = i + window
   indices = indices[indices > 0 & indices <= length(list_object)]
@@ -129,6 +137,26 @@ getDateIds <- function(date, row_filter=NULL){
   datetime_ids = vector("list", length(datetimeseq))
   datetime_ids[nonempty] = nonempty_datetime_ids
   datetime_ids
+}
+
+getBatchIds <- function(date, meta.vars=NULL, row_filter=NULL){
+  if(is.null(row_filter)) row_filter = rep(TRUE, length(date))
+  
+  datetime = as.Date(date)
+  datetimeseq = seq.Date(min(datetime), max(datetime), by='days')
+  
+  nonempty = which(datetimeseq %in% unique(datetime))
+  nonempty_datetime_ids = plyr::llply(datetimeseq[nonempty], function(dtime) which(datetime == dtime & row_filter))
+  datetime_ids = vector("list", length(datetimeseq))
+  datetime_ids[nonempty] = nonempty_datetime_ids
+  datetime_ids
+}
+
+split_meta <- function(meta, meta.vars) {
+  meta = data.table::as.data.table(meta)
+  meta[,.ID := 1:nrow(meta)]
+  subsets = split(meta, by=meta.vars, drop = T, keep.by = F)
+  sapply(subsets, function(x) x$.ID, simplify = F)
 }
 
 #' Compare the documents in a dtm with a sliding window over time
@@ -158,6 +186,7 @@ getDateIds <- function(date, row_filter=NULL){
 #' @param only.to A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare other documents to only these documents.
 #' @param return.zeros If true, all comparison results are returned, including those with zero similarity (rarely usefull and problematic with large data)
 #' @param only.complete.window if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.
+#' @param verbose If TRUE, report progress
 #' 
 #' @return A network/graph in the \link[igraph]{igraph} class
 #' @export
@@ -178,7 +207,7 @@ newsflow.compare <- function(dtm, meta, id.var='document_id', date.var='date', h
   confirm.dtm.meta(meta, id.var, date.var)
   meta = match.dtm.meta(dtm, meta, id.var)
   
-  message('Indexing articles by date/time')
+  if (verbose) message('Indexing articles by date/time')
   if(is.null(only.from) & is.null(only.to)){
     dateids.x = dateids.y = getDateIds(meta[,date.var])
   } else{ 
@@ -197,11 +226,14 @@ newsflow.compare <- function(dtm, meta, id.var='document_id', date.var='date', h
     if(rev(window)[1] > 0) dateindex = dateindex[dateindex <= length(dateids.x) - rev(window)[1]]  
   }
   
-  message('Comparing documents')
+  progress = if (verbose) 'text' else 'none'
+  if (verbose) message('Comparing documents')
+  
+  
   output = plyr::ldply(dateindex, function(i) ldply_documents.compare(i, dtm, dateids.x, dateids.y, window, measure, min.similarity, n.topsim, return.zeros), .progress='text')
   output = output[,!colnames(output) == '.id']
   
-  message('Matching document meta')
+  if (verbose) message('Matching document meta')
   g = document.network(output, meta, id.var, date.var)
   
   delete.pairs = which(igraph::E(g)$hourdiff < hour.window[1] | igraph::E(g)$hourdiff > hour.window[2])
@@ -215,6 +247,7 @@ ldply_documents.compare <- function(i, dtm, dateids.x, dateids.y, window, measur
   dtm.y_indices = unique(unlistWindow(dateids.y,i,window))
   if(length(dtm.y_indices) == 0) return(NULL)
 
+  
   documents.compare(dtm[dtm.x_indices,], dtm[dtm.y_indices,], measure, min.similarity, n.topsim, return.zeros)
 }
 
@@ -253,9 +286,9 @@ ldply_documents.compare <- function(i, dtm, dateids.x, dateids.y, window, measur
 #' dtm2 = delete.duplicates(dtm, meta, similarity = 0.5, keep='first', tf.idf = TRUE)
 delete.duplicates <- function(dtm, meta, id.var='document_id', date.var='date', source.var='source', hour.window=c(-24,24), measure='cosine', similarity=1, keep='first', tf.idf=FALSE){
   if(tf.idf) {
-    g = newsflow.compare(tm::weightTfIdf(dtm), meta, measure=measure, min.similarity = similarity, hour.window=hour.window)
+    g = newsflow.compare(tm::weightTfIdf(dtm), meta, id.var=id.var, date.var=date.var, measure=measure, min.similarity = similarity, hour.window=hour.window)
   } else {
-    g = newsflow.compare(dtm, meta, measure=measure, min.similarity = similarity, hour.window=hour.window)
+    g = newsflow.compare(dtm, meta, id.var=id.var, date.var=date.var, measure=measure, min.similarity = similarity, hour.window=hour.window)
   }
   
   e = igraph::get.edges(g, igraph::E(g))
