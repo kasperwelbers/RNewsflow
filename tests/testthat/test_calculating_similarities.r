@@ -41,10 +41,11 @@ test_that("Matrix multiplication", {
   is_same(cp,cp_correct)
   
   
+
   ## filtering by group/date. Documents have to be in the same group, or within the given date range
   
   m = Matrix::rsparsematrix(10,10,0.5)
-  tcrossprod_sparse(m, group = c(1,1,1,2,2,2,3,3,3,3))
+  tcrossprod_sparse(m, group = c(1,1,1,2,2,2,3,3,3,3), batchsize = 1)
   
   date = seq.Date(as.Date('2010-01-01'), as.Date('2010-01-10'), by=1)
   tcrossprod_sparse(m, date = date, lwindow = -1, rwindow = 1)

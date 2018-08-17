@@ -157,11 +157,9 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.
     group = quanteda::docvars(dtm, group.var)
   } else group = NULL
   
-  if (is.null(only.from) && is.null(only.to)) {
-    dtm.y = NULL
-    date.y = NULL
-    group.y = NULL
-  }
+  dtm.y = NULL
+  date.y = NULL
+  group.y = NULL
   if (!is.null(only.from)) {
     if(!class(only.from) == 'logical') only.from = rownames(dtm) %in% only.from
     dtm.y = dtm
@@ -175,7 +173,7 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.
     if(!class(only.to) == 'logical') only.to = rownames(dtm) %in% only.to
     dtm.y = dtm.y[only.to,]
     date.y = date.y[only.to]
-    if (!is.null(group)) group.y = group.y[only.from]
+    if (!is.null(group)) group.y = group.y[only.to]
   }
   
   if (only.complete.window) {
@@ -183,6 +181,7 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.
     right_out = date + as.difftime(hour.window[2], units = 'hours') > max(date)
     dtm = dtm[!left_out & !right_out,]
     date = date[!left_out & !right_out]
+    if (!is.null(group)) group = group[!left_out & !right_out]
   }
   
   diag = !is.null(dtm.y)
@@ -225,9 +224,9 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.
 #' 
 #' ## example with very low similarity threshold (normally not recommended!)
 #' dtm2 = delete.duplicates(dtm, similarity = 0.5, keep='first', tf.idf = TRUE)
-delete.duplicates <- function(dtm, date.var='date', group.var=NULL, hour.window=c(-24,24), measure=c('cosine','overlap_pct'), similarity=1, keep='first', tf.idf=FALSE){
+delete.duplicates <- function(dtm, date.var='date', group.var=NULL, hour.window=c(-24,24), measure=c('cosine','overlap_pct'), similarity=1, keep='first', tf.idf=FALSE, verbose=F){
   if(tf.idf) dtm = quanteda::dfm_tfidf(dtm)
-  g = newsflow.compare(dtm, date.var, hour.window, group.var, measure=measure, min.similarity=similarity, only.complete.window = F)
+  g = newsflow.compare(dtm, date.var=date.var, hour.window=hour.window, group.var=group.var, measure=measure, min.similarity=similarity, only.complete.window = F, verbose=verbose)
   
   e = igraph::get.edges(g, igraph::E(g))
   d = igraph::get.data.frame(g, 'edges')  
@@ -252,11 +251,13 @@ delete.duplicates <- function(dtm, date.var='date', group.var=NULL, hour.window=
   
   message('Deleting ', length(duplicates), ' duplicates')
  
-  duplicates.med = meta$source[match(duplicates, rownames(dtm))]
-  counts.med = table(duplicates.med)
-  for(source in names(counts.med)){
-      message('\t',source, ': ', counts.med[source])
-  }
+  if (!is.null(group.var)) {
+    duplicates.med = quanteda::docvars(dtm, group.var)[match(duplicates, rownames(dtm))]
+    counts.med = table(duplicates.med)
+    for(source in names(counts.med)){
+        message('\t',source, ': ', counts.med[source])
+    }
+  } 
   
   dtm[!rownames(dtm) %in% duplicates,]
 }

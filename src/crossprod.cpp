@@ -81,20 +81,27 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
   std::pair<int,int> batch_indices;
   
   for (int i = 0; i < rows; i++) {
+    
     // CREATE BATCH
     if (i % batchsize == 0) {
       i_end = i + (batchsize - 1);
       if (i_end > rows) i_end = rows - 1;
+      
       batch_indices = find_positions(index2, std::get<0>(index1[i]),
                                      std::get<0>(index1[i_end]),
                                      std::get<1>(index1[i]) + lwindow,
                                      std::get<1>(index1[i_end]) + rwindow);
+      
+      // note that batch_indices second is the position after the last item that matches the search (like x.end())
+      // therefore batch_indices.second - batch_indices.first correctly gives the number of rows after the row at batch_indices.first.
+      if (batch_indices.first >= batch_indices.second) continue;
       m2_batch = m2.middleRows(batch_indices.first, batch_indices.second - batch_indices.first);
       offset = batch_indices.first;
     } 
+    if (batch_indices.first >= batch_indices.second) continue;
+    
     std::vector<double> res(m2_batch.rows());
-    
-    
+
     // FIND ALL MATCHES FOR i IN BATCH
     std::vector<bool> use_pair(m2_batch.rows());
     double group1_val = std::get<0>(index1[i]);
@@ -111,22 +118,26 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
       use_pair[j] = true;
     }
     
+
     // MANAGE TRIPLET VECTOR CAPACITY
     if (tl.capacity() < tl.size() + res.size()) {
       double pct_to_go = 1 - i/double(rows);
       tl.reserve(tl.capacity() * (1.2 + 0.8*pct_to_go));
     }
     
+
     // CROSSPROD (updates res by reference)
     if (crossfun == "prod" && !rowsum_div) sim_product(i, m1, m2_batch, res, use_pair);
     if (crossfun == "prod" && rowsum_div) sim_product_pct(i, m1, m2_batch, res, use_pair);
     if (crossfun == "min" && !rowsum_div) sim_min(i, m1, m2_batch, res, use_pair);
     if (crossfun == "min" && rowsum_div) sim_min_pct(i, m1, m2_batch, res, use_pair);
 
+
     // SAVE VALUES WITH CORRECT POSITIONS
     fill_triples(tl, res, index1, index2, offset, i, use_threshold, min_value, top_n);
     if (Progress::check_abort())
       stop("Aborted");
+    
     p.increment(1);
   }
   

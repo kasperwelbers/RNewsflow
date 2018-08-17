@@ -6,7 +6,7 @@
 \usage{
 delete.duplicates(dtm, date.var = "date", group.var = NULL,
   hour.window = c(-24, 24), measure = c("cosine", "overlap_pct"),
-  similarity = 1, keep = "first", tf.idf = FALSE)
+  similarity = 1, keep = "first", tf.idf = FALSE, verbose = F)
 }
 \arguments{
 \item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}

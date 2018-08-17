@@ -5,3 +5,7 @@ batched_tcrossprod_cpp <- function(m1, m2, group1, group2, order1, order2, use_t
     .Call('_RNewsflow_batched_tcrossprod_cpp', PACKAGE = 'RNewsflow', m1, m2, group1, group2, order1, order2, use_threshold, min_value, top_n, diag, only_upper, rowsum_div, l2norm, crossfun, lwindow, rwindow, verbose, batchsize)
 }
 
+findit <- function(x, start, end, v1, v2) {
+    invisible(.Call('_RNewsflow_findit', PACKAGE = 'RNewsflow', x, start, end, v1, v2))
+}
+

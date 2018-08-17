@@ -34,9 +34,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// findit
+void findit(std::vector<double> x, double start, double end, double v1, double v2);
+RcppExport SEXP _RNewsflow_findit(SEXP xSEXP, SEXP startSEXP, SEXP endSEXP, SEXP v1SEXP, SEXP v2SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<double> >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type start(startSEXP);
+    Rcpp::traits::input_parameter< double >::type end(endSEXP);
+    Rcpp::traits::input_parameter< double >::type v1(v1SEXP);
+    Rcpp::traits::input_parameter< double >::type v2(v2SEXP);
+    findit(x, start, end, v1, v2);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_RNewsflow_batched_tcrossprod_cpp", (DL_FUNC) &_RNewsflow_batched_tcrossprod_cpp, 18},
+    {"_RNewsflow_findit", (DL_FUNC) &_RNewsflow_findit, 5},
     {NULL, NULL, 0}
 };
 

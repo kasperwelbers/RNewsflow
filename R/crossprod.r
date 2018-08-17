@@ -78,6 +78,7 @@ tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, only_upper=F, diag=T, 
     use_threshold=FALSE
     min_value=0 ## not used, but can't be NULL
   } else use_threshold=TRUE
+  
   cp = batched_tcrossprod_cpp(m, m2, group1=group, group2=group2, order1=order1, order2=order2, use_threshold=use_threshold, min_value=min_value, top_n=top_n, diag=diag, only_upper=only_upper, rowsum_div=rowsum_div, l2norm=l2norm, crossfun=crossfun,
                               lwindow=lwindow, rwindow=rwindow, verbose=verbose, batchsize=batchsize)
   rownames(cp) = rownames(m)
