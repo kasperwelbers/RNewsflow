@@ -6,7 +6,8 @@
 \usage{
 delete.duplicates(dtm, date.var = "date", group.var = NULL,
   hour.window = c(-24, 24), measure = c("cosine", "overlap_pct"),
-  similarity = 1, keep = "first", tf.idf = FALSE, verbose = F)
+  similarity = 1, keep = "first", tf.idf = FALSE, dup_csv = NULL,
+  verbose = F)
 }
 \arguments{
 \item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}
@@ -24,6 +25,10 @@ delete.duplicates(dtm, date.var = "date", group.var = NULL,
 \item{keep}{A character indicating whether to keep the 'first' or 'last' published of duplicate documents.}
 
 \item{tf.idf}{if TRUE, weight the dtm with tf.idf before comparing documents. The original (non-weighted) DTM is returned.}
+
+\item{dup_csv}{Optionally, a path for writing a csv file with the duplicates edgelist. For each duplicate pair it is noted if "from" or "to" is the duplicate, or if "both" are duplicates (of other documents)}
+
+\item{verbose}{if TRUE, report progress}
 }
 \value{
 A dtm with the duplicate documents deleted

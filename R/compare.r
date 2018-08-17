@@ -126,6 +126,7 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct')
 #' @param only.from A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare only these documents to other documents. 
 #' @param only.to A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare other documents to only these documents.
 #' @param only.complete.window if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.
+#' @param return_as Detemine whether output is returned as an "edgelist" or "igraph" network.
 #' @param verbose If TRUE, report progress
 #' 
 #' @return A network/graph in the \link[igraph]{igraph} class
@@ -144,8 +145,9 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct')
 #' head(igraph::get.data.frame(g, 'vertices'))
 #' head(igraph::get.data.frame(g, 'edges'))
 newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.var=NULL, measure=c('cosine','overlap_pct'), 
-                             min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, only.complete.window=TRUE, verbose=FALSE){
+                             min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, only.complete.window=TRUE, return_as = c('igraph','edgelist'), verbose=FALSE){
   measure = match.arg(measure)
+  return_as = match.arg(return_as)
   meta = quanteda::docvars(dtm)
 
   if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a valid dfm docvar')
@@ -190,13 +192,25 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.
   if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
                                                        date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', verbose=verbose)
   cp = as(cp, 'dgTMatrix')
-  cp = data.frame(x=rownames(cp)[cp@i+1], y=colnames(cp)[cp@j+1], similarity=cp@x)
-  cp = cp[!as.character(cp$x) == as.character(cp$y),]
   
-  if (verbose) message('Matching document meta')
-  meta$document_id = rownames(meta)
-  rownames(meta) = NULL
-  g = document.network(cp, meta, 'document_id', date.var)
+  if (return_as == 'edgelist') {
+    if (!is.null(dtm.y)) 
+      hourdiff = round(difftime(date.y[cp@j+1], date[cp@i+1], units = 'hours'),3)
+    else
+      hourdiff = round(difftime(date[cp@j+1], date[cp@i+1], units = 'hours'),3)
+    cp = data.frame(from=rownames(cp)[cp@i+1], to=colnames(cp)[cp@j+1], weight=cp@x, hourdiff = hourdiff)
+    return(cp[!as.character(cp$from) == as.character(cp$to),])
+  } 
+  if (return_as == 'igraph') {
+    cp = data.frame(x=rownames(cp)[cp@i+1], y=colnames(cp)[cp@j+1], similarity=cp@x)
+    cp = cp[!as.character(cp$x) == as.character(cp$y),]
+  
+    if (verbose) message('Creating network')
+    meta$document_id = rownames(meta)
+    rownames(meta) = NULL
+    g = document.network(cp, meta, 'document_id', date.var)
+    return(g)
+  } 
 }
 
 #' Delete duplicate (or similar) documents from a document term matrix 
@@ -215,6 +229,8 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.
 #' @param similarity a threshold for similarity. Documents of which similarity is equal or higher are deleted
 #' @param keep A character indicating whether to keep the 'first' or 'last' published of duplicate documents.
 #' @param tf.idf if TRUE, weight the dtm with tf.idf before comparing documents. The original (non-weighted) DTM is returned.
+#' @param dup_csv Optionally, a path for writing a csv file with the duplicates edgelist. For each duplicate pair it is noted if "from" or "to" is the duplicate, or if "both" are duplicates (of other documents)
+#' @param verbose if TRUE, report progress
 #' 
 #' @return A dtm with the duplicate documents deleted
 #' @export
@@ -224,12 +240,13 @@ newsflow.compare <- function(dtm, date.var='date', hour.window=c(-24,24), group.
 #' 
 #' ## example with very low similarity threshold (normally not recommended!)
 #' dtm2 = delete.duplicates(dtm, similarity = 0.5, keep='first', tf.idf = TRUE)
-delete.duplicates <- function(dtm, date.var='date', group.var=NULL, hour.window=c(-24,24), measure=c('cosine','overlap_pct'), similarity=1, keep='first', tf.idf=FALSE, verbose=F){
+delete.duplicates <- function(dtm, date.var='date', group.var=NULL, hour.window=c(-24,24), measure=c('cosine','overlap_pct'), similarity=1, keep='first', tf.idf=FALSE, dup_csv=NULL, verbose=F){
   if(tf.idf) dtm = quanteda::dfm_tfidf(dtm)
-  g = newsflow.compare(dtm, date.var=date.var, hour.window=hour.window, group.var=group.var, measure=measure, min.similarity=similarity, only.complete.window = F, verbose=verbose)
+  d = newsflow.compare(dtm, date.var=date.var, hour.window=hour.window, group.var=group.var, measure=measure, 
+                       min.similarity=similarity, only.complete.window = F, return_as = 'edgelist', verbose=verbose)
   
-  e = igraph::get.edges(g, igraph::E(g))
-  d = igraph::get.data.frame(g, 'edges')  
+  #e = igraph::get.edges(g, igraph::E(g))
+  #d = igraph::get.data.frame(g, 'edges')  
   
   duplicates = c()
   if(keep == 'first') {
@@ -240,14 +257,19 @@ delete.duplicates <- function(dtm, date.var='date', group.var=NULL, hour.window=
     duplicates = c(duplicates, as.character(unique(d$from[d$hourdiff > 0])))
     duplicates = c(duplicates, as.character(unique(d$to[d$hourdiff < 0])))
   }
-  d = d[!d$from %in% duplicates & !d$to %in% duplicates,]
   
-  ## if there are identical articles that occured simultaneously, delete randomly
-  d = d[sample(1:nrow(d), nrow(d)),]
-  d$fromi = match(d$from, unique(d$from, d$to))
-  d$toi = match(d$to, unique(d$from, d$to))
-  d = d[d$fromi < d$toi,]
-  duplicates = unique(c(duplicates, as.character(d$from)))
+  ## if there are duplicate articles that occured simultaneously, delete first match to dtm rows
+  ds = d[!d$from %in% duplicates & !d$to %in% duplicates,] ## duplicates that occur simultaneously
+  ds$fromi = match(ds$from, rownames(dtm)) ## makes unique match to all ids in d
+  ds$toi = match(ds$to, rownames(dtm))
+  duplicates = unique(c(duplicates, 
+                        as.character(ds$from[ds$fromi < ds$toi]),
+                        as.character(ds$to[ds$fromi > ds$toi])))
+
+  if (length(duplicates) == 0) {
+    message("There are no duplicates")
+    return(dtm)
+  }
   
   message('Deleting ', length(duplicates), ' duplicates')
  
@@ -259,6 +281,19 @@ delete.duplicates <- function(dtm, date.var='date', group.var=NULL, hour.window=
     }
   } 
   
+  d$is_duplicate = NA
+  is_from = d$from %in% duplicates
+  is_to = d$to %in% duplicates
+  d$is_duplicate[is_from & !is_to] = 'from'
+  d$is_duplicate[!is_from & is_to] = 'to'
+  d$is_duplicate[is_from & is_to] = 'both'
+  if (anyNA(d$is_duplicate)) warning(sprintf("There are %s document pairs for which neither document is marked as a duplicate. This shouldn't happen, so please report as a bug", sum(is.na(d$is_duplicate))))
+  if (!is.null(dup_csv)) {
+    d = d[order(d$from, d$hourdiff),]
+    d$weight = round(d$weight,4)
+    write.csv(d, dup_csv, row.names=F)
+  }
+
   dtm[!rownames(dtm) %in% duplicates,]
 }
 

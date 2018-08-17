@@ -7,7 +7,8 @@
 newsflow.compare(dtm, date.var = "date", hour.window = c(-24, 24),
   group.var = NULL, measure = c("cosine", "overlap_pct"),
   min.similarity = 0, n.topsim = NULL, only.from = NULL, only.to = NULL,
-  only.complete.window = TRUE, verbose = FALSE)
+  only.complete.window = TRUE, return_as = c("igraph", "edgelist"),
+  verbose = FALSE)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda{dfm}]}
@@ -29,6 +30,8 @@ newsflow.compare(dtm, date.var = "date", hour.window = c(-24, 24),
 \item{only.to}{A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare other documents to only these documents.}
 
 \item{only.complete.window}{if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.}
+
+\item{return_as}{Detemine whether output is returned as an "edgelist" or "igraph" network.}
 
 \item{verbose}{If TRUE, report progress}
 }
