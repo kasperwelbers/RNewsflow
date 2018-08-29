@@ -8,7 +8,7 @@ documents.compare(dtm, dtm.y = NULL, measure = c("cosine", "overlap_pct"),
   min.similarity = 0, n.topsim = NULL)
 }
 \arguments{
-\item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}
+\item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used.}
 
 \item{dtm.y}{Optional. If given, documents from dtm will only be compared to the documents in dtm.y}
 

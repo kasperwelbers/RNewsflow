@@ -1,3 +1,10 @@
+#' quanteda dfm for RNewsflow vignette demo 
+#'
+#' @docType data
+#' @usage data(rnewsflow_dfm)
+#' @format dfm
+'rnewsflow_dfm'
+
 #' Document Term Matrix for one news agency, and the print and online editions of two newspapers
 #' 
 #' @docType data

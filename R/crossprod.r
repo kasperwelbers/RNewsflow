@@ -85,3 +85,4 @@ tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, only_upper=F, diag=T, 
   colnames(cp) = rownames(m2)
   cp
 }
+

@@ -24,6 +24,7 @@ Imports:
     Rcpp (>= 0.12.12),
     RcppEigen (>= 0.3.3.4.0)
 LinkingTo: Rcpp, RcppEigen, RcppProgress
+LazyData: true
 RoxygenNote: 6.0.1
 Suggests: 
     knitr,

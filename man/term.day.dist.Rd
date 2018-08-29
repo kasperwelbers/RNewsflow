@@ -4,12 +4,14 @@
 \alias{term.day.dist}
 \title{Calculate statistics for term occurence across days}
 \usage{
-term.day.dist(dtm, date.var = "date")
+term.day.dist(dtm, meta = NULL, date.var = "date")
 }
 \arguments{
-\item{dtm}{A quanteda \link[quanteda{dfm}]}
+\item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually}
 
-\item{date.var}{The name of the dfm docvar containing the document date. default is "date". The values should be of type POSIXlt or POSIXct}
+\item{meta}{If dtm is a quanteda dfm, docvars(meta) is used by default (meta is NULL) to obtain the meta data. Otherwise, the meta data.frame has to be given by the user, with the rows of the meta data.frame matching the rows of the dtm (i.e. each row is a document)}
+
+\item{date.var}{The name of the meta column specifying the document date. default is "date". The values should be of type POSIXlt or POSIXct}
 }
 \value{
 A data.frame with statistics for each term.

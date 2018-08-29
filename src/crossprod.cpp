@@ -37,9 +37,10 @@ void fill_triples(std::vector<Eigen::Triplet<double> >& tl, std::vector<double>&
 Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& m1, Eigen::SparseMatrix<double>& m2,
                                                    IntegerVector group1, IntegerVector group2, 
                                                    NumericVector order1, NumericVector order2,
-                                                   bool use_threshold=true, double min_value=0, int top_n=0, bool diag=true, bool only_upper=false, bool rowsum_div=false, bool l2norm=false, std::string crossfun="prod",
+                                                   bool use_threshold=true, double min_value=0, int top_n=0, bool diag=true, bool only_upper=false, 
+                                                   bool rowsum_div=false, bool l2norm=false, std::string crossfun="prod",
                                                    int lwindow=0, int rwindow=0,
-                                                   bool verbose=false, int batchsize = 10000) {
+                                                   bool verbose=false, int batchsize = 1000) {
   if (m1.cols() != m2.cols()) stop("m1 and m2 need to have the same number of columns");
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
   std::vector<std::tuple<double,double,int> > index1, index2;
@@ -77,9 +78,7 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
   int i_end;
   int offset = 0;
   
-  std::pair<int,int> i_indices;
   std::pair<int,int> batch_indices;
-  
   for (int i = 0; i < rows; i++) {
     
     // CREATE BATCH
@@ -118,7 +117,6 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
       use_pair[j] = true;
     }
     
-
     // MANAGE TRIPLET VECTOR CAPACITY
     if (tl.capacity() < tl.size() + res.size()) {
       double pct_to_go = 1 - i/double(rows);
@@ -126,14 +124,14 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
     }
     
 
-    // CROSSPROD (updates res by reference)
+    // CROSSPROD (fills res by reference)
     if (crossfun == "prod" && !rowsum_div) sim_product(i, m1, m2_batch, res, use_pair);
     if (crossfun == "prod" && rowsum_div) sim_product_pct(i, m1, m2_batch, res, use_pair);
     if (crossfun == "min" && !rowsum_div) sim_min(i, m1, m2_batch, res, use_pair);
     if (crossfun == "min" && rowsum_div) sim_min_pct(i, m1, m2_batch, res, use_pair);
 
 
-    // SAVE VALUES WITH CORRECT POSITIONS
+    // SAVE VALUES WITH CORRECT POSITIONS (using offset and index)
     fill_triples(tl, res, index1, index2, offset, i, use_threshold, min_value, top_n);
     if (Progress::check_abort())
       stop("Aborted");

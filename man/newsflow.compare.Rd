@@ -4,20 +4,22 @@
 \alias{newsflow.compare}
 \title{Compare the documents in a dtm with a sliding window over time}
 \usage{
-newsflow.compare(dtm, date.var = "date", hour.window = c(-24, 24),
-  group.var = NULL, measure = c("cosine", "overlap_pct"),
+newsflow.compare(dtm, meta = NULL, date.var = "date", hour.window = c(-24,
+  24), group.var = NULL, measure = c("cosine", "overlap_pct"),
   min.similarity = 0, n.topsim = NULL, only.from = NULL, only.to = NULL,
   only.complete.window = TRUE, return_as = c("igraph", "edgelist"),
   verbose = FALSE)
 }
 \arguments{
-\item{dtm}{A quanteda \link[quanteda{dfm}]}
+\item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually}
 
-\item{date.var}{The name of the dfm docvar containing the document date. default is "date". The values should be of type POSIXlt or POSIXct}
+\item{meta}{If dtm is a quanteda dfm, docvars(meta) is used by default (meta is NULL) to obtain the meta data. Otherwise, the meta data.frame has to be given by the user, with the rows of the meta data.frame matching the rows of the dtm (i.e. each row is a document)}
+
+\item{date.var}{The name of the column in meta that specifies the document date. default is "date". The values should be of type POSIXlt or POSIXct}
 
 \item{hour.window}{A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.}
 
-\item{group.var}{Optionally, the name of a dfm docvar to specify groups (e.g., document of the same source). If given, only documents within the same group will be compared.}
+\item{group.var}{Optionally,  The name of the column in meta that specifies a group (e.g., source, sourcetype). If given, only documents within the same group will be compared.}
 
 \item{measure}{the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).}
 

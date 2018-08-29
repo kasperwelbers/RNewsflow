@@ -4,19 +4,21 @@
 \alias{delete.duplicates}
 \title{Delete duplicate (or similar) documents from a document term matrix}
 \usage{
-delete.duplicates(dtm, date.var = "date", group.var = NULL,
-  hour.window = c(-24, 24), measure = c("cosine", "overlap_pct"),
-  similarity = 1, keep = "first", tf.idf = FALSE, dup_csv = NULL,
-  verbose = F)
+delete.duplicates(dtm, meta = NULL, date.var = "date",
+  hour.window = c(-24, 24), group.var = NULL, measure = c("cosine",
+  "overlap_pct"), similarity = 1, keep = "first", tf.idf = FALSE,
+  dup_csv = NULL, verbose = F)
 }
 \arguments{
-\item{dtm}{A document-term matrix in the tm \link[tm]{DocumentTermMatrix} class. It is recommended to weight the DTM beforehand, for instance using \link[tm]{weightTfIdf}.}
+\item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually}
 
-\item{date.var}{Optionally, the name of the dfm docvar containing the document date. If given, only documents within the given hour.window will be compared. default is "date". The values should be of type POSIXlt or POSIXct}
+\item{meta}{If dtm is a quanteda dfm, docvars(meta) is used by default (meta is NULL) to obtain the meta data. Otherwise, the meta data.frame has to be given by the user, with the rows of the meta data.frame matching the rows of the dtm (i.e. each row is a document)}
 
-\item{group.var}{Optionally, the name of the dfm docvar containing a group of documents (e.g. of the same source). If given, only documents of the same group are compared.}
+\item{date.var}{The name of the column in meta that specifies the document date. default is "date". The values should be of type POSIXlt or POSIXct}
 
-\item{hour.window}{A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. By default c(-24,24), which compares each document to all other documents within a 24 hour time distance.}
+\item{hour.window}{A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.}
+
+\item{group.var}{Optionally,  The name of the column in meta that specifies a group (e.g., source, sourcetype). If given, only documents within the same group will be compared.}
 
 \item{measure}{the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).}
 

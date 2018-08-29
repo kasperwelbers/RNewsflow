@@ -7,14 +7,15 @@ dtmToSparseMatrix <- function(dtm){
 
 
 match.dtm.meta <- function(dtm, meta, id.var){
-  if(mean(rownames(dtm) %in% meta[,id.var]) < 1) stop('Not all documents in DTM match with a document in the meta data.frame')
+  if(!all(rownames(dtm) %in% meta[,id.var])) stop('Not all documents in DTM match with a document in the meta data.frame')
   meta[match(rownames(dtm), meta[,id.var]),]
 }
 
 #' Calculate statistics for term occurence across days
 #'
-#' @param dtm A quanteda \link[quanteda{dfm}]
-#' @param date.var The name of the dfm docvar containing the document date. default is "date". The values should be of type POSIXlt or POSIXct
+#' @param dtm A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually
+#' @param meta If dtm is a quanteda dfm, docvars(meta) is used by default (meta is NULL) to obtain the meta data. Otherwise, the meta data.frame has to be given by the user, with the rows of the meta data.frame matching the rows of the dtm (i.e. each row is a document)
+#' @param date.var The name of the meta column specifying the document date. default is "date". The values should be of type POSIXlt or POSIXct
 #'
 #' @return A data.frame with statistics for each term.
 #' \itemize{
@@ -33,16 +34,22 @@ match.dtm.meta <- function(dtm, meta, id.var){
 #' tdd = term.day.dist(dtm, 'date')
 #' head(tdd)
 #' tail(tdd)
-term.day.dist <- function(dtm, date.var='date'){
-  if (!date.var %in% names(docvars(dtm))) stop('The name specified in date.var is not a valid dfm docvar')
+term.day.dist <- function(dtm, meta=NULL, date.var='date'){
+  if (is.null(meta)) meta = quanteda::docvars(dtm)
+  dtm = quanteda::as.dfm(dtm)
+  dtm = as(dtm, 'dgTMatrix')
+  if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a valid dfm docvar')
+  
+  document.date = as.Date(meta[[date.var]])
   
   cs = Matrix::colSums(dtm)
-  if(sum(cs == 0) > 0) {
+  if(any(cs == 0)) {
     message("dtm contains empty columns/terms. These will be ignored (and won't appear in the output)")
-    dtm = dtm[,slam::col_sums(dtm) > 0]
+    filter = Matrix::colSums(dtm) > 0
+    dtm = dtm[,filter]
+    document.date = document.date[filter]
   } 
-
-  document.date = as.Date(meta[,date.var])
+  
   dateseq = seq.Date(min(document.date), max(document.date), by='days')
   i = document.date[dtm@i+1]
   i = match(i, dateseq)

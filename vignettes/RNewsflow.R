@@ -3,41 +3,40 @@ options(digits=3)
 library(knitr)
 
 ## ---- message=FALSE, warning=FALSE, echo=TRUE----------------------------
-doc1 = 'Socrates is human'
-doc2 = 'Humans are mortal'
-doc3 = 'Therefore, Socrates is mortal'
-dtm = RTextTools::create_matrix(
-  textColumns = c(doc1,doc2,doc3), 
-  minWordLength = 1, removeStopwords = FALSE)
+library(quanteda)
+d = data.frame(id = c(1,2,3),
+               text = c('Socrates is human', 'Humans are mortal', 'Therefore, Socrates is mortal'),
+               author = c('Aristotle','Aristotle','Aristotle'),
+               stringsAsFactors = F)
 
-rownames(dtm) = paste('Document', 1:nrow(dtm))
-as.matrix(dtm)
+corp = corpus(d, docid_field = 'id', text_field='text')
+dtm = dfm(corp)
+
+dtm
+docvars(dtm)
 
 ## ---- message=FALSE, warning=FALSE, echo=TRUE----------------------------
 library(RNewsflow)
 
-data(dtm)
-as.matrix(dtm[1:3,1:5])
+dtm = rnewsflow_dfm ## copy the demo data
+dtm
 
 ## ------------------------------------------------------------------------
-data(meta)
-head(meta,3)
+head(docvars(dtm), 3)
 
 ## ------------------------------------------------------------------------
-tdd = term.day.dist(dtm, meta)
-tdd[sample(1:nrow(tdd), 4),] # show 4 random rows
+tdd = term.day.dist(dtm)
+tail(tdd, 3)
 
 ## ------------------------------------------------------------------------
 select_terms = tdd$term[tdd$days.entropy.norm <= 0.3]
 dtm = dtm[,select_terms]
 
 ## ------------------------------------------------------------------------
-dtm = weightTfIdf(dtm)
+dtm = quanteda::dfm_tfidf(dtm)
 
 ## ----results='hide', message=FALSE, warning=FALSE------------------------
-g = newsflow.compare(dtm, meta,
-                             hour.window = c(0,36), 
-                             min.similarity = 0.4)
+g = newsflow.compare(dtm, hour.window = c(0,36), min.similarity = 0.4)
 
 ## ------------------------------------------------------------------------
 vertex.sourcetype = V(g)$sourcetype
@@ -72,7 +71,7 @@ show.window(g, to.attribute = 'source')
 g_subcomps = decompose.graph(g)
 
 ## ---- fig.width = 7, fig.height = 3--------------------------------------
-gs = g_subcomps[[2]] # select the second sub-component
+gs = g_subcomps[[55]] # select the second sub-component
 document.network.plot(gs)
 
 ## ---- fig.width = 7, fig.height = 4--------------------------------------
@@ -131,18 +130,18 @@ head(docXsource)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  library(RNewsflow)
+#  library(quanteda)
 #  
-#  # Prepare DTM and meta data
-#  data(dtm)
-#  data(meta)
+#  # Prepare DTM
+#  dtm = rnewsflow_dfm  ## copy demo data
 #  
-#  tdd = term.day.dist(dtm, meta)
+#  tdd = term.day.dist(dtm)
 #  dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.3]]
 #  
-#  dtm = weightTfIdf(dtm)
+#  dtm = dfm_tfidf(dtm)
 #  
 #  # Prepare document similarity network
-#  g = newsflow.compare(dtm, meta, hour.window = c(-0.1,60),
+#  g = newsflow.compare(dtm, hour.window = c(-0.1,60),
 #                       min.similarity = 0.4)
 #  g = filter.window(g, hour.window = c(6, 36),
 #                    to.vertices = V(g)$sourcetype == 'Print NP')
