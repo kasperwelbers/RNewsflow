@@ -37,12 +37,13 @@ void fill_triples(std::vector<Eigen::Triplet<double> >& tl, std::vector<double>&
 Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& m1, Eigen::SparseMatrix<double>& m2,
                                                    IntegerVector group1, IntegerVector group2, 
                                                    NumericVector order1, NumericVector order2,
+                                                   NumericMatrix simmat,
                                                    bool use_threshold=true, double min_value=0, int top_n=0, bool diag=true, bool only_upper=false, 
                                                    bool rowsum_div=false, bool l2norm=false, std::string crossfun="prod",
                                                    int lwindow=0, int rwindow=0,
                                                    bool verbose=false, int batchsize = 1000) {
   if (m1.cols() != m2.cols()) stop("m1 and m2 need to have the same number of columns");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+            
   std::vector<std::tuple<double,double,int> > index1, index2;
   index1 = create_index(group1,order1);
   index2 = create_index(group2,order2);
@@ -51,15 +52,23 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
   bool not_batched = unique(group1).size() == 1 && unique(group2).size() == 1 && unique(order1).size() == 1 && unique(order2).size() == 1;
   if (not_batched) batchsize = m1.rows();
     
+    
   m1 = sm_prepare(m1, index1, true, l2norm);   // sort and transpose m1
   m2 = sm_prepare(m2, index2, false, l2norm);  // only sort m2
+  
+  std::vector<double> softcos_mag(m1.cols()); 
+  if (crossfun == "softcos") {
+    if (l2norm) stop("l2norm cannot be used in combination with softcos. softcos will always use the soft cosine magnitude calculation"); 
+    softcos_mag = softcos_row_mag(m1, simmat);
+  }
+    
   
   int rows = m1.cols();
   int cols = m2.rows();
   if (rows != cols && only_upper) stop("using 'only_upper = true' is only possible if m1 and m2 have the same number of rows (so output is symmetric)");
   if (rows != cols && !diag) stop("using 'diag = false' is only possible if m1 and m2 have the same number of rows (so output is symmetric)");
   
-  if (crossfun != "prod" && crossfun != "min") stop("Not a valid crossfun (currently supports prod and min)");
+  if (crossfun != "prod" && crossfun != "min" && crossfun != "softcos") stop("Not a valid crossfun (currently supports prod, min and softcos)");
   
   
   std::vector<Eigen::Triplet<double> > tl;
@@ -129,8 +138,15 @@ Eigen::SparseMatrix<double> batched_tcrossprod_cpp(Eigen::SparseMatrix<double>& 
     if (crossfun == "prod" && rowsum_div) sim_product_pct(i, m1, m2_batch, res, use_pair);
     if (crossfun == "min" && !rowsum_div) sim_min(i, m1, m2_batch, res, use_pair);
     if (crossfun == "min" && rowsum_div) sim_min_pct(i, m1, m2_batch, res, use_pair);
-
-
+    
+    // SPECIAL CROSSPROD FOR SOFT COSINE 
+    if (crossfun == "softcos") {
+      sim_softcos(i, m1, m2_batch, res, use_pair, simmat);      // (fills res by reference)
+      for (int res_i = 0; res_i < res.size(); res_i++) {
+        res[res_i] = res[res_i] / (softcos_mag[i] * softcos_mag[res_i + batch_indices.first]);
+      }
+    }
+    
     // SAVE VALUES WITH CORRECT POSITIONS (using offset and index)
     fill_triples(tl, res, index1, index2, offset, i, use_threshold, min_value, top_n);
     if (Progress::check_abort())

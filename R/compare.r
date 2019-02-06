@@ -67,8 +67,10 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct')
 #' It is recommended to weight the DTM beforehand, for instance using Term frequency-inverse document frequency (tf.idf)
 #' 
 #' @param dtm A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually
+#' @param dtm.y optionally, another dtm. If given, the documents in dtm will be compared to the documents in dtm.y. This cannot be combined with only.from and only.to
 #' @param meta If dtm is a quanteda dfm, docvars(meta) is used by default (meta is NULL) to obtain the meta data. Otherwise, the meta data.frame has to be given by the user, with the rows of the meta data.frame matching the rows of the dtm (i.e. each row is a document)
-#' @param date.var The name of the column in meta that specifies the document date. default is "date". The values should be of type POSIXlt or POSIXct
+#' @param meta.y like meta, but for dtm.y (only necessary if dtm.y is used)
+#' @param date.var The name of the column in meta that specifies the document date. default is "date". The values should be of type POSIXct
 #' @param hour.window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.
 #' @param group.var Optionally,  The name of the column in meta that specifies a group (e.g., source, sourcetype). If given, only documents within the same group will be compared.
 #' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), and the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document).
@@ -95,8 +97,10 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct')
 #' 
 #' head(igraph::get.data.frame(g, 'vertices'))
 #' head(igraph::get.data.frame(g, 'edges'))
-newsflow.compare <- function(dtm, meta=NULL, date.var='date', hour.window=c(-24,24), group.var=NULL, measure=c('cosine','overlap_pct'), 
+newsflow.compare <- function(dtm, dtm.y=NULL, meta=NULL, meta.y=NULL, date.var='date', hour.window=c(-24,24), group.var=NULL, measure=c('cosine','overlap_pct'), 
                              min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, only.complete.window=TRUE, return_as = c('igraph','edgelist'), verbose=FALSE){
+  
+  ########### prepare dtm
   if (is.null(meta)) {
     if (!is(dtm, 'dfm')) stop('meta can only be NULL if dtm is a quanteda dfm class')
     meta = quanteda::docvars(dtm)
@@ -105,39 +109,66 @@ newsflow.compare <- function(dtm, meta=NULL, date.var='date', hour.window=c(-24,
   meta$document_id = rownames(dtm)
   measure = match.arg(measure)
   return_as = match.arg(return_as)
-  #meta = quanteda::docvars(dtm)
-  
-  #d = quanteda::as.dfm(dtm)
-  #m = quanteda::docvars(d)
-  #m$document_id = rownames(m)
+
   if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a valid dfm docvar')
   date = meta[[date.var]]
-  if (!is(date, 'POSIXlt') && !is(date, 'POSIXct')) stop("Date has to be of type POSIXlt or POSIXct (use as.POSIXlt or strptime)")
+  if (!is(date, 'POSIXct')) stop("Date has to be of type POSIXct (use as.POSIXct)")
+  if (any(sapply(meta, is, 'POSIXlt'))) stop('meta data cannot contain a column of the POSIXlt class')
   
   if (!is.null(group.var)) {
     if (!group.var %in% colnames(meta)) stop('The name specified in group.var is not a valid dfm docvar')
     group = meta[[group.var]]
   } else group = NULL
   
-  dtm.y = NULL
-  date.y = NULL
-  group.y = NULL
-  if (!is.null(only.from)) {
-    if(!class(only.from) == 'logical') only.from = rownames(dtm) %in% only.from
-    dtm.y = dtm
-    date.y = date
-    group.y = group
-    dtm = dtm[only.from,]
-    date = date[only.from]
-    if (!is.null(group)) group = group[only.from]
-  }
-  if (!is.null(only.to)) {
-    if(!class(only.to) == 'logical') only.to = rownames(dtm) %in% only.to
-    dtm.y = dtm.y[only.to,]
-    date.y = date.y[only.to]
-    if (!is.null(group)) group.y = group.y[only.to]
+  ########### prepare dtm.y
+  if (!is.null(dtm.y)) {
+    if (!is.null(only.from)) stop('Cannot use only.from if dtm.y is used')
+    if (!is.null(only.to)) stop('Cannot use only.to if dtm.y is used')
+
+    if (is.null(meta.y)) {
+      if (!is(dtm.y, 'dfm')) stop('meta.y can only be NULL if dtm.y is a quanteda dfm class')
+      meta.y = quanteda::docvars(dtm.y)
+    }
+
+    dtm.y = quanteda::as.dfm(dtm.y)
+    if (!identical(quanteda::featnames(dtm), quanteda::featnames(dtm.y))) 
+      dtm.y = quanteda:::pad_dfm(dtm.y, quanteda::featnames(dtm))
+
+    meta.y$document_id = rownames(dtm.y)
+    measure = match.arg(measure)
+    return_as = match.arg(return_as)
+    
+    if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a valid dfm docvar')
+    date.y = meta.y[[date.var]]
+    if (!is(date.y, 'POSIXct')) stop("Date.y has to be of type POSIXct (use as.POSIXct)")
+    if (any(sapply(meta.y, is, 'POSIXlt'))) stop('meta data cannot contain a column of the POSIXlt class')
+    
+    if (!is.null(group.var)) {
+      if (!group.var %in% colnames(meta.y)) stop('The name specified in group.var is not a valid dfm docvar')
+      group.y = meta.y[[group.var]]
+    } else group.y = NULL
+  } else {
+    dtm.y = NULL
+    date.y = NULL
+    group.y = NULL
+    if (!is.null(only.from)) {
+      if(!class(only.from) == 'logical') only.from = rownames(dtm) %in% only.from
+      dtm.y = dtm
+      date.y = date
+      group.y = group
+      dtm = dtm[only.from,]
+      date = date[only.from]
+      if (!is.null(group)) group = group[only.from]
+    }
+    if (!is.null(only.to)) {
+      if(!class(only.to) == 'logical') only.to = rownames(dtm) %in% only.to
+      dtm.y = dtm.y[only.to,]
+      date.y = date.y[only.to]
+      if (!is.null(group)) group.y = group.y[only.to]
+    }
   }
   
+  ############# compare
   if (only.complete.window) {
     left_out = date + as.difftime(hour.window[1], units = 'hours') < min(date)
     right_out = date + as.difftime(hour.window[2], units = 'hours') > max(date)
@@ -153,6 +184,7 @@ newsflow.compare <- function(dtm, meta=NULL, date.var='date', hour.window=c(-24,
                                                        date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', verbose=verbose)
   cp = as(cp, 'dgTMatrix')
   
+  ############## prepare return
   if (return_as == 'edgelist') {
     if (!is.null(dtm.y)) 
       hourdiff = round(difftime(date.y[cp@j+1], date[cp@i+1], units = 'hours'),3)
@@ -167,7 +199,9 @@ newsflow.compare <- function(dtm, meta=NULL, date.var='date', hour.window=c(-24,
     cp = cp[!as.character(cp$x) == as.character(cp$y),]
   
     if (verbose) message('Creating network')
-    g = document.network(cp, meta, 'document_id', date.var)
+    
+    if (!is.null(meta.y)) meta = data.table::rbindlist(list(meta, meta.y), use.names = T, fill = T)
+    g = document.network(cp, as.data.frame(meta), 'document_id', date.var)
     return(g)
   } 
 }

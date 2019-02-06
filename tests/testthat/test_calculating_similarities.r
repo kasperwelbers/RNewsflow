@@ -17,8 +17,8 @@ test_that("Matrix multiplication", {
   library(RNewsflow)
   set.seed(1)
   m = Matrix::rsparsematrix(5,10,0.5)
-  
-  cp = tcrossprod_sparse(m, min_value = NULL)
+
+  cp = tcrossprod_sparse(m, min_value = NULL, l2norm = F)
   cp_correct = Matrix::tcrossprod(m)
   is_same(cp,cp_correct)
   

@@ -1,3 +1,12 @@
+cosine_similarity <- function(m){
+  m = as(m, 'dgTMatrix')
+  norm = sqrt(Matrix::colSums(m^2))
+  m@x = m@x / norm[m@j+1]  
+  as.matrix(Matrix::crossprod(m))
+}
+
+
+
 #' The tcrossprod function for sparse matrices, with output filters applied on the fly to reduce memory usage.
 #'
 #' @param m A dgCMatrix
@@ -16,6 +25,7 @@
 #' @param lwindow If date (and date2) are used, lwindow determines the left side of the date window. e.g. -10 means that rows are only matched with rows for which date is within 10 [date_units] before.
 #' @param rwindow Like lwindow, but for the right side. e.g. an lwindow of -1 and rwindow of 1, with date_unit is "days", means that only rows are matched for which the dates are within a 1 day distance
 #' @param date_unit The date unit used in lwindow and rwindow. Supports "days", "hours", "minutes" and "seconds". Note that refers to the time distance between two rows ("days" doesn't refer to calendar days, but to a time of 24 hours)
+#' @param simmat if softcos is used, a symmetric matrix with terms that indicates the similarity of terms (i.e. adjacency matrix). If NULL, a cosine similarity matrix will be created on the go 
 #' @param batchsize experimental 
 #' @param verbose if TRUE, report progress
 #'
@@ -30,8 +40,9 @@
 #' tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F)
 #' tcrossprod_sparse(m, min_value = 0.2, only_upper = T, diag = F)
 #' tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F, top_n = 1)
-tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, only_upper=F, diag=T, top_n=NULL, rowsum_div=F, l2norm=F, crossfun='prod', group=NULL, group2=NULL, date=NULL, date2=NULL, lwindow=-1, rwindow=1, date_unit=c('days','hours','minutes','seconds'), batchsize=1000, verbose=F) {
+tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, only_upper=F, diag=T, top_n=NULL, rowsum_div=F, l2norm=F, crossfun=c('prod','min','softcos'), group=NULL, group2=NULL, date=NULL, date2=NULL, lwindow=-1, rwindow=1, date_unit=c('days','hours','minutes','seconds'), simmat=NULL, batchsize=1000, verbose=F) {
   date_unit = match.arg(date_unit)
+  crossfun = match.arg(crossfun)
   if (is.null(top_n)) top_n = 0
   if (is.null(m2)) {
     m2 = m
@@ -79,7 +90,19 @@ tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, only_upper=F, diag=T, 
     min_value=0 ## not used, but can't be NULL
   } else use_threshold=TRUE
   
-  cp = batched_tcrossprod_cpp(m, m2, group1=group, group2=group2, order1=order1, order2=order2, use_threshold=use_threshold, min_value=min_value, top_n=top_n, diag=diag, only_upper=only_upper, rowsum_div=rowsum_div, l2norm=l2norm, crossfun=crossfun,
+  
+  if (crossfun == 'softcos') {
+    if (!is.null(simmat)) {
+      if (!nrow(simmat) == ncol(simmat)) stop('simmat has to be symmetrical')
+      if (!nrow(simmat) == ncol(m)) stop('number of terms (cols/rows) in simmat has to match number of terms (cols) in m')
+    } else {
+      simmat = cosine_similarity(m)
+    }
+  } else {
+    simmat = matrix()
+  }
+  
+  cp = batched_tcrossprod_cpp(m, m2, group1=group, group2=group2, order1=order1, order2=order2, simmat=simmat, use_threshold=use_threshold, min_value=min_value, top_n=top_n, diag=diag, only_upper=only_upper, rowsum_div=rowsum_div, l2norm=l2norm, crossfun=crossfun,
                               lwindow=lwindow, rwindow=rwindow, verbose=verbose, batchsize=batchsize)
   rownames(cp) = rownames(m)
   colnames(cp) = rownames(m2)

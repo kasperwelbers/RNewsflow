@@ -21,5 +21,8 @@ void sim_product_pct(int, const Eigen::SparseMatrix<double>&, const Eigen::Spars
 void sim_min_pct(int, const Eigen::SparseMatrix<double>&, const Eigen::SparseMatrix<double>&,
                          std::vector<double>&, std::vector<bool>&);
 
+void sim_softcos(int, const Eigen::SparseMatrix<double>&, const Eigen::SparseMatrix<double>&, 
+                 std::vector<double>&, std::vector<bool>&, const NumericMatrix&);
+
 
 #endif

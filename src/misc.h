@@ -8,6 +8,8 @@
 using namespace Rcpp;
 
 std::vector<double> get_row_l2(Eigen::SparseMatrix<double>& m);
+std::vector<double> softcos_row_mag(const Eigen::SparseMatrix<double>& m1, NumericMatrix& simmat);
+  
   
 bool search_group_l ( const std::tuple<double,double,int>& vec, const double& val) ;
 bool search_group_u ( const double& val, const std::tuple<double,double,int>& vec) ;

@@ -59,3 +59,15 @@ void sim_min_pct(int i, const Eigen::SparseMatrix<double>& m1, const Eigen::Spar
   }
   as_pct(sum_value, res);
 } 
+
+void sim_softcos(int i, const Eigen::SparseMatrix<double>& m1, const Eigen::SparseMatrix<double>& m2, 
+                 std::vector<double>& res, std::vector<bool>& use_pair, const NumericMatrix& simmat){
+  for (Eigen::SparseMatrix<double>::InnerIterator it1(m1,i); it1; ++it1) {
+    for (int j = 0; j < m1.rows(); j++) {
+      for (Eigen::SparseMatrix<double>::InnerIterator it2(m2,j); it2; ++it2) {
+        if (!use_pair[it2.row()]) continue;
+        res[it2.row()] += it1.value() * it2.value() * simmat(it1.row(), it2.col());
+      }
+    }
+  }
+} 

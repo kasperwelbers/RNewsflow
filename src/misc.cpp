@@ -15,9 +15,30 @@ std::vector<double> get_row_l2(Eigen::SparseMatrix<double>& m) {
       out[it.row()] += pow(it.value(),2);
     }
   }
-  for (int i=0; i < out.size(); i++) out[i] = pow(out[i], 0.5);
+  for (int i=0; i < out.size(); i++) {
+    out[i] = pow(out[i], 0.5);
+  }
   return(out);
 }
+
+std::vector<double> softcos_row_mag(const Eigen::SparseMatrix<double>& m1, NumericMatrix& simmat) {
+  std::vector<double> out(m1.cols());
+  
+  for (int k = 0; k < m1.cols(); k++){
+    for (Eigen::SparseMatrix<double>::InnerIterator it1(m1,k); it1; ++it1) {
+      for (Eigen::SparseMatrix<double>::InnerIterator it2(m1,k); it2; ++it2) {
+        if (simmat(it1.row(), it2.row()) == 0) continue; 
+        out[k] += it1.value() * it2.value() * simmat(it1.row(), it2.row());
+      }
+    }
+  }
+
+  for (int i=0; i < out.size(); i++) {
+    out[i] = pow(out[i], 0.5);
+  }
+  return(out);
+}
+
 
 Eigen::SparseMatrix<double> sm_prepare(Eigen::SparseMatrix<double>& m, std::vector<std::tuple<double,double,int> > index, bool transpose, bool l2norm) {
   if (m.rows() != index.size()) stop("number of rows is not equal to length of index");
