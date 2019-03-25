@@ -2,13 +2,15 @@
 % Please edit documentation in R/crossprod.r
 \name{tcrossprod_sparse}
 \alias{tcrossprod_sparse}
-\title{The tcrossprod function for sparse matrices, with output filters applied on the fly to reduce memory usage.}
+\title{The tcrossprod function for sparse matrices, for people that like drowning in parameters}
 \usage{
-tcrossprod_sparse(m, m2 = NULL, min_value = NULL, only_upper = F,
-  diag = T, top_n = NULL, rowsum_div = F, l2norm = F,
-  crossfun = "prod", group = NULL, group2 = NULL, date = NULL,
+tcrossprod_sparse(m, m2 = NULL, min_value = NULL, max_value = NULL,
+  only_upper = F, diag = T, top_n = NULL, rowsum_div = F,
+  normalize = c("none", "l2", "softl2"), crossfun = c("prod", "min",
+  "softprod"), group = NULL, group2 = NULL, date = NULL,
   date2 = NULL, lwindow = -1, rwindow = 1, date_unit = c("days",
-  "hours", "minutes", "seconds"), batchsize = 1000, verbose = F)
+  "hours", "minutes", "seconds"), simmat = NULL, simmat_thres = NULL,
+  batchsize = 1000, verbose = F)
 }
 \arguments{
 \item{m}{A dgCMatrix}
@@ -16,6 +18,8 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, only_upper = F,
 \item{m2}{A dgCMatrix}
 
 \item{min_value}{Optionally, a numerical value, specifying the threshold for including a score in the output.}
+
+\item{max_value}{Optionally, a numerical value for the upper limit for including a score in the output.}
 
 \item{only_upper}{if true, only the upper triangle of the matrix is returned. Only possible for symmetrical output (m and m2 have same number of columns)}
 
@@ -25,7 +29,7 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, only_upper = F,
 
 \item{rowsum_div}{if true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering)}
 
-\item{l2norm}{if true, use l2 Norm}
+\item{normalize}{normalize rows by a given norm score. Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine)}
 
 \item{crossfun}{The function used in the vector operations. Normally this is the "prod", for product (dot product). Here we also allow (currently only) the "min", for minimum value. We use this in our document overlap_pct score.}
 
@@ -43,7 +47,11 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, only_upper = F,
 
 \item{date_unit}{The date unit used in lwindow and rwindow. Supports "days", "hours", "minutes" and "seconds". Note that refers to the time distance between two rows ("days" doesn't refer to calendar days, but to a time of 24 hours)}
 
-\item{batchsize}{experimental}
+\item{simmat}{if softcos is used, a symmetric matrix with terms that indicates the similarity of terms (i.e. adjacency matrix). If NULL, a cosine similarity matrix will be created on the go}
+
+\item{simmat_thres}{if softcos is used, a threshold for the term similarity.}
+
+\item{batchsize}{If group and/or date are used, size of batches.}
 
 \item{verbose}{if TRUE, report progress}
 }
@@ -51,14 +59,16 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, only_upper = F,
 A dgCMatrix
 }
 \description{
-The tcrossprod function for sparse matrices, with output filters applied on the fly to reduce memory usage.
+tcrossprod with benefits. Enables filtering the results on the fly, to 
+To achieve this, options for similarity measures are included in the function.
+For example, to get the cosine similarity, you can normalize with "l2" and use the "prod" (product) function for the
 }
 \examples{
 set.seed(1)
 m = Matrix::rsparsematrix(5,10,0.5)
-tcrossprod_sparse(m, min_value = 0, only_upper = F, diag = T)
-tcrossprod_sparse(m, min_value = 0, only_upper = F, diag = F)
-tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F)
-tcrossprod_sparse(m, min_value = 0.2, only_upper = T, diag = F)
-tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F, top_n = 1)
+tcrossprod_sparse(m, min_value = 0, only_upper = FALSE, diag = TRUE)
+tcrossprod_sparse(m, min_value = 0, only_upper = FALSE, diag = FALSE)
+tcrossprod_sparse(m, min_value = 0, only_upper = TRUE, diag = FALSE)
+tcrossprod_sparse(m, min_value = 0.2, only_upper = TRUE, diag = FALSE)
+tcrossprod_sparse(m, min_value = 0, only_upper = TRUE, diag = FALSE, top_n = 1)
 }

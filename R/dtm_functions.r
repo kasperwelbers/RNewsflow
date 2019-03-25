@@ -5,6 +5,20 @@ dtmToSparseMatrix <- function(dtm){
   sm
 }
 
+pad_dfm <- function(dfm, cnames) {
+  ## not pretty, but quanteda:::pad_dfm is not exported
+  dv = quanteda::docvars(dfm)
+  rnames = rownames(dfm)
+  dfm = methods::as(dfm, 'dgTMatrix')
+  colindex = match(colnames(dfm), cnames)
+  isna = is.na(colindex[dfm@j+1])
+  out = Matrix::spMatrix(nrow(dfm), length(cnames), i=dfm@i[!isna]+1, j=colindex[dfm@j[!isna]+1], x = dfm@x[!isna])
+  out = quanteda::as.dfm(out)
+  rownames(out) = rnames
+  colnames(out) = cnames
+  if (nrow(dv) > 0) quanteda::docvars(out) = dv
+  out
+}
 
 match.dtm.meta <- function(dtm, meta, id.var){
   if(!all(rownames(dtm) %in% meta[,id.var])) stop('Not all documents in DTM match with a document in the meta data.frame')
@@ -29,26 +43,32 @@ match.dtm.meta <- function(dtm, meta, id.var){
 #' @export
 #'
 #' @examples
-#' data(dtm)
-#' 
-#' tdd = term.day.dist(dtm, 'date')
+#' tdd = term.day.dist(rnewsflow_dfm, date.var='date')
 #' head(tdd)
 #' tail(tdd)
 term.day.dist <- function(dtm, meta=NULL, date.var='date'){
   if (is.null(meta)) meta = quanteda::docvars(dtm)
   dtm = quanteda::as.dfm(dtm)
-  dtm = as(dtm, 'dgTMatrix')
+  dtm = methods::as(dtm, 'dgTMatrix')
   if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a valid dfm docvar')
   
   document.date = as.Date(meta[[date.var]])
+  
+  if (any(is.na(document.date))) {
+    message("date contains NA. These documents will be ignored")
+    filter = !is.na(document.date)
+    dtm = dtm[filter,]
+    document.date = document.date[filter]
+  }
   
   cs = Matrix::colSums(dtm)
   if(any(cs == 0)) {
     message("dtm contains empty columns/terms. These will be ignored (and won't appear in the output)")
     filter = Matrix::colSums(dtm) > 0
     dtm = dtm[,filter]
-    document.date = document.date[filter]
   } 
+  
+  
   
   dateseq = seq.Date(min(document.date), max(document.date), by='days')
   i = document.date[dtm@i+1]
@@ -70,3 +90,4 @@ term.day.dist <- function(dtm, meta=NULL, date.var='date'){
   rownames(d) = NULL
   d
 }
+

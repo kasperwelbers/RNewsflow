@@ -5,7 +5,7 @@
 \title{Create a document similarity network}
 \usage{
 document.network(d, meta, id.var = "document_id", date.var = "date",
-  min.similarity = 0)
+  min.similarity = NA)
 }
 \arguments{
 \item{d}{A data.frame with three columns, that represents an edgelist with weight values. 
@@ -21,7 +21,7 @@ The date column should be intepretable with \link[base]{as.POSIXct}, and its lab
 
 \item{date.var}{The label for the document date column in the `meta` data.frame . default is "date"}
 
-\item{min.similarity}{For convenience, ignore all edges where the weight is below `min.similarity`. Default is zero.}
+\item{min.similarity}{For convenience, ignore all edges where the weight is below `min.similarity`.}
 }
 \value{
 A network/graph in the \link[igraph]{igraph} class

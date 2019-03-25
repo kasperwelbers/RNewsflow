@@ -44,8 +44,6 @@ Note that this can also be used to delete "updates" of articles (e.g., on news s
 This should be considered if the temporal order of publications is relevant for the analysis.
 }
 \examples{
-data(dtm)
-
 ## example with very low similarity threshold (normally not recommended!)
-dtm2 = delete.duplicates(dtm, similarity = 0.5, keep='first', tf.idf = TRUE)
+dtm2 = delete.duplicates(rnewsflow_dfm, similarity = 0.5, keep='first', tf.idf = TRUE)
 }

@@ -7,9 +7,11 @@ output:
   rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to RNewsflow}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, include=FALSE}
@@ -27,12 +29,10 @@ library(knitr)
 # Introduction
 
 The news diffusion process in the digital age involves many interdependent sources, ranging from news agencies and traditional newspapers to blogs and people on social media [@meraz11; @paterson05; @pew10].
-We offer the `RNewsflow` R package[^reviewernote] as a toolkit to analyze the homogeneity and diffusion of news content using computational text analysis.
+We offer the `RNewsflow` R package as a toolkit to analyze the homogeneity and diffusion of news content using computational text analysis.
 This analysis consists of two steps.
 First, techniques from the field of information retrieval are used to measure the similarity of news messages (e.g., addressing the same event, containing identical phrases).
 Second, the temporal order in which messages are published is used to analyze consistent patterns in who follows whom.
-
-[^reviewernote]: R is an open-source statistical software package (https://www.r-project.org/).
 
 The main contribution of this package lies in the specialized application of document similarity measures for the purpose of comparing news messages.
 News is a special type of information in the sense that it has a time dimension---it quickly loses its relevance.
@@ -76,22 +76,24 @@ A DTM is a matrix in which rows represent documents, columns represent terms, an
 This is referred to as a *bag of words* representation of texts, since we ignore the order of words. 
 This simplified representation makes analysis much easier and less computationally demanding, and as research has shown: ``a simple list of words, which we call unigrams, is often sufficient to convey the general meaning of a text'' [@grimmer13: 6].
 
-As input for this package, the DTM has to be in the `DocumentTermMarix` class of the  `tm` package [@feinerer08].
-This is a popular R package for text mining, or computational text analysis, which also contains functions to create a DTM based on raw text in various formats.
-We also recommend the `RTextTools` package [@jurka13], which has the `create_matrix` function that wraps various `tm` functions for creating a DTM into a single convenient function.
-For example, see the following DTM, created with the `create_matrix` function.
-
+As input for this package, the DTM can either be in the `dfm` class of the `quanteda` package [@quanteda] or in the `DocumentTermMarix` class of the  `tm` package [@feinerer08].
+We recommend using `quanteda`, because the `dfm` class can contain the document meta data (called `docvars` in `quanteda`), and is generally more efficient and versatile.
+For detailed instructions you can visit the [quanteda website](https://quanteda.io/).
+Here we will demonstrate one of the easiest ways to create a DTM with the meta data included, based on a data.frame.
+We first create a corpus with the `corpus` function, and then process this corpus into a DTM with the `dfm` function.
 
 ```{r, message=FALSE, warning=FALSE, echo=TRUE}
-doc1 = 'Socrates is human'
-doc2 = 'Humans are mortal'
-doc3 = 'Therefore, Socrates is mortal'
-dtm = RTextTools::create_matrix(
-  textColumns = c(doc1,doc2,doc3), 
-  minWordLength = 1, removeStopwords = FALSE)
+library(quanteda)
+d = data.frame(id = c(1,2,3),
+               text = c('Socrates is human', 'Humans are mortal', 'Therefore, Socrates is mortal'),
+               author = c('Aristotle','Aristotle','Aristotle'),
+               stringsAsFactors = F)
 
-rownames(dtm) = paste('Document', 1:nrow(dtm))
-as.matrix(dtm)
+corp = corpus(d, docid_field = 'id', text_field='text')
+dtm = dfm(corp)
+
+dtm
+docvars(dtm)
 ```
 
 Based on the representation of texts in the DTM, the similarity of documents can be calculated as the similarity of row vectors.
@@ -99,16 +101,16 @@ However, as seen in the example, this approach has certain pitfalls if we simply
 For instance, the words "human" and "humans" are given separate columns, despite having largely the same meaning.
 As a result, this similarity of the first two texts is not recognized.
 Also, the words "are", and "is" do not have any substantial meaning, so they are not informative and can be misleading for the calculation of document similarity.
-There are various techniques to filter and transform words that can be used to mend these issues.
+There are various `preprocessing` techniques to filter and transform words that can be used to mend these issues.
 In addition, we can use these techniques to steer on what grounds documents are compared.
 
-* First of all, it is advisable to make all terms lowercase, and reduce terms to their root using stemming or lemmatizing[^lemma].
+* First of all, it is advisable to make all terms lowercase, and reduce terms to their root using stemming or lemmatization[^lemma].
 Thus, "Hope", "hoped", "hoping", etc. all become "hope".
-This is because we are interested in the meaning of these terms, and not the specific form in which they are used. 
+This is because we are (often) interested in the meaning of these terms, and not the specific form in which they are used. 
 
 * Second, one should filter out irrelevant words.
 Very common words, stopwords and boilerplate words contain little or no relevant information about news items.
-Very rare terms, while ignored in many computational text analysis approaches, are particularly informative for our current purpose, and should be kept.
+Very rare terms, while ignored in many computational text analysis approaches, can be particularly informative for comparing news items, and should probably be kept.
 
 * Third, it is also possible to specifically select or filter out only certain types of words by using part-of-speech tagging[^pos].
 For instance, to compare whether documents address the same event one can focus on nouns and proper names.
@@ -122,13 +124,12 @@ Without going into specifics, lemmatization is a much more computationally deman
 
 [^pos]: Part-of-speech tagging is a technique that identifies types of words, such as verbs, nouns and adjectives.
 
-All mentioned techniques except for lemmatization and part-of-speech tagging are available in the `tm` package and in the `create_matrix` function of the `RTextTools` package.
-To use lemmatization or part-of-speech tagging there are several free to use grammar parsers, such as *CoreNLP* for English [@corenlp] and *Frog* for Dutch [@bosch07][^external].
-
-[^external]: To create a DTM based on externally pre-processed documents, one can use the base function `xtabs` to create a sparse matrix and the `as.DocumentTermMatrix` function from the `tm` package to transform this matrix to the `DocumentTermMatrix` class.
-
+All mentioned preprocessing techniques except for lemmatization and part-of-speech tagging can be used in quanteda (as arguments in the `dfm` function).
+To use lemmatization or part-of-speech tagging there are several free to use grammar parsers, such as *CoreNLP* for English [@corenlp] and *Frog* for Dutch [@bosch07].
+For more information about preprocessing, please consult [@welbers17].
+ 
 For this vignette, data is used that has been preprocessed with the Dutch grammar parser Frog. 
-The data is based on a recent study on the influence of a Dutch news agency on the print and online editions of Dutch newspapers in political news coverage (Author citation, forthcoming).
+The data is based on a recent study on the influence of a Dutch news agency on the print and online editions of Dutch newspapers in political news coverage [@welbers18].
 The terms have been lemmatized, and only the nouns and proper names of the headline and first five sentences (that generally contain the essential who, what and where of news) are used.
 By focusing on these elements, the analysis in this study focused on whether documents address the same events.
 This data is also made available in the package as demo data, in which the actual nouns and proper names have been substituted with indexed word types (e.g., the third organization in the vocabulary is referred to as organization.3, the 20th noun as noun.20).
@@ -136,25 +137,16 @@ This data is also made available in the package as demo data, in which the actua
 ```{r, message=FALSE, warning=FALSE, echo=TRUE}
 library(RNewsflow)
 
-data(dtm)
-as.matrix(dtm[1:3,1:5])
+dtm = rnewsflow_dfm ## copy the demo data
+dtm
 ```
 
-## Organizing document meta information
-
-In addition to the DTM, we need meta information for each document.
-This should be structured as a data frame with at least two columns.
-The first column contains the document names, and should match with the rownames (i.e. document names) of the DTM.
-The second column contains the publication date of the document, which should be in the `Date` or `POSIXct` class.
-For easy compatibility with the functions offered in this package, it is recommended to label these columns "document_id" and "date".
-Any additional columns in the meta data.frame can be used in the analysis to aggregate and visualize results.
-Here it is recommended to have at least a column containing the source of the document, labeled "source".[^defaults]
-
-[^defaults]: "document_id", "date" and "source" are the default labels used in several functions to interpret the meta information. Note that these defaults can always be changed using the function parameters. Using the default labels only serves as a convenience.
+To compare news across media and over time, it is necessary to have meta data about the date of a document, and convenient to have meta data about the source of a document.
+In the demo data, this is included as the `docvars` of the `dfm`. 
+Note that if the `DocumentTermClass` class of the `tm` package is used, the meta data has to be managed manually, as a data.frame in which the rows (i.e. documents) match the rows (i.e. documents) in the DTM.
 
 ```{r}
-data(meta)
-head(meta,3)
+head(docvars(dtm), 3)
 ```
 
 ## Using word statistics to filter and weight the DTM
@@ -162,11 +154,11 @@ head(meta,3)
 As a final step in the data preparation, we can filter and weight words based on word statistics, such as how often a word occured.
 Since we are analyzing news diffusion, a particularly interesting characteristic of words is the distribution of their use over time.
 To focus the comparison of documents on words that indicate new events, we can filter out words that are evenly used over time.
-To calculate this, we offer the `term.day.dist` function. 
+To calculate this, we provide the `term.day.dist` function. 
 
 ```{r}
-tdd = term.day.dist(dtm, meta)
-tdd[sample(1:nrow(tdd), 4),] # show 4 random rows
+tdd = term.day.dist(dtm)
+tail(tdd, 3)
 ```
 
 Of particular interest is the `days.entropy` score, which is the entropy of the distribution of words over days.
@@ -186,10 +178,10 @@ In addition to deleting terms, we should also weight terms.
 Turney explains that ''The idea of weighting is to give more weight to surprising events and less weight to expected events'', which is important because ''surprising events, if shared by two vectors, are more discriminative of the similarity between the vectors than less surprising events'' [@turney02: 156]. 
 Thus, we want to give more weight to rare words than common words.
 A classic weighting scheme and recommended standard in information retrieval is the term-frequency inverse document frequency (tf.idf) [@sparck72,@monroe08].
-This and other weighting schemes can easily be applied using the `tm` package, for instance using the `weightTfIdf` function.
+This and other weighting schemes can easily be applied using the `quanteda` package, for instance using the `dfm_tfidf` function.
 
 ```{r}
-dtm = weightTfIdf(dtm)
+dtm = quanteda::dfm_tfidf(dtm)
 ```
 
 # Calculating document similarities
@@ -209,16 +201,14 @@ This is a commonly used measure, which indicates similarity as a score between 0
 The `min.similarity` parameter is used to ignore all document pairs below a certain similarity score.
 In the current example we use a minimum similarity of 0.4, because a validity test in the paper from which the current data is taken found this to be a good threshold for finding documents that address the same events.
 Whether or not a threshold should be used and what the value should be depends on the goal of the analysis and the data.
-We recommend a manual validation to verify that the similarity threshold matches human interpretation of whether or not two documents are similar, given a pre-defined interpretation of similarity (e.g., same event, same theme). 
+We recommend manual validation to verify that the similarity threshold matches human interpretation of whether or not two documents are similar, given a pre-defined interpretation of similarity (e.g., same event, same theme). 
 
 [^alternativemeasure]: Alternatively, the current version also supports *percentage.from* and *percentage.to*, which are measures giving the percentage of overlapping term occurences. This is an asymmetrical measures: the overlap percentage of document 1 to document 2 can be different from the overlap percentage of document 2 to document 1. Therefore, *from* and *to* indicate whether the percentage is based on the document *from* which we compare or the article *to* which we compare. When using an asymmetrical measure, the direction should be carefully taken into account in the analysis.
 
 [^cosine_exception]: If the DTM contains negative values, the cosine similarity score can range from -1 to 1. Note that for the other similarity measures there can be no negative values in the DTM. 
 
 ```{r results='hide', message=FALSE, warning=FALSE}
-g = newsflow.compare(dtm, meta,
-                             hour.window = c(0,36), 
-                             min.similarity = 0.4)
+g = newsflow.compare(dtm, hour.window = c(0,36), min.similarity = 0.4)
 ```
 
 The output `g` is a network, or graph, in the format of the `igraph` package [@csardi06}.
@@ -319,7 +309,7 @@ To visualize these components, we offer the `document.network.plot` function.
 This function draws a network where nodes (i.e. documents) are positioned based on their date (x-axis) and source (y-axis).
 
 ```{r, fig.width = 7, fig.height = 3}
-gs = g_subcomps[[2]] # select the second sub-component
+gs = g_subcomps[[55]] # select the second sub-component
 document.network.plot(gs)
 ```
 
@@ -502,7 +492,7 @@ By enabling both the document comparison and analysis to be performed within R, 
 
 The data input required for this analysis consists solely of textual documents and their corresponding publication date and source.
 Since no human coding is required, the package enables large scale comparative and longitudinal studies.
-Although the demonstration in this vignette used a moderate sized dataset, the `document.window.compare` can handle much larger data and is fast, thanks to the excellent sparse matrix multiplication alghoritm of the `Matrix` package.
+Although the demonstration in this vignette used a moderate sized dataset, the `newsflow.compare` function can handle much larger data and is fast, thanks to a dedicated Rcpp (c++) implementation of sparse matrix multiplication for comparing documents within the given date window.
 
 The validity of the method presented here relies on various factors; most importantly the type of data, the pre-processing and DTM preparation steps and the similarity threshold.
 It is thus recommended to use a gold standard, based on human interpretation, to test its validity. 
@@ -528,18 +518,18 @@ The source code is hosted on GitHub---https://github.com/kasperwelbers/RNewsflow
 
 ```{r eval=FALSE}
 library(RNewsflow)
+library(quanteda)
 
-# Prepare DTM and meta data
-data(dtm)
-data(meta)
+# Prepare DTM
+dtm = rnewsflow_dfm  ## copy demo data
 
-tdd = term.day.dist(dtm, meta)
+tdd = term.day.dist(dtm)
 dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.3]]
 
-dtm = weightTfIdf(dtm)
+dtm = dfm_tfidf(dtm)
 
 # Prepare document similarity network
-g = newsflow.compare(dtm, meta, hour.window = c(0.1,36), 
+g = newsflow.compare(dtm, hour.window = c(-0.1,60), 
                      min.similarity = 0.4)
 g = filter.window(g, hour.window = c(6, 36), 
                   to.vertices = V(g)$sourcetype == 'Print NP')
@@ -549,7 +539,6 @@ show.window(g, to.attribute = 'source')
 g_subcomps = decompose.graph(g)
 document.network.plot(g_subcomps[[2]], dtm=dtm)
 
-# Aggregate network 
 g.agg = network.aggregate(g, by='source', 
                           edge.attribute='hourdiff', agg.FUN=median)
 

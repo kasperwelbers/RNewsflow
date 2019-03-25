@@ -6,7 +6,7 @@
 \title{quanteda dfm for RNewsflow vignette demo}
 \format{dfm}
 \usage{
-data(rnewsflow_dfm)
+rnewsflow_dfm
 }
 \description{
 quanteda dfm for RNewsflow vignette demo

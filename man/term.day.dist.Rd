@@ -28,9 +28,7 @@ A data.frame with statistics for each term.
 Calculate statistics for term occurence across days
 }
 \examples{
-data(dtm)
-
-tdd = term.day.dist(dtm, 'date')
+tdd = term.day.dist(rnewsflow_dfm, date.var='date')
 head(tdd)
 tail(tdd)
 }

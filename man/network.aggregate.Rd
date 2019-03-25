@@ -22,6 +22,8 @@ network.aggregate(g, by = NULL, by.from = by, by.to = by,
 \item{agg.FUN}{The function used to aggregate the edge attribute}
 
 \item{return.df}{Optional. If TRUE, the results are returned as a data.frame. This can in particular be convenient if by.from and by.to are used.}
+
+\item{keep_isolates}{if True, also return scores for isolates}
 }
 \value{
 A network/graph in the \link[igraph]{igraph} class, or a data.frame if return.df is TRUE.

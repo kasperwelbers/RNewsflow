@@ -4,11 +4,12 @@
 \alias{directed.network.plot}
 \title{A wrapper for \link[igraph]{plot.igraph} for visualizing directed networks.}
 \usage{
-directed.network.plot(g, weight.var = "from.Vprop", weight.thres = NULL,
-  delete.isolates = FALSE, vertex.size = 30, vertex.color = "lightblue",
-  vertex.label.color = "black", vertex.label.cex = 0.7,
-  edge.color = "grey", show.edge.labels = TRUE,
-  edge.label.color = "black", edge.label.cex = 0.6, edge.arrow.size = 1,
+directed.network.plot(g, weight.var = "from.Vprop",
+  weight.thres = NULL, delete.isolates = FALSE, vertex.size = 30,
+  vertex.color = "lightblue", vertex.label.color = "black",
+  vertex.label.cex = 0.7, edge.color = "grey",
+  show.edge.labels = TRUE, edge.label.color = "black",
+  edge.label.cex = 0.6, edge.arrow.size = 1,
   layout = igraph::layout.davidson.harel, ...)
 }
 \arguments{

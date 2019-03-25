@@ -1,8 +1,8 @@
 testthat::context('Calculating similarities')
 
 is_same <- function(m1,m2){
-  testthat::expect_true(identical(as(as(m1, 'dgTMatrix'), 'dgCMatrix'),
-                                  as(as(m2, 'dgTMatrix'), 'dgCMatrix')))
+  testthat::expect_true(identical(methods::as(methods::as(m1, 'dgTMatrix'), 'dgCMatrix'),
+                                  methods::as(methods::as(m2, 'dgTMatrix'), 'dgCMatrix')))
 }
 
 is_same_m1nonzero <- function(m1,m2) {
@@ -12,13 +12,18 @@ is_same_m1nonzero <- function(m1,m2) {
   is_same(m1,m2)
 }
 
-
 test_that("Matrix multiplication", {
   library(RNewsflow)
   set.seed(1)
-  m = Matrix::rsparsematrix(5,10,0.5)
-
-  cp = tcrossprod_sparse(m, min_value = NULL, l2norm = F)
+  m = Matrix::rsparsematrix(10,10,0.5)
+  
+  #tcrossprod_sparse(abs(m), min_value = NULL, crossfun='softprod', verbose=T)
+  #tcrossprod_sparse(abs(m), min_value = NULL, normalize='softl2', crossfun='softprod', verbose=T)
+  #tcrossprod_sparse(abs(m), min_value = NULL, normalize='l2', crossfun='prod', verbose=T)
+  
+  m = Matrix::rsparsematrix(10,10,0.5)
+  
+  cp = tcrossprod_sparse(m, min_value = NULL)
   cp_correct = Matrix::tcrossprod(m)
   is_same(cp,cp_correct)
   
@@ -26,6 +31,11 @@ test_that("Matrix multiplication", {
   tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F)
   tcrossprod_sparse(m, min_value = 0.2, only_upper = T, diag = F)
   tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F, top_n = 1)
+  
+  ## use min_value vector
+  set.seed(2)
+  m = Matrix::rsparsematrix(10,5,0.5)
+  tcrossprod_sparse(m, min_value = c(-1,10,10,0,0,0,1,1,0,0), only_upper = T, diag = F)
   
   ## heavy lifting
   #m = abs(Matrix::rsparsematrix(1000000,20000,0.001))
@@ -74,10 +84,10 @@ test_that("Matrix multiplication", {
   
   ## cosine (using l2 Norm parameter)
   m = abs(Matrix::rsparsematrix(10,10,0.5))
-  cp = tcrossprod_sparse(m, l2norm=T)
+  cp = tcrossprod_sparse(m, normalize='l2')
   
   mnorm = sqrt(Matrix::rowSums(m^2))
-  m2 = as(m, 'dgTMatrix')
+  m2 = methods::as(m, 'dgTMatrix')
   m2@x = m2@x / mnorm[m2@i+1]  
   cp_correct = Matrix::tcrossprod(m2)
   

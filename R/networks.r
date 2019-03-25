@@ -14,7 +14,7 @@
 #' The date column should be intepretable with \link[base]{as.POSIXct}, and its label is specified in the `date.var` argument.            
 #' @param id.var The label for the document name/id column in the `meta` data.frame. Default is "document_id"
 #' @param date.var The label for the document date column in the `meta` data.frame . default is "date"
-#' @param min.similarity For convenience, ignore all edges where the weight is below `min.similarity`. Default is zero.
+#' @param min.similarity For convenience, ignore all edges where the weight is below `min.similarity`. 
 #'
 #' @return A network/graph in the \link[igraph]{igraph} class
 #' @export
@@ -33,26 +33,30 @@
 #' 
 #' igraph::get.data.frame(g, 'both')
 #' igraph::plot.igraph(g)
-document.network <- function(d, meta, id.var='document_id', date.var='date', min.similarity=0){
+document.network <- function(d, meta, id.var='document_id', date.var='date', min.similarity=NA){
   if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a column in meta')
   if (!id.var %in% colnames(meta)) stop('The name specified in id.var is not a column in meta')
   
   if (nrow(d) == 0) d = data.frame(x=numeric(), y=numeric(), similarity=numeric())
   
   colnames(d) = c('x','y','similarity')
-  d = d[d$similarity >= min.similarity, c('x','y','similarity')]
-  d = d[order(-d$similarity),]
+  
+  if (!is.na(min.similarity)) d = d[d$similarity >= min.similarity, c('x','y','similarity')]
+  if (is.data.table(d)) {
+    d = data.table::setorderv(d, cols='similarity', order = -1)
+  } else {
+    d = d[order(-d$similarity),]
+  }
 
   g = igraph::graph.data.frame(d[,c('x','y')])
   igraph::E(g)$weight = d$similarity
-  
   if (nrow(d) > 0)
     if (!all(igraph::V(g)$name %in% meta[[id.var]])) stop("Not all documents in d match with an 'id' in the meta information")
   
   ## add documents in meta data.frame that do not appear in the edgelist (in other words, isolates)
   missingmeta = as.character(meta[!meta[,id.var] %in% igraph::V(g)$name, id.var])
   g = igraph::add.vertices(g, nv = length(missingmeta), attr = list(name=missingmeta))
-
+  
   meta = meta[match(igraph::V(g)$name, meta[,id.var]),]
   attribs = colnames(meta)[!colnames(meta) == id.var]
   for(attrib in attribs){
@@ -61,8 +65,9 @@ document.network <- function(d, meta, id.var='document_id', date.var='date', min
   
   edgelist = igraph::get.edges(g, igraph::E(g))
   dates = as.POSIXct(igraph::V(g)$date) 
-  igraph::E(g)$hourdiff = round(difftime(dates[edgelist[,2]], dates[edgelist[,1]], units = 'hours'),3)
-  
+  #igraph::E(g)$hourdiff = round(difftime(dates[edgelist[,2]], dates[edgelist[,1]], units = 'hours'),3)
+  dates = as.numeric(dates)
+  igraph::E(g)$hourdiff = round((dates[edgelist[,2]] - dates[edgelist[,1]]) / (60*60), 3)
   g
 }
 
@@ -85,8 +90,8 @@ document.network <- function(d, meta, id.var='document_id', date.var='date', min
 #' @export
 #'
 #' @examples
-#' data(docnet)
-#' data(dtm)
+#' docnet = docnet
+#' dtm = rnewsflow_dfm
 #' 
 #' docnet_comps = igraph::decompose.graph(docnet) # get subcomponents
 #' 
@@ -113,8 +118,9 @@ document.network.plot <- function(g, date.attribute='date', source.attribute='so
   cluster = igraph::delete.vertices(cluster, which(!igraph::V(cluster)$source %in% sources))
   
   if(!is.null(dtm)){
+    dtm = quanteda::as.dfm(dtm)
     graphics::layout(matrix(c(1, 1, 2, 2), 2, 2, byrow = TRUE), widths = c(1.5, 2.5), heights = c(1, 2))  
-    topwords = slam::col_sums(dtm[rownames(dtm) %in% igraph::V(cluster)$name,])
+    topwords = Matrix::colSums(dtm[rownames(dtm) %in% igraph::V(cluster)$name,])
     topwords = topwords[topwords > 0, drop=FALSE]
     topwords = head(topwords[order(-topwords)], 10)
     graphics::par(mar = c(0,0,0,0))
@@ -337,6 +343,7 @@ only.first.match <- function(g){
 #' @param edge.attribute Select an edge attribute to aggregate using the function specified in `agg.FUN`. Defaults to 'weight'
 #' @param agg.FUN The function used to aggregate the edge attribute
 #' @param return.df Optional. If TRUE, the results are returned as a data.frame. This can in particular be convenient if by.from and by.to are used.
+#' @param keep_isolates if True, also return scores for isolates
 #'
 #' @return A network/graph in the \link[igraph]{igraph} class, or a data.frame if return.df is TRUE.
 #' @export

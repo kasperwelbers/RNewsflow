@@ -1,8 +1,8 @@
 Package: RNewsflow
 Type: Package
 Title: Tools for Analyzing Content Homogeneity and News Diffusion using Computational Text Analysis
-Version: 1.0
-Date: 2016-02-14
+Version: 1.1.0
+Date: 2019-03-23
 Author: Kasper Welbers & Wouter van Atteveldt
 Maintainer: Kasper Welbers <kasperwelbers@gmail.com>
 Description: A collection of tools for measuring the similarity of news content and tracing the flow of (news) messages over
@@ -12,22 +12,22 @@ Depends:
     R (>= 3.2.0), 
     igraph,
     tm,
-    Matrix (>= 1.2),
-    RcppProgress (>= 0.1)
+    Matrix (>= 1.2)
 Imports: 
-    plyr,
     slam,
+    stringi,
     scales,
     wordcloud,
     data.table,
     methods,
+    quanteda,
     Rcpp (>= 0.12.12),
-    RcppEigen (>= 0.3.3.4.0)
+    RcppEigen (>= 0.3.3.4.0),
+    RcppProgress (>= 0.1)
 LinkingTo: Rcpp, RcppEigen, RcppProgress
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests: 
     knitr,
-    rmarkdown,
-    RTextTools
+    rmarkdown
 VignetteBuilder: knitr

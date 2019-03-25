@@ -8,7 +8,7 @@
 using namespace Rcpp;
 
 std::vector<double> get_row_l2(Eigen::SparseMatrix<double>& m);
-std::vector<double> softcos_row_mag(const Eigen::SparseMatrix<double>& m1, NumericMatrix& simmat);
+std::vector<double> softcos_row_mag(const Eigen::SparseMatrix<double>& m, const Eigen::SparseMatrix<double>& simmat, bool verbose);
   
   
 bool search_group_l ( const std::tuple<double,double,int>& vec, const double& val) ;
@@ -53,8 +53,10 @@ std::vector<std::pair<T,int> > index_and_sort_top_n(std::vector<T>& x, int top_n
   return(xi);
 }
 
+std::vector<double> batch_softcos_mag_prepare(const Eigen::SparseMatrix<double>& m2_batch, const Eigen::SparseMatrix<double>& batch_simmat);
+Eigen::SparseMatrix<double> batch_simmat_prepare(Eigen::SparseMatrix<double>& m2_batch, const Eigen::SparseMatrix<double>& simmat);
 
-Eigen::SparseMatrix<double> sm_prepare(Eigen::SparseMatrix<double>& m, std::vector<std::tuple<double,double,int> > index, bool transpose, bool l2norm);
+Eigen::SparseMatrix<double> sm_prepare(Eigen::SparseMatrix<double>& m, std::vector<std::tuple<double,double,int> > index, const Eigen::SparseMatrix<double>& simmat, bool transpose, std::string normalize);
 
 std::vector<std::tuple<double,double,int> > create_index(Rcpp::IntegerVector group, 
                                                          Rcpp::NumericVector order);
