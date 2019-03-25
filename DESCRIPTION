@@ -1,11 +1,11 @@
 Package: RNewsflow
 Type: Package
-Title: Tools for Analyzing Content Homogeneity and News Diffusion using Computational Text Analysis
+Title: Tools for Comparing Text Messages Across Time and Media
 Version: 1.1.0
-Date: 2019-03-23
+Date: 2019-03-25
 Author: Kasper Welbers & Wouter van Atteveldt
 Maintainer: Kasper Welbers <kasperwelbers@gmail.com>
-Description: A collection of tools for measuring the similarity of news content and tracing the flow of (news) messages over
+Description: A collection of tools for measuring the similarity of text messages and tracing the flow of messages over
     time and across media. 
 License: MIT + file LICENSE
 Depends: 
@@ -21,11 +21,10 @@ Imports:
     data.table,
     methods,
     quanteda,
-    Rcpp (>= 0.12.12),
-    RcppEigen (>= 0.3.3.4.0),
-    RcppProgress (>= 0.1)
+    Rcpp (>= 0.12.12)
 LinkingTo: Rcpp, RcppEigen, RcppProgress
 LazyData: true
+SystemRequirements: C++11
 RoxygenNote: 6.1.0
 Suggests: 
     knitr,

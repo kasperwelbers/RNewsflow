@@ -7,23 +7,6 @@
 
 using namespace Rcpp;
 
-// autoquery
-List autoquery(SpMat& m1, SpMat& m2, NumericVector order1, NumericVector order2, int lwindow_start, int lwindow_end, double max_prob);
-RcppExport SEXP _RNewsflow_autoquery(SEXP m1SEXP, SEXP m2SEXP, SEXP order1SEXP, SEXP order2SEXP, SEXP lwindow_startSEXP, SEXP lwindow_endSEXP, SEXP max_probSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SpMat& >::type m1(m1SEXP);
-    Rcpp::traits::input_parameter< SpMat& >::type m2(m2SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type order1(order1SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type order2(order2SEXP);
-    Rcpp::traits::input_parameter< int >::type lwindow_start(lwindow_startSEXP);
-    Rcpp::traits::input_parameter< int >::type lwindow_end(lwindow_endSEXP);
-    Rcpp::traits::input_parameter< double >::type max_prob(max_probSEXP);
-    rcpp_result_gen = Rcpp::wrap(autoquery(m1, m2, order1, order2, lwindow_start, lwindow_end, max_prob));
-    return rcpp_result_gen;
-END_RCPP
-}
 // term_union_cpp
 List term_union_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms, std::vector<bool> parentheses, bool verbose);
 RcppExport SEXP _RNewsflow_term_union_cpp(SEXP mSEXP, SEXP simmatSEXP, SEXP termsSEXP, SEXP parenthesesSEXP, SEXP verboseSEXP) {
@@ -85,20 +68,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// findit
-void findit(std::vector<double> x, double start, double end, double v1, double v2);
-RcppExport SEXP _RNewsflow_findit(SEXP xSEXP, SEXP startSEXP, SEXP endSEXP, SEXP v1SEXP, SEXP v2SEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<double> >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type start(startSEXP);
-    Rcpp::traits::input_parameter< double >::type end(endSEXP);
-    Rcpp::traits::input_parameter< double >::type v1(v1SEXP);
-    Rcpp::traits::input_parameter< double >::type v2(v2SEXP);
-    findit(x, start, end, v1, v2);
-    return R_NilValue;
-END_RCPP
-}
 // window_corp_comp
 SpMat window_corp_comp(SpMat& m1, SpMat& m2, NumericVector order1, NumericVector order2, int lwindow, int rwindow, double min_chi, double min_ratio, double smooth);
 RcppExport SEXP _RNewsflow_window_corp_comp(SEXP m1SEXP, SEXP m2SEXP, SEXP order1SEXP, SEXP order2SEXP, SEXP lwindowSEXP, SEXP rwindowSEXP, SEXP min_chiSEXP, SEXP min_ratioSEXP, SEXP smoothSEXP) {
@@ -120,11 +89,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_RNewsflow_autoquery", (DL_FUNC) &_RNewsflow_autoquery, 7},
     {"_RNewsflow_term_union_cpp", (DL_FUNC) &_RNewsflow_term_union_cpp, 5},
     {"_RNewsflow_term_intersect_cpp", (DL_FUNC) &_RNewsflow_term_intersect_cpp, 5},
     {"_RNewsflow_batched_tcrossprod_cpp", (DL_FUNC) &_RNewsflow_batched_tcrossprod_cpp, 21},
-    {"_RNewsflow_findit", (DL_FUNC) &_RNewsflow_findit, 5},
     {"_RNewsflow_window_corp_comp", (DL_FUNC) &_RNewsflow_window_corp_comp, 9},
     {NULL, NULL, 0}
 };
