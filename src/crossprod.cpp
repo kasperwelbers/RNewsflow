@@ -63,14 +63,13 @@ std::vector<bool> create_use_pair(int i, int offset, Index& index1, Index& index
   return(use_pair);
 }
 
-
 // [[Rcpp::export]]
 SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2, 
                              IntegerVector group1, IntegerVector group2, 
                              NumericVector order1, NumericVector order2,
                              const SpMat& simmat,
                              bool use_min=true, NumericVector min_value=0, bool use_max=false, NumericVector max_value=1, int top_n=0, bool diag=true, bool only_upper=false, 
-                             bool rowsum_div=false, std::string normalize="none", std::string crossfun="prod",
+                             bool rowsum_div=false, bool zscore=false, std::string normalize="none", std::string crossfun="prod",
                              int lwindow=0, int rwindow=0,
                              bool verbose=false, int batchsize = 1000) {
   if (m1.cols() != m2.cols()) stop("m1 and m2 need to have the same number of columns");
@@ -93,7 +92,7 @@ SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
   if (rows != cols && only_upper) stop("using 'only_upper = true' is only possible if m1 and m2 have the same number of rows (so output is symmetric)");
   if (rows != cols && !diag) stop("using 'diag = false' is only possible if m1 and m2 have the same number of rows (so output is symmetric)");
   
-  if (crossfun != "prod" && crossfun != "min" && crossfun != "softprod") stop("Not a valid crossfun (currently supports prod, min and softcos)");
+  if (crossfun != "prod" && crossfun != "min" && crossfun != "softprod" && crossfun != "maxproduct") stop("Not a valid crossfun (currently supports prod, min, softcos and maxproduct)");
   if (normalize != "none" && normalize != "l2" && normalize != "softl2") stop("Not a valid normalize function (currently supports none, l2 and softl2)");
   
   Triplet tl;
@@ -152,10 +151,12 @@ SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
     
     // CROSSPROD (fills res by reference)
     if (crossfun == "prod") sim_product(i, m1, m2_batch, res, use_pair);
+    if (crossfun == "maxproduct") sim_maxproduct(i, m1, m2_batch, res, use_pair);      
     if (crossfun == "min") sim_min(i, m1, m2_batch, res, use_pair);
     if (crossfun == "softprod") sim_softprod(i, m1, m2_batch, res, use_pair, batch_simmat);      
     
     if (rowsum_div) as_pct(i, m1, res); 
+    if (zscore) as_pnorm(res, false);
       
     // SAVE VALUES WITH CORRECT POSITIONS (using offset and index)
     fill_triples(tl, res, index1, index2, offset, i, use_min, min_value, use_max, max_value, top_n);

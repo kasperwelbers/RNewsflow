@@ -4,7 +4,7 @@
 \alias{term_union}
 \title{Combine terms in a dtm}
 \usage{
-term_union(dtm, simmat, as_dfm = T, verbose = T)
+term_union(dtm, simmat, as_dfm = T, verbose = F)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm} or a dgCMatrix.}

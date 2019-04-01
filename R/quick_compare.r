@@ -25,7 +25,6 @@ match_texts <- function(x, y, date.var='date', date.var.x=date.var, date.var.y=d
     dfm_args = mb[-(1:2)]
 
     if (!identical(d[-2], mb[[i]][-2])) {
-      print('preapre')
       text = y[[mb[[i]]$y_text]]
       dfm_y = do.call(quanteda::dfm, args = c(list(x=as.character(text)), dfm_args))
     }

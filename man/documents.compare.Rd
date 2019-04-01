@@ -5,19 +5,25 @@
 \title{Compare the documents in two corpora/dtms}
 \usage{
 documents.compare(dtm, dtm.y = NULL, measure = c("cosine",
-  "overlap_pct", "overlap", "softcosine"), min.similarity = 0,
-  n.topsim = NULL, simmat = NULL, simmat_thres = NULL)
+  "overlap_pct", "overlap", "crossprod", "softcosine", "query_lookup",
+  "query_lookup_pct"), min.similarity = 0, n.topsim = NULL,
+  zscore = F, simmat = NULL, simmat_thres = NULL)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used.}
 
 \item{dtm.y}{Optional. If given, documents from dtm will only be compared to the documents in dtm.y}
 
-\item{measure}{the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental)}
+\item{measure}{the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document 
+that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental).
+The regular crossprod (inner product) is also supported.
+If the dtm's are prepared with the create_queries function, the special "query_lookup" and "query_lookup_pct" can be used.}
 
 \item{min.similarity}{a threshold for similarity. lower values are deleted. Set to 0 by default.}
 
 \item{n.topsim}{An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.}
+
+\item{zscore}{if true, transform the similarity scores for each document in dtm to z-scores. The min.similarity filter  will then apply to this value.}
 
 \item{simmat}{If softcosine is used, a symmetrical matrix with the similarity scores of terms. If NULL, the cosine similarity of terms in dtm will be used}
 

@@ -9,7 +9,13 @@ using namespace Rcpp;
 
 void as_pct(int, const Eigen::SparseMatrix<double>&, std::vector<double>& res);
 
+void as_pnorm(std::vector<double>& res, bool log_trans);
+
+
 void sim_product(int, const Eigen::SparseMatrix<double>&, const Eigen::SparseMatrix<double>&,
+                 std::vector<double>&, std::vector<bool>&);
+
+void sim_maxproduct(int, const Eigen::SparseMatrix<double>&, const Eigen::SparseMatrix<double>&,
                  std::vector<double>&, std::vector<bool>&);
 
 void sim_min(int, const Eigen::SparseMatrix<double>& m1, const Eigen::SparseMatrix<double>& m2,

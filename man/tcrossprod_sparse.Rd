@@ -6,11 +6,12 @@
 \usage{
 tcrossprod_sparse(m, m2 = NULL, min_value = NULL, max_value = NULL,
   only_upper = F, diag = T, top_n = NULL, rowsum_div = F,
-  normalize = c("none", "l2", "softl2"), crossfun = c("prod", "min",
-  "softprod"), group = NULL, group2 = NULL, date = NULL,
-  date2 = NULL, lwindow = -1, rwindow = 1, date_unit = c("days",
-  "hours", "minutes", "seconds"), simmat = NULL, simmat_thres = NULL,
-  batchsize = 1000, verbose = F)
+  zscore = F, normalize = c("none", "l2", "softl2"),
+  crossfun = c("prod", "min", "softprod", "maxproduct"), group = NULL,
+  group2 = NULL, date = NULL, date2 = NULL, lwindow = -1,
+  rwindow = 1, date_unit = c("days", "hours", "minutes", "seconds"),
+  simmat = NULL, simmat_thres = NULL, batchsize = 1000,
+  verbose = F)
 }
 \arguments{
 \item{m}{A dgCMatrix}
@@ -29,9 +30,16 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, max_value = NULL,
 
 \item{rowsum_div}{if true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering)}
 
+\item{zscore}{if true, transform the similarity scores for each row in m to z-scores. The min_value and max_value filters will in that case apply to the zscore value.}
+
 \item{normalize}{normalize rows by a given norm score. Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine)}
 
-\item{crossfun}{The function used in the vector operations. Normally this is the "prod", for product (dot product). Here we also allow (currently only) the "min", for minimum value. We use this in our document overlap_pct score.}
+\item{crossfun}{The function used in the vector operations. 
+Normally this is the "prod", for product (dot product). 
+Here we also allow the "min", for minimum value. 
+We use this in our document overlap_pct score.
+In addition, there is the (experimental) softprod, that can be used in combination with softl2 normalization to get the soft cosine similarity.
+And, the "maxproduct" is a special case used in the query_lookup measure, that uses product but only returns the score of the strongest matching term.}
 
 \item{group}{Optionally, a character vector that specifies a group (e.g., source) for each row in m. If given, only pairs of rows with the same group are calculated.}
 
@@ -59,9 +67,14 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, max_value = NULL,
 A dgCMatrix
 }
 \description{
-tcrossprod with benefits. Enables filtering the results on the fly, to 
+tcrossprod with benefits. Enables limiting row combinations to within specified groups 
+and date windows, and filters results that do not pass the threshold on the fly.
 To achieve this, options for similarity measures are included in the function.
 For example, to get the cosine similarity, you can normalize with "l2" and use the "prod" (product) function for the
+}
+\details{
+This function is called by the document comparison functions (documents.compare, newsflow.compare, delete.duplicates).
+We only expose it here for additional flexibility, and because it could be usefull outside of the purpose of this package.
 }
 \examples{
 set.seed(1)

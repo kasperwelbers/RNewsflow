@@ -5,11 +5,7 @@ test_that("rnewsflow", {
   library(RNewsflow)
   library(quanteda)
   
-  data(dtm)
-  data(meta)
-  dtm = as.dfm(dtm)
-  docvars(dtm, 'date') = meta$date
-  class(docvars(dtm, 'date'))
+  dtm = rnewsflow_dfm
   
   test = newsflow.compare(dtm, date.var = 'date', min.similarity = 0.1)
   testthat::expect_equal(igraph::ecount(test), 50518)

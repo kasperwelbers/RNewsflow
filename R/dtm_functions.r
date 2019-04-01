@@ -7,16 +7,19 @@ dtmToSparseMatrix <- function(dtm){
 
 pad_dfm <- function(dfm, cnames) {
   ## not pretty, but quanteda:::pad_dfm is not exported
-  dv = quanteda::docvars(dfm)
+  is_dfm = methods::is(dfm, 'dfm')
+  if (is_dfm) dv = quanteda::docvars(dfm)
   rnames = rownames(dfm)
   dfm = methods::as(dfm, 'dgTMatrix')
   colindex = match(colnames(dfm), cnames)
   isna = is.na(colindex[dfm@j+1])
   out = Matrix::spMatrix(nrow(dfm), length(cnames), i=dfm@i[!isna]+1, j=colindex[dfm@j[!isna]+1], x = dfm@x[!isna])
-  out = quanteda::as.dfm(out)
+  out = methods::as(out, 'dgCMatrix')
+  if (is_dfm) out = quanteda::as.dfm(out)
   rownames(out) = rnames
   colnames(out) = cnames
-  if (nrow(dv) > 0) quanteda::docvars(out) = dv
+  if (is_dfm)
+    if (nrow(dv) > 0) quanteda::docvars(out) = dv
   out
 }
 
@@ -90,4 +93,13 @@ term.day.dist <- function(dtm, meta=NULL, date.var='date'){
   rownames(d) = NULL
   d
 }
+
+
+
+#x = rpois(100, 1)
+#mean = mean(x)
+#sd = sd(x)
+#ra = ( mean + sqrt( mean^2 + 4*sd^2 ) ) / ( 2 * sd^2 )
+#sh = 1 + mean * ra
+#plot(x, dgamma(x, sh, ra))
 

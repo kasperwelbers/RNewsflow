@@ -2,11 +2,12 @@
 % Please edit documentation in R/feature_preparation.r
 \name{create_queries}
 \alias{create_queries}
-\title{(experimental) Combine column in a document term matrix to get highly sparse, dichotomous features.}
+\title{(experimental) Automatically infer queries from combinations of terms in a dtm}
 \usage{
 create_queries(dtm, ref_dtm = NULL, min_docfreq = 2,
-  max_docprob = 0.001, weight = T, union_sim_thres = NA,
-  verbose = T, only_dtm_combs = T)
+  max_docprob = 0.001, weight = c("tfidf", "binary"),
+  min_obs_exp = NA, union_sim_thres = NA, verbose = F,
+  combine_all = T, only_dtm_combs = T)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}}
@@ -17,31 +18,41 @@ create_queries(dtm, ref_dtm = NULL, min_docfreq = 2,
 
 \item{max_docprob}{The maximum probability (document frequency / N) for terms or combinations of terms}
 
-\item{weight}{If true, weight the query dtm (if ref_dtm is used, uses the idf of the ref_dtm)}
+\item{weight}{Determine how to weight the queries (if ref_dtm is used, uses the idf of the ref_dtm). 
+Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting. "docprob" scores the query term as the probability that it occurs in a document in the lookup dtm (note that here rarer terms have a lower value).
+The ref_dfm will always be binary.}
+
+\item{min_obs_exp}{The minimum ratio of the observed and expected frequency of a term combination}
 
 \item{union_sim_thres}{If given, a number between 0 and 1, used as the cosine similarity threshold for combining clusters of terms}
 
 \item{verbose}{If true, report progress}
 
-\item{only_dtm_combs}{Only include term combinations that occur in dtm}
+\item{combine_all}{If True, combine all terms. If False (default), terms that are included as unigrams (i.e. that are within the min_docfreq and max_docprob) are not combined with other terms.}
+
+\item{only_dtm_combs}{Only include term combinations that occur in dtm. This makes sense if we are only interested in assymetric similarity measures based on the query}
 }
 \value{
 a list with a query dtm and lookup dtm.
 }
 \description{
-Creates queries
+Prepares query terms with high sparsity. Returns two matrices: a query and lookup dtm.
+Can either be used with one dtm as input (which becomes both the query and lookup dtm) or
+with a dtm and ref_dtm (reference), in which case dtm represents the queries and ref_dtm the lookup dtm.
 }
 \details{
+The query dtm will contain the weighted term scores of the queries,
+and the lookup dtm will contain binary values for whether or not terms occured.
+This is designed to be used with the document.compare or newsflow.compare functions to compare the query matrix to the lookup matrix,
+using the special 'query_lookup' similarity measure.
+
 Performs two operations. 
 First, clusters of very similar columns (high cosine similarity) can be merged into a single column.
 This is an OR (union) combination, meaning that if at least one column is nonzero, the value will be one.
 Second, all columns will be combined to get the co-occurences (AND, or intersect).
 
-The output dtm will have dichotomous features (the cluster of combination of clusters does or does not occur in the document).
-To keep the size manageable, a max_docprob is used to only keep features that occur in at most max_docprob*nrow(dtm) documents.
-
-If a ref_dtm is given, only the ref_dtm will be used to compute the new features.
-The output will contain both the dtm and ref_dtm transformed to contain only the new features
+To keep the vocabulary size manageable, only terms with at least min_docfreq (minimum document frequency) and max_docprob (max document probability) are returned.
+If a ref_dtm is given, the ref_dtm will be used to compute the docfreq and docprob values, used for filtering and weighting.
 }
 \examples{
  q = create_queries(rnewsflow_dfm, min_docfreq = 2, union_sim_thres = 0.9, 

@@ -37,3 +37,4 @@ matrix.autocor <- function(m, rows_lag=1){
   cors[is.na(cors)] = 0
   cors  
 }
+

@@ -17,9 +17,13 @@ reindexTerms <- function(dtm, terms){
 #' 
 #' @param dtm A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used.
 #' @param dtm.y Optional. If given, documents from dtm will only be compared to the documents in dtm.y
-#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental)
+#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document 
+#'                that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental).
+#'                The regular crossprod (inner product) is also supported.
+#'                If the dtm's are prepared with the create_queries function, the special "query_lookup" and "query_lookup_pct" can be used.
 #' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
+#' @param zscore if true, transform the similarity scores for each document in dtm to z-scores. The min.similarity filter  will then apply to this value.
 #' @param simmat If softcosine is used, a symmetrical matrix with the similarity scores of terms. If NULL, the cosine similarity of terms in dtm will be used
 #' @param simmat_thres If softosine is used, a threshold for the similarity scores of terms
 #' 
@@ -33,7 +37,7 @@ reindexTerms <- function(dtm, terms){
 #' 
 #' comp = documents.compare(rnewsflow_dfm, min.similarity=0.4)
 #' head(comp)
-documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct','overlap','softcosine'), min.similarity=0, n.topsim=NULL, simmat=NULL, simmat_thres=NULL) {  
+documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct'), min.similarity=0, n.topsim=NULL, zscore=F, simmat=NULL, simmat_thres=NULL) {  
   dtm = quanteda::as.dfm(dtm)
   measure = match.arg(measure)
 
@@ -52,11 +56,21 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct',
   if (!is.null(dtm.y)) dtm.y = methods::as(dtm.y, 'dgCMatrix')
   
   diag = !is.null(dtm.y)
-  if (measure == 'cosine') cp = tcrossprod_sparse(dtm, dtm.y, normalize='l2', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
-  if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
-  if (measure == 'overlap') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = F, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
-  if (measure == 'softcosine') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, normalize='softl2', crossfun = 'softprod', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
-  
+  if (measure == 'cosine') cp = tcrossprod_sparse(dtm, dtm.y, zscore=zscore, normalize='l2', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
+  if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, zscore=zscore, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
+  if (measure == 'overlap') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = F, zscore=zscore, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
+  if (measure == 'crossprod') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = F, zscore=zscore, crossfun = 'prod', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
+  if (measure == 'softcosine') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, zscore=zscore, normalize='softl2', crossfun = 'softprod', min_value = min.similarity, top_n = n.topsim, diag=diag, simmat=simmat, simmat_thres=simmat_thres)
+  if (measure == 'query_lookup') {
+    if (length(unique(dtm.y@x)) != 1) dtm.y = methods::as(dtm.y>0, 'dgCMatrix')
+    cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = F, zscore=zscore, crossfun = 'prod', min_value = min.similarity, top_n = n.topsim, diag=diag, 
+                           simmat=simmat, simmat_thres=simmat_thres)
+  }
+  if (measure == 'query_lookup_pct') {
+    if (length(unique(dtm.y@x)) != 1) dtm.y = methods::as(dtm.y>0, 'dgCMatrix')
+    cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, zscore=zscore, crossfun = 'prod', min_value = min.similarity, top_n = n.topsim, diag=diag, 
+                           simmat=simmat, simmat_thres=simmat_thres)
+  }
   cp = methods::as(cp, 'dgTMatrix')
   cp = data.frame(x=rownames(cp)[cp@i+1], y=colnames(cp)[cp@j+1], similarity=cp@x)
   cp[!as.character(cp$x) == as.character(cp$y),]
@@ -78,13 +92,17 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct',
 #' @param date.var The name of the column in meta that specifies the document date. default is "date". The values should be of type POSIXct
 #' @param hour.window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.
 #' @param group.var Optionally,  The name of the column in meta that specifies a group (e.g., source, sourcetype). If given, only documents within the same group will be compared.
-#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental)
+#' @param measure the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document 
+#'                that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental).
+#'                The regular crossprod (inner product) is also supported.
+#'                If the dtm's are prepared with the create_queries function, the special "query_lookup" and "query_lookup_pct" can be used.
 #' @param min.similarity a threshold for similarity. lower values are deleted. Set to 0.1 by default.
 #' @param n.topsim An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.
 #' @param only.from A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare only these documents to other documents. 
 #' @param only.to A vector with names/ids of documents (dtm rownames), or a logical vector that matches the rows of the dtm. Use to compare other documents to only these documents.
 #' @param only.complete.window if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.
-#' @param return_as Detemine whether output is returned as an "edgelist" or "igraph" network.
+#' @param zscore if true, transform the similarity scores for each document in dtm to z-scores. The min.similarity filter  will then apply to this value.
+#' @param return_as Detemine whether output is returned as an "edgelist", "igraph" network or sparse "matrix'.
 #' @param batchsize If group and/or date are used, size of batches.
 #' @param simmat If softcosine is used, a symmetrical matrix with the similarity scores of terms. If NULL, the cosine similarity of terms in dtm will be used
 #' @param simmat_thres If softosine is used, a threshold for the similarity scores of terms
@@ -104,8 +122,8 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct',
 #' 
 #' head(igraph::get.data.frame(g, 'vertices'))
 #' head(igraph::get.data.frame(g, 'edges'))
-newsflow.compare <- function(dtm, dtm.y=NULL, meta=NULL, meta.y=NULL, date.var='date', hour.window=c(-24,24), group.var=NULL, measure=c('cosine','overlap_pct','overlap','softcosine'), 
-                             min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, only.complete.window=TRUE, return_as = c('igraph','edgelist'), batchsize=1000, simmat=NULL, simmat_thres=NULL, verbose=FALSE){
+newsflow.compare <- function(dtm, dtm.y=NULL, meta=NULL, meta.y=NULL, date.var='date', hour.window=c(-24,24), group.var=NULL, measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct'), 
+                             min.similarity=0, n.topsim=NULL, only.from=NULL, only.to=NULL, only.complete.window=TRUE, zscore=F, return_as = c('igraph','edgelist','matrix'), batchsize=1000, simmat=NULL, simmat_thres=NULL, verbose=FALSE){
   
   ########### prepare dtm
   if (is.null(meta)) {
@@ -188,14 +206,30 @@ newsflow.compare <- function(dtm, dtm.y=NULL, meta=NULL, meta.y=NULL, date.var='
   }
   
   diag = !is.null(dtm.y)
-  if (measure == 'cosine') cp = tcrossprod_sparse(dtm, dtm.y, normalize='l2', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2=group.y,
+  if (measure == 'cosine') cp = tcrossprod_sparse(dtm, dtm.y, zscore=zscore, normalize='l2', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2=group.y,
                                                   date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, verbose=verbose)
-  if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
+  if (measure == 'overlap_pct') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, zscore=zscore, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
                                                        date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, verbose=verbose)
-  if (measure == 'overlap') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = F, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
+  if (measure == 'overlap') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = F, zscore=zscore, crossfun = 'min', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
                                                        date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, verbose=verbose)
-  if (measure == 'softcosine') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, normalize='softl2', crossfun = 'softprod', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
+  if (measure == 'crossprod') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = F, zscore=zscore, crossfun = 'prod', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
+                                                   date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, verbose=verbose)
+  if (measure == 'query_lookup') {
+    if (length(unique(dtm.y@x)) != 1) dtm.y = methods::as(dtm.y>0, 'dgCMatrix')
+    cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = F, zscore=zscore, crossfun = 'prod', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
+                           date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, verbose=verbose)
+  }
+  if (measure == 'query_lookup_pct') {
+    if (length(unique(dtm.y@x)) != 1) dtm.y = methods::as(dtm.y>0, 'dgCMatrix')
+    cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, zscore=zscore, crossfun = 'prod', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
+                           date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, verbose=verbose)
+  }
+  
+  if (measure == 'softcosine') cp = tcrossprod_sparse(dtm, dtm.y, rowsum_div = T, zscore=zscore, normalize='softl2', crossfun = 'softprod', min_value = min.similarity, top_n = n.topsim, diag=diag, group=group, group2 = group.y,
                                                        date = date, date2 = date.y, lwindow = hour.window[1], rwindow = hour.window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, verbose=verbose)
+  
+  if (return_as == 'matrix') return(cp)
+  
   cp = methods::as(cp, 'dgTMatrix')
   if (length(cp@i) == 0) return(NULL)
   

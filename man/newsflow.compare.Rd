@@ -6,11 +6,12 @@
 \usage{
 newsflow.compare(dtm, dtm.y = NULL, meta = NULL, meta.y = NULL,
   date.var = "date", hour.window = c(-24, 24), group.var = NULL,
-  measure = c("cosine", "overlap_pct", "overlap", "softcosine"),
-  min.similarity = 0, n.topsim = NULL, only.from = NULL,
-  only.to = NULL, only.complete.window = TRUE,
-  return_as = c("igraph", "edgelist"), batchsize = 1000,
-  simmat = NULL, simmat_thres = NULL, verbose = FALSE)
+  measure = c("cosine", "overlap_pct", "overlap", "crossprod",
+  "softcosine", "query_lookup", "query_lookup_pct"), min.similarity = 0,
+  n.topsim = NULL, only.from = NULL, only.to = NULL,
+  only.complete.window = TRUE, zscore = F, return_as = c("igraph",
+  "edgelist", "matrix"), batchsize = 1000, simmat = NULL,
+  simmat_thres = NULL, verbose = FALSE)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually}
@@ -27,7 +28,10 @@ newsflow.compare(dtm, dtm.y = NULL, meta = NULL, meta.y = NULL,
 
 \item{group.var}{Optionally,  The name of the column in meta that specifies a group (e.g., source, sourcetype). If given, only documents within the same group will be compared.}
 
-\item{measure}{the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental)}
+\item{measure}{the measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document 
+that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental).
+The regular crossprod (inner product) is also supported.
+If the dtm's are prepared with the create_queries function, the special "query_lookup" and "query_lookup_pct" can be used.}
 
 \item{min.similarity}{a threshold for similarity. lower values are deleted. Set to 0.1 by default.}
 
@@ -39,7 +43,9 @@ newsflow.compare(dtm, dtm.y = NULL, meta = NULL, meta.y = NULL,
 
 \item{only.complete.window}{if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.}
 
-\item{return_as}{Detemine whether output is returned as an "edgelist" or "igraph" network.}
+\item{zscore}{if true, transform the similarity scores for each document in dtm to z-scores. The min.similarity filter  will then apply to this value.}
+
+\item{return_as}{Detemine whether output is returned as an "edgelist", "igraph" network or sparse "matrix'.}
 
 \item{batchsize}{If group and/or date are used, size of batches.}
 

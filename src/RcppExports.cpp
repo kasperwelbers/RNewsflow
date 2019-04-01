@@ -38,8 +38,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // batched_tcrossprod_cpp
-SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2, IntegerVector group1, IntegerVector group2, NumericVector order1, NumericVector order2, const SpMat& simmat, bool use_min, NumericVector min_value, bool use_max, NumericVector max_value, int top_n, bool diag, bool only_upper, bool rowsum_div, std::string normalize, std::string crossfun, int lwindow, int rwindow, bool verbose, int batchsize);
-RcppExport SEXP _RNewsflow_batched_tcrossprod_cpp(SEXP m1SEXP, SEXP m2SEXP, SEXP group1SEXP, SEXP group2SEXP, SEXP order1SEXP, SEXP order2SEXP, SEXP simmatSEXP, SEXP use_minSEXP, SEXP min_valueSEXP, SEXP use_maxSEXP, SEXP max_valueSEXP, SEXP top_nSEXP, SEXP diagSEXP, SEXP only_upperSEXP, SEXP rowsum_divSEXP, SEXP normalizeSEXP, SEXP crossfunSEXP, SEXP lwindowSEXP, SEXP rwindowSEXP, SEXP verboseSEXP, SEXP batchsizeSEXP) {
+SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2, IntegerVector group1, IntegerVector group2, NumericVector order1, NumericVector order2, const SpMat& simmat, bool use_min, NumericVector min_value, bool use_max, NumericVector max_value, int top_n, bool diag, bool only_upper, bool rowsum_div, bool zscore, std::string normalize, std::string crossfun, int lwindow, int rwindow, bool verbose, int batchsize);
+RcppExport SEXP _RNewsflow_batched_tcrossprod_cpp(SEXP m1SEXP, SEXP m2SEXP, SEXP group1SEXP, SEXP group2SEXP, SEXP order1SEXP, SEXP order2SEXP, SEXP simmatSEXP, SEXP use_minSEXP, SEXP min_valueSEXP, SEXP use_maxSEXP, SEXP max_valueSEXP, SEXP top_nSEXP, SEXP diagSEXP, SEXP only_upperSEXP, SEXP rowsum_divSEXP, SEXP zscoreSEXP, SEXP normalizeSEXP, SEXP crossfunSEXP, SEXP lwindowSEXP, SEXP rwindowSEXP, SEXP verboseSEXP, SEXP batchsizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -58,13 +58,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type diag(diagSEXP);
     Rcpp::traits::input_parameter< bool >::type only_upper(only_upperSEXP);
     Rcpp::traits::input_parameter< bool >::type rowsum_div(rowsum_divSEXP);
+    Rcpp::traits::input_parameter< bool >::type zscore(zscoreSEXP);
     Rcpp::traits::input_parameter< std::string >::type normalize(normalizeSEXP);
     Rcpp::traits::input_parameter< std::string >::type crossfun(crossfunSEXP);
     Rcpp::traits::input_parameter< int >::type lwindow(lwindowSEXP);
     Rcpp::traits::input_parameter< int >::type rwindow(rwindowSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< int >::type batchsize(batchsizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(batched_tcrossprod_cpp(m1, m2, group1, group2, order1, order2, simmat, use_min, min_value, use_max, max_value, top_n, diag, only_upper, rowsum_div, normalize, crossfun, lwindow, rwindow, verbose, batchsize));
+    rcpp_result_gen = Rcpp::wrap(batched_tcrossprod_cpp(m1, m2, group1, group2, order1, order2, simmat, use_min, min_value, use_max, max_value, top_n, diag, only_upper, rowsum_div, zscore, normalize, crossfun, lwindow, rwindow, verbose, batchsize));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -91,7 +92,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_RNewsflow_term_union_cpp", (DL_FUNC) &_RNewsflow_term_union_cpp, 5},
     {"_RNewsflow_term_intersect_cpp", (DL_FUNC) &_RNewsflow_term_intersect_cpp, 5},
-    {"_RNewsflow_batched_tcrossprod_cpp", (DL_FUNC) &_RNewsflow_batched_tcrossprod_cpp, 21},
+    {"_RNewsflow_batched_tcrossprod_cpp", (DL_FUNC) &_RNewsflow_batched_tcrossprod_cpp, 22},
     {"_RNewsflow_window_corp_comp", (DL_FUNC) &_RNewsflow_window_corp_comp, 9},
     {NULL, NULL, 0}
 };

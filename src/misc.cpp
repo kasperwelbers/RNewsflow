@@ -49,7 +49,7 @@ std::vector<double> batch_softcos_mag_prepare(const SpMat& m2_batch, const SpMat
   }
   for (int i=0; i < out.size(); i++) {
     out[i] = pow(out[i], 0.5);
-    Rcout << out[i] << std::endl;
+    //Rcout << out[i] << std::endl;
   }
   
   return(out);

@@ -1,25 +1,33 @@
-#' (experimental) Combine column in a document term matrix to get highly sparse, dichotomous features.
+#' (experimental) Automatically infer queries from combinations of terms in a dtm
 #'
-#' Creates queries 
+#' Prepares query terms with high sparsity. Returns two matrices: a query and lookup dtm.
+#' Can either be used with one dtm as input (which becomes both the query and lookup dtm) or
+#' with a dtm and ref_dtm (reference), in which case dtm represents the queries and ref_dtm the lookup dtm.
+#' 
+#' The query dtm will contain the weighted term scores of the queries,
+#' and the lookup dtm will contain binary values for whether or not terms occured.
+#' This is designed to be used with the document.compare or newsflow.compare functions to compare the query matrix to the lookup matrix,
+#' using the special 'query_lookup' similarity measure. 
 #'
 #' Performs two operations. 
 #' First, clusters of very similar columns (high cosine similarity) can be merged into a single column.
 #' This is an OR (union) combination, meaning that if at least one column is nonzero, the value will be one.
 #' Second, all columns will be combined to get the co-occurences (AND, or intersect). 
 #' 
-#' The output dtm will have dichotomous features (the cluster of combination of clusters does or does not occur in the document).
-#' To keep the size manageable, a max_docprob is used to only keep features that occur in at most max_docprob*nrow(dtm) documents.
-#'
-#' If a ref_dtm is given, only the ref_dtm will be used to compute the new features.
-#' The output will contain both the dtm and ref_dtm transformed to contain only the new features
+#' To keep the vocabulary size manageable, only terms with at least min_docfreq (minimum document frequency) and max_docprob (max document probability) are returned.
+#' If a ref_dtm is given, the ref_dtm will be used to compute the docfreq and docprob values, used for filtering and weighting.
 #'
 #' @param dtm          A quanteda \link[quanteda]{dfm}
 #' @param ref_dtm      Optionally, another quanteda \link[quanteda]{dfm}. If given, the ref_dtm will be used to calculate the docfreq/docprob scores.
 #' @param min_docfreq  The minimum frequency for terms or combinations of terms
 #' @param max_docprob  The maximum probability (document frequency / N) for terms or combinations of terms
-#' @param weight       If true, weight the query dtm (if ref_dtm is used, uses the idf of the ref_dtm)
+#' @param weight       Determine how to weight the queries (if ref_dtm is used, uses the idf of the ref_dtm). 
+#'                     Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting. "docprob" scores the query term as the probability that it occurs in a document in the lookup dtm (note that here rarer terms have a lower value).
+#'                     The ref_dfm will always be binary.
+#' @param min_obs_exp  The minimum ratio of the observed and expected frequency of a term combination
 #' @param union_sim_thres If given, a number between 0 and 1, used as the cosine similarity threshold for combining clusters of terms 
-#' @param only_dtm_combs Only include term combinations that occur in dtm 
+#' @param combine_all  If True, combine all terms. If False (default), terms that are included as unigrams (i.e. that are within the min_docfreq and max_docprob) are not combined with other terms.
+#' @param only_dtm_combs Only include term combinations that occur in dtm. This makes sense if we are only interested in assymetric similarity measures based on the query
 #' @param verbose      If true, report progress
 #'
 #' @return a list with a query dtm and lookup dtm.
@@ -29,7 +37,8 @@
 #'  q = create_queries(rnewsflow_dfm, min_docfreq = 2, union_sim_thres = 0.9, 
 #'                     max_docprob = 0.05, verbose = FALSE)
 #'  head(colnames(q$query_dtm),100)
-create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, weight=T, union_sim_thres=NA, verbose=T, only_dtm_combs=T) {
+create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, weight=c('tfidf','binary'), min_obs_exp=NA, union_sim_thres=NA, verbose=F, combine_all=T, only_dtm_combs=T) {
+  weight = match.arg(weight)
   if (!methods::is(dtm, 'dfm')) stop('dtm has to be a quanteda dfm')
   if (!is.null(ref_dtm) && !methods::is(dtm, 'dfm')) stop('ref_dtm has to be a quanteda dfm')
   
@@ -51,7 +60,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
   }
   
   if (verbose) message('Computing term combinations')
-  simmat2 = term_cooccurence_docprob(m, max_docfreq = max_docprob * nrow(dtm), 
+  simmat2 = term_cooccurence_docprob(m, max_docfreq = max_docprob * nrow(m), min_obs_exp=min_obs_exp,
                                     min_docfreq=min_docfreq, verbose=verbose)
 
 
@@ -68,7 +77,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
     }
     
     if (only_dtm_combs) {
-      simmat_filter = term_cooccurence_docprob(m, max_docfreq = nrow(m), 
+      simmat_filter = term_cooccurence_docprob(m, max_docfreq = nrow(m), min_obs_exp=min_obs_exp,
                                        min_docfreq=1, verbose=F)
       nz = which(simmat2 > 0)
       dropval = nz[simmat_filter[nz] == 0]
@@ -76,7 +85,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
       simmat2 = Matrix::drop0(simmat2)
     }
     
-    simmat2 = rm_comb_if_diag(simmat2)
+    if (!combine_all) simmat2 = rm_comb_if_diag(simmat2)
     m = term_intersect(methods::as(m, 'dgCMatrix'), methods::as(simmat2, 'dgCMatrix'), as_dfm=F, verbose=F)
     
     if (verbose) message('Building new reference dtm')
@@ -89,30 +98,37 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
     m_ref = NULL
   }
   
-  
-  if (weight && !ncol(m) == 0) {
-    m = if (is.null(m_ref)) weight_queries(m, m) else weight_queries(m, m_ref)
-  }
-  
+  if (!ncol(m) == 0) m = weight_queries(m, m_ref, weight)
+
   m = quanteda::as.dfm(m)
   quanteda::docvars(m) = quanteda::docvars(dtm)
   
   if (!is.null(m_ref)) {
-    m_ref = quanteda::as.dfm(m_ref)
+    m_ref = quanteda::as.dfm(m_ref > 0)
     quanteda::docvars(m_ref) = quanteda::docvars(ref_dtm)
   } else {
-    m_ref = m
+    m_ref = m > 0
   }
   
   list(query_dtm=m, ref_dtm=m_ref)
 }
 
-weight_queries <- function(dfm_x, dfm_y) {
-  ts = Matrix::colSums(dfm_y > 0)
+weight_queries <- function(dfm_x, dfm_y=NULL, weight) {
+  if (weight == 'binary') return(dfm_x > 0)
+  
+  if (is.null(dfm_y)) dfm_y = dfm_x
+  ts = Matrix::colSums(dfm_y > 0)  
   ts = ts[match(colnames(dfm_x), names(ts))]
   ts[is.na(ts)] = 0
-  idf = log(1 + (nrow(dfm_y) / (ts+1)))
-  t(t(dfm_x) * idf)
+  
+  if (weight == 'docprob') {
+    dprob = (ts / nrow(dfm_y))
+    return(t(t(dfm_x > 0) * dprob))
+  }
+  if (weight == 'tfidf') {
+    idf = log(1 + (nrow(dfm_y) / (ts+1)))
+    return(t(t(dfm_x > 0) * idf))
+  }
 }
 
 match_simmat_terms <- function(dtm, simmat) {
@@ -145,14 +161,16 @@ match_simmat_terms <- function(dtm, simmat) {
 #'                       'Nah more like Gadaffel','What Gargamel?'))
 #' simmat = term_char_sim(colnames(dfm), same_start=0)
 #' term_union(dfm, simmat, verbose = FALSE)
-term_union <- function(dtm, simmat, as_dfm=T, verbose=T) {
+term_union <- function(dtm, simmat, as_dfm=T, verbose=F) {
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
-  simmat = match_simmat_terms(dtm, simmat)
+  #simmat = match_simmat_terms(dtm, simmat)
+  dtm = pad_dfm(dtm, colnames(simmat))
   
   parentheses = grepl('[&|]', colnames(dtm))
   ml = term_union_cpp(dtm, simmat, colnames(dtm), parentheses, verbose)
   colnames(ml$m) = ml$colnames
   rownames(ml$m) = rownames(dtm)
+  ml$m = ml$m[,colSums(ml$m) > 0]
   
   if (as_dfm && methods::is(dtm, 'dfm')) {
     m = quanteda::as.dfm(ml$m > 0)
@@ -176,15 +194,16 @@ term_union <- function(dtm, simmat, as_dfm=T, verbose=T) {
 #'
 #' @return  A dgCMatrix or quanteda dfm
 #' @export
-term_intersect <- function(dtm, simmat, as_dfm=T, verbose=T) {
+term_intersect <- function(dtm, simmat, as_dfm=T, verbose=F) {
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
+  #simmat = match_simmat_terms(dtm, simmat)
+  dtm = pad_dfm(dtm, colnames(simmat))
   
-  simmat = match_simmat_terms(dtm, simmat)
-
   parentheses = grepl('[&|]', colnames(dtm))
   ml = term_intersect_cpp(dtm, simmat, colnames(dtm), parentheses, verbose)
   colnames(ml$m) = ml$colnames
   rownames(ml$m) = rownames(dtm)
+  ml$m = ml$m[,Matrix::colSums(ml$m) > 0]
   
   if (as_dfm && methods::is(dtm, 'dfm')) {
     m = quanteda::as.dfm(ml$m > 0)
@@ -203,8 +222,17 @@ term_occur_sim <- function(m, min_cos, verbose=F) {
 ## create a matrix with document probabilities (docfreq / n) for all column combinations
 ## max_docfreq is used to only keep sufficiently rare combinations
 ## typically, min_docfreq is used to drop very sparse terms, and max_docfreq is used to drop terms that are too common to be informative.
-term_cooccurence_docprob <- function(m, max_docfreq, min_docfreq=NULL, verbose=F) {
+term_cooccurence_docprob <- function(m, max_docfreq, min_docfreq=NULL, min_obs_exp=NA, verbose=F) {
   simmat = tcrossprod_sparse(methods::as(t(m > 0), 'dgCMatrix'), min_value=min_docfreq, max_value = max_docfreq, verbose=verbose)
+  
+  if (!is.na(min_obs_exp)) {
+    simmat = methods::as(simmat, 'dgTMatrix')
+    prob = Matrix::colMeans(m > 0)
+    exp = prob[simmat@i+1] * prob[simmat@j+1] * nrow(m)
+    simmat@x[(simmat@x / exp) < min_obs_exp] = 0
+    simmat = Matrix::drop0(simmat)
+  }
+  
   methods::as(simmat, 'dgCMatrix')
 }
 
