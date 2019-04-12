@@ -7,7 +7,8 @@
 documents.compare(dtm, dtm.y = NULL, measure = c("cosine",
   "overlap_pct", "overlap", "crossprod", "softcosine", "query_lookup",
   "query_lookup_pct"), min.similarity = 0, n.topsim = NULL,
-  zscore = F, simmat = NULL, simmat_thres = NULL)
+  pvalue = c("none", "normal", "lognormal", "nz_normal", "nz_lognormal",
+  "disparity"), simmat = NULL, simmat_thres = NULL)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used.}
@@ -23,7 +24,10 @@ If the dtm's are prepared with the create_queries function, the special "query_l
 
 \item{n.topsim}{An alternative or additional sort of threshold for similarity. Only keep the [n.topsim] highest similarity scores for x. Can return more than [n.topsim] similarity scores in the case of duplicate similarities.}
 
-\item{zscore}{if true, transform the similarity scores for each document in dtm to z-scores. The min.similarity filter  will then apply to this value.}
+\item{pvalue}{If used, transform the similarity score to a p-value. The value is reversed, so that higher means more similar 
+(and thus the min.similarity still makes sense). Currently supports "normal" and "lognormal" distribution, and the uniform distribution 
+used in the "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}). Also "nz_normal" and "nz_lognormal" can be used
+to only consider the nonzero values.}
 
 \item{simmat}{If softcosine is used, a symmetrical matrix with the similarity scores of terms. If NULL, the cosine similarity of terms in dtm will be used}
 

@@ -25,7 +25,7 @@ Imports:
 LinkingTo: Rcpp, RcppEigen, RcppProgress
 LazyData: true
 SystemRequirements: C++11
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests: 
     knitr,
     rmarkdown

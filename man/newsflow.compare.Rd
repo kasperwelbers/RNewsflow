@@ -9,9 +9,10 @@ newsflow.compare(dtm, dtm.y = NULL, meta = NULL, meta.y = NULL,
   measure = c("cosine", "overlap_pct", "overlap", "crossprod",
   "softcosine", "query_lookup", "query_lookup_pct"), min.similarity = 0,
   n.topsim = NULL, only.from = NULL, only.to = NULL,
-  only.complete.window = TRUE, zscore = F, return_as = c("igraph",
-  "edgelist", "matrix"), batchsize = 1000, simmat = NULL,
-  simmat_thres = NULL, verbose = FALSE)
+  only.complete.window = TRUE, pvalue = c("none", "normal",
+  "lognormal", "nz_normal", "nz_lognormal", "disparity"),
+  return_as = c("igraph", "edgelist", "matrix"), batchsize = 1000,
+  simmat = NULL, simmat_thres = NULL, verbose = FALSE)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually}
@@ -43,7 +44,10 @@ If the dtm's are prepared with the create_queries function, the special "query_l
 
 \item{only.complete.window}{if True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.}
 
-\item{zscore}{if true, transform the similarity scores for each document in dtm to z-scores. The min.similarity filter  will then apply to this value.}
+\item{pvalue}{If used, transform the similarity score to a p-value. The value is reversed, so that higher means more similar 
+(and thus the min.similarity still makes sense). Currently supports "normal" and "lognormal" distribution, and the uniform distribution 
+used in the "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}). Also "nz_normal" and "nz_lognormal" can be used
+to only consider the nonzero values.}
 
 \item{return_as}{Detemine whether output is returned as an "edgelist", "igraph" network or sparse "matrix'.}
 

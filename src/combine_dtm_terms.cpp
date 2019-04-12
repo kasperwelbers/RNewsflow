@@ -16,7 +16,7 @@ std::string prep_term(std::string term, bool parentheses) {
 }
 
 // [[Rcpp::export]]
-List term_union_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms, std::vector<bool> parentheses, bool verbose = true) {
+List term_union_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms, std::vector<bool> parentheses, bool verbose = true, std::string sep = " | ") {
   // simmat is assumed to be symmetrical
   if (simmat.cols() != m.cols()) stop("number of columns in m and simmat not identical");
   if (simmat.rows() != simmat.cols()) stop("simmat not symmetrical");
@@ -55,7 +55,7 @@ List term_union_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms, std
     if (clustnames[cluster] == "")
       clustnames[cluster] = prep_term(terms[r], parentheses[r]);
     else
-      clustnames[cluster] = clustnames[cluster] + "|" + prep_term(terms[r], parentheses[r]);
+      clustnames[cluster] = clustnames[cluster] + sep + prep_term(terms[r], parentheses[r]);
     
     for (SpMat::InnerIterator termit(simmat, r); termit; ++termit) {
       if (termit.row() < r) continue;
@@ -80,7 +80,7 @@ List term_union_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms, std
 }
 
 // [[Rcpp::export]]
-List term_intersect_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms, std::vector<bool> parentheses, bool verbose = true) {
+List term_intersect_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms, std::vector<bool> parentheses, bool verbose = true, std::string sep = " & ") {
   // simmat is assumed to be symmetrical
   if (simmat.cols() != m.cols()) stop("number of columns in m and simmat not identical");
   if (simmat.rows() != simmat.cols()) stop("simmat not symmetrical");
@@ -105,7 +105,7 @@ List term_intersect_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms,
       if (i == j) 
         colnames.push_back(prep_term(terms[i], parentheses[i]));
       else
-        colnames.push_back(prep_term(terms[i], parentheses[i]) + "&" + prep_term(terms[j], parentheses[j]));
+        colnames.push_back(prep_term(terms[i], parentheses[i]) + sep + prep_term(terms[j], parentheses[j]));
         
       SpMat::InnerIterator itx(m, i);
       SpMat::InnerIterator ity(m, j);

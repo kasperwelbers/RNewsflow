@@ -4,8 +4,8 @@
 \alias{hourdiff_range_thresholds}
 \title{Inspect effects of thresholds on matches over time}
 \usage{
-hourdiff_range_thresholds(g, breaks = 25, hourdiff_range = c(0, Inf),
-  min_hourdiff = NA, max_hourdiff = NA)
+hourdiff_range_thresholds(g, breaks = 20, hourdiff_range = c(0, Inf),
+  min_weight = NA, min_hourdiff = NA, max_hourdiff = NA)
 }
 \arguments{
 \item{g}{The output of newsflow.compare (either as "igraph" or "edgelist")}
@@ -13,6 +13,8 @@ hourdiff_range_thresholds(g, breaks = 25, hourdiff_range = c(0, Inf),
 \item{breaks}{The number of breaks for the weight threshold}
 
 \item{hourdiff_range}{The time period (hourdiff range) in which the match 'should' occur.}
+
+\item{min_weight}{Optionally, filter out all value below the given weight}
 
 \item{min_hourdiff}{the lowest possible hourdiff value. This is used to estimate noise. If not specified, will be estimated based on data.}
 

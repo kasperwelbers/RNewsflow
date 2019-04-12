@@ -20,24 +20,37 @@ void as_pct(int i, const SpMat& m, std::vector<double>& res){
 }
 
 
-void as_pnorm(std::vector<double>& res, bool log_trans=false) {
+void as_pnorm(std::vector<double>& res, bool log_trans=false, bool nz = false) {
   NumericVector v = Rcpp::wrap(res);
+  if (nz) v = v[v>0];
   if (log_trans) v = log(v+1);
   double M = mean(v);
   double SD = sd(v);
   
-  //double alpha = pow(M,2) * ((1 - M) / pow(SD, 2) - 1 / M);
-  //double beta = alpha * (1 / M - 1);
-    
-
-  //pbeta(c(0.0000001,0.00001,0.0001,0.001,0.01), alpha, beta)
   for (int i=0; i < res.size(); i++) {
     if (SD == 0) {
       res[i] = 0;
     } else {
-      //res[i] = R::pbeta(res[i], alpha, beta, 1, 0);
-      res[i] = (res[i] - M) / SD;
-      //res[i] = R::pnorm(res[i], M, SD, 0, 0);
+      //res[i] = (res[i] - M) / SD;
+      res[i] = 1 - R::pnorm(res[i], M, SD, 0, 0);
+    }
+  }
+}
+
+void as_pdisparity(std::vector<double>& res) {
+  NumericVector v = Rcpp::wrap(res);
+  double vsum = sum(v);
+  double k = sum(v>0);
+  
+  //Rcout << vsum << " " << k << std::endl;
+  
+  for (int i=0; i < res.size(); i++) {
+    if (k == 0) {
+      res[i] = 0;
+    } else {
+      res[i] = res[i] / vsum;
+      res[i] = pow(1 - res[i], k - 1);
+      res[i] = 1 - res[i];   // inverse for min threshold
     }
   }
 }

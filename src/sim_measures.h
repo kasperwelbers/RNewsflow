@@ -9,8 +9,8 @@ using namespace Rcpp;
 
 void as_pct(int, const Eigen::SparseMatrix<double>&, std::vector<double>& res);
 
-void as_pnorm(std::vector<double>& res, bool log_trans);
-
+void as_pnorm(std::vector<double>& res, bool log_trans, bool nz);
+void as_pdisparity(std::vector<double>& res);
 
 void sim_product(int, const Eigen::SparseMatrix<double>&, const Eigen::SparseMatrix<double>&,
                  std::vector<double>&, std::vector<bool>&);

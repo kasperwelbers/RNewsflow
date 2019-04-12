@@ -15,19 +15,22 @@
 #' Second, all columns will be combined to get the co-occurences (AND, or intersect). 
 #' 
 #' To keep the vocabulary size manageable, only terms with at least min_docfreq (minimum document frequency) and max_docprob (max document probability) are returned.
-#' If a ref_dtm is given, the ref_dtm will be used to compute the docfreq and docprob values, used for filtering and weighting.
+#' If a ref_dtm is given, both the dtm and ref_dtm will be used to compute the docfreq and docprob values, used for filtering and weighting (unless use_dtm_and_ref = F).
 #'
 #' @param dtm          A quanteda \link[quanteda]{dfm}
 #' @param ref_dtm      Optionally, another quanteda \link[quanteda]{dfm}. If given, the ref_dtm will be used to calculate the docfreq/docprob scores.
 #' @param min_docfreq  The minimum frequency for terms or combinations of terms
 #' @param max_docprob  The maximum probability (document frequency / N) for terms or combinations of terms
 #' @param weight       Determine how to weight the queries (if ref_dtm is used, uses the idf of the ref_dtm). 
-#'                     Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting. "docprob" scores the query term as the probability that it occurs in a document in the lookup dtm (note that here rarer terms have a lower value).
+#'                     Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting (actually just idf, since scores are binary). 
 #'                     The ref_dfm will always be binary.
+#' @param norm_weight  Normalize the weight score so that the highest value is 1. If "max" is used, max is the highest possible value. "doc_max" uses the highest value within each document, and "dtm_max" uses the highest observed value in the dtm.
 #' @param min_obs_exp  The minimum ratio of the observed and expected frequency of a term combination
 #' @param union_sim_thres If given, a number between 0 and 1, used as the cosine similarity threshold for combining clusters of terms 
+#' @param union_sim_thres2 Like union_sim_thres, but after combining terms
 #' @param combine_all  If True, combine all terms. If False (default), terms that are included as unigrams (i.e. that are within the min_docfreq and max_docprob) are not combined with other terms.
-#' @param only_dtm_combs Only include term combinations that occur in dtm. This makes sense if we are only interested in assymetric similarity measures based on the query
+#' @param only_dtm_combs Only include term combinations that occur in dtm. This makes sense (and saves a lot of memory) if you are only interested in assymetric similarity measures based on the query
+#' @param use_dtm_and_ref if a ref_dtm is used, both the dtm and ref_dtm are used to compute the docfreq and docprob values used for filtering and weighting. If use_dtm_and_ref is set o FALSE, only the ref_dtm is used.
 #' @param verbose      If true, report progress
 #'
 #' @return a list with a query dtm and lookup dtm.
@@ -37,8 +40,9 @@
 #'  q = create_queries(rnewsflow_dfm, min_docfreq = 2, union_sim_thres = 0.9, 
 #'                     max_docprob = 0.05, verbose = FALSE)
 #'  head(colnames(q$query_dtm),100)
-create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, weight=c('tfidf','binary'), min_obs_exp=NA, union_sim_thres=NA, verbose=F, combine_all=T, only_dtm_combs=T) {
+create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, weight=c('tfidf','binary'), norm_weight=c('max','doc_max','dtm_max','none'), min_obs_exp=NA, union_sim_thres=NA, union_sim_thres2=NA, combine_all=T, only_dtm_combs=T, use_dtm_and_ref=T, verbose=F) {
   weight = match.arg(weight)
+  norm_weight = match.arg(norm_weight)
   if (!methods::is(dtm, 'dfm')) stop('dtm has to be a quanteda dfm')
   if (!is.null(ref_dtm) && !methods::is(dtm, 'dfm')) stop('ref_dtm has to be a quanteda dfm')
   
@@ -46,6 +50,10 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
     voc = colnames(ref_dtm)[Matrix::colSums(ref_dtm) >= min_docfreq]
     voc = intersect(colnames(dtm), voc)
     m = ref_dtm[,voc]
+    if (use_dtm_and_ref) {
+      m = rbind(m, dtm[,voc])                                  ## add dtm rows
+      orig_ref = c(rep(T, nrow(ref_dtm)), rep(F, nrow(dtm)))   ## remember which, to remove later
+    }
   } else {
     m = dtm[,Matrix::colSums(dtm > 0) > min_docfreq]
   }
@@ -93,17 +101,32 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
     m_ref = term_intersect(methods::as(m_ref, 'dgCMatrix'), methods::as(simmat2, 'dgCMatrix'), as_dfm=F, verbose=F)
     
   } else {
-    simmat2 = rm_comb_if_diag(simmat2)
+    if (!combine_all) simmat2 = rm_comb_if_diag(simmat2)
     m = term_intersect(methods::as(m, 'dgCMatrix'), methods::as(simmat2, 'dgCMatrix'), as_dfm=F)
     m_ref = NULL
   }
   
-  if (!ncol(m) == 0) m = weight_queries(m, m_ref, weight)
+  ## second merging of similar terms after combining
+  if (!is.na(union_sim_thres2)) {
+    if (!is.null(m_ref)) {
+      simmat3 = term_occur_sim(methods::as(m_ref, 'dgCMatrix'), union_sim_thres2, verbose=verbose)
+      m = term_union(methods::as(m,'dgCMatrix'), methods::as(simmat3,'dgCMatrix'), as_dfm=F, sep=' #&# ', par=F)
+      m_ref = term_union(methods::as(m_ref, 'dgCMatrix'), methods::as(simmat3,'dgCMatrix'), as_dfm=F, sep=' #&# ', par=F)
+    } else {
+      simmat3 = term_occur_sim(m, union_sim_thres2, verbose=verbose)
+      m = term_union(m, methods::as(simmat3,'dgCMatrix'), as_dfm=F, sep=' #&# ', par=F)
+    }
+    newvoc = merge_vocabulary_terms(colnames(m))
+    colnames(m) = colnames(m_ref) = newvoc
+  }
+    
+  if (!ncol(m) == 0) m = weight_queries(m, m_ref, weight, norm_weight)
 
   m = quanteda::as.dfm(m)
   quanteda::docvars(m) = quanteda::docvars(dtm)
   
   if (!is.null(m_ref)) {
+    if (use_dtm_and_ref) m_ref = m_ref[orig_ref,]   ## remove dtm rows
     m_ref = quanteda::as.dfm(m_ref > 0)
     quanteda::docvars(m_ref) = quanteda::docvars(ref_dtm)
   } else {
@@ -113,7 +136,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
   list(query_dtm=m, ref_dtm=m_ref)
 }
 
-weight_queries <- function(dfm_x, dfm_y=NULL, weight) {
+weight_queries <- function(dfm_x, dfm_y=NULL, weight, norm_weight) {
   if (weight == 'binary') return(dfm_x > 0)
   
   if (is.null(dfm_y)) dfm_y = dfm_x
@@ -121,15 +144,24 @@ weight_queries <- function(dfm_x, dfm_y=NULL, weight) {
   ts = ts[match(colnames(dfm_x), names(ts))]
   ts[is.na(ts)] = 0
   
-  if (weight == 'docprob') {
-    dprob = (ts / nrow(dfm_y))
-    return(t(t(dfm_x > 0) * dprob))
+  if (weight == 'docprob') w = (ts / nrow(dfm_y))
+  if (weight == 'tfidf') w = log((nrow(dfm_y) - ts + 0.5) / (ts+0.5), base=2)
+  
+  dfm_x = t(t(dfm_x > 0) * w)
+  
+  if (norm_weight == 'doc_max') dfm_x = dfm_x / apply(dfm_x, MARGIN = 1, max)
+  if (norm_weight == 'dtm_max') dfm_x = dfm_x / max(dfm_x)
+  if (norm_weight == 'max') {
+    if (weight == 'docprob') max_possible = (1 / nrow(dfm_y))
+    if (weight == 'tfidf') max_possible = log((nrow(dfm_y) - 1 + 0.5) / (1+0.5), base=2)
+    dfm_x = dfm_x / max_possible
   }
-  if (weight == 'tfidf') {
-    idf = log(1 + (nrow(dfm_y) / (ts+1)))
-    return(t(t(dfm_x > 0) * idf))
-  }
+  return(dfm_x)
 }
+
+dfm_x = abs(rsparsematrix(10,11,0.2))
+
+
 
 match_simmat_terms <- function(dtm, simmat) {
   if (!all(colnames(dtm) %in% colnames(simmat))) stop('not all terms in dtm are in  simmat')
@@ -152,6 +184,7 @@ match_simmat_terms <- function(dtm, simmat) {
 #' @param simmat       A similarity matrix in dgCMatrix format. For instance, created with \link{term_char_sim}
 #' @param as_dfm       If True, return as quanteda dfm
 #' @param verbose      If True, report progress
+#' @param sep          The separator used for pasting the terms
 #'
 #' @return  A dgCMatrix or quanteda dfm
 #' @export
@@ -161,13 +194,13 @@ match_simmat_terms <- function(dtm, simmat) {
 #'                       'Nah more like Gadaffel','What Gargamel?'))
 #' simmat = term_char_sim(colnames(dfm), same_start=0)
 #' term_union(dfm, simmat, verbose = FALSE)
-term_union <- function(dtm, simmat, as_dfm=T, verbose=F) {
+term_union <- function(dtm, simmat, as_dfm=T, verbose=F, sep='|', par=NA) {
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
   #simmat = match_simmat_terms(dtm, simmat)
   dtm = pad_dfm(dtm, colnames(simmat))
   
-  parentheses = grepl('[&|]', colnames(dtm))
-  ml = term_union_cpp(dtm, simmat, colnames(dtm), parentheses, verbose)
+  parentheses = if (is.na(par)) grepl('[&]', colnames(dtm)) else par
+  ml = term_union_cpp(dtm, simmat, colnames(dtm), parentheses, verbose, sep)
   colnames(ml$m) = ml$colnames
   rownames(ml$m) = rownames(dtm)
   ml$m = ml$m[,colSums(ml$m) > 0]
@@ -191,16 +224,17 @@ term_union <- function(dtm, simmat, as_dfm=T, verbose=F) {
 #' @param simmat       A similarity matrix in dgCMatrix format. For instance, created with \link{term_char_sim}
 #' @param as_dfm       If True, return as quanteda dfm
 #' @param verbose      If True, report progress
+#' @param sep          The separator used for pasting the terms 
 #'
 #' @return  A dgCMatrix or quanteda dfm
 #' @export
-term_intersect <- function(dtm, simmat, as_dfm=T, verbose=F) {
+term_intersect <- function(dtm, simmat, as_dfm=T, verbose=F, par=NA, sep=' & ') {
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
   #simmat = match_simmat_terms(dtm, simmat)
   dtm = pad_dfm(dtm, colnames(simmat))
   
-  parentheses = grepl('[&|]', colnames(dtm))
-  ml = term_intersect_cpp(dtm, simmat, colnames(dtm), parentheses, verbose)
+  parentheses = if (is.na(par)) grepl('[|]', colnames(dtm)) else par
+  ml = term_intersect_cpp(dtm, simmat, colnames(dtm), parentheses, verbose, sep)
   colnames(ml$m) = ml$colnames
   rownames(ml$m) = rownames(dtm)
   ml$m = ml$m[,Matrix::colSums(ml$m) > 0]
@@ -323,16 +357,67 @@ term_char_sim <- function(voc, type=c('tri','bi'), min_overlap=2/3, max_diff=4, 
   methods::as(simmat, 'dgCMatrix')
 }
 
-
-get_doc_terms <- function(dtm, docname) {
+#' View term scores for a given document
+#'
+#' @param dtm      A quanteda dfm
+#' @param docname  name of document to select
+#' @param doc_i    alternatively, select document by index
+#'
+#' @return  A named vector with terms (names) and scores
+#' @export
+#'
+#' @examples
+#' get_doc_terms(rnewsflow_dfm, doc_i=1)
+get_doc_terms <- function(dtm, docname=NULL, doc_i=NULL) {
+  if (is.null(docname) && is.null(doc_i)) stop('either docname or doc_i has to be specified')
+  if (!is.null(docname) && !is.null(doc_i)) stop('either (not both) docname or doc_i has to be specified')
+  if (!is.null(doc_i)) docname = docnames(dtm)[doc_i]
   r = dtm[quanteda::docnames(dtm) == docname]
   if (nrow(r) == 0) stop('docname is not a document in dtm')
   cs = colSums(r)
   cs[cs > 0]
 }
 
+
+#' View overlapping terms for a given pair of documents
+#'
+#' @param dtm      A quanteda dfm
+#' @param doc.x    The name of the first document in dtm
+#' @param doc.y    The name of the second document in dtm (or dtm.y) 
+#' @param dtm.y    Optionally, a second dtm (for when the documents occur in separate dtm's) 
+#'
+#' @return  A character vector
+#' @export
+#'
+#' @examples
+#' get_overlap_terms(rnewsflow_dfm, 
+#'                   quanteda::docnames(rnewsflow_dfm)[1],
+#'                   quanteda::docnames(rnewsflow_dfm)[5])
 get_overlap_terms <- function(dtm, doc.x, doc.y, dtm.y=dtm) {
   tx = get_doc_terms(dtm, doc.x)
   ty = get_doc_terms(dtm.y, doc.y)
   intersect(names(tx), names(ty))
+}
+
+
+
+merge_vocabulary_terms <- function(voc) {
+  term = left = right = i = NULL  
+  l = stringi::stri_split(voc, fixed = ' #&# ')
+  ln = sapply(l, length)
+  l = unlist(l)
+  lr = stringi::stri_split(l, fixed = ' & ')
+  lrn = sapply(lr, length)
+  d = data.table::data.table(i = rep(1:length(ln), ln),
+                             left = sapply(lr, '[[', 1))
+  d[lrn > 1, right := sapply(lr[lrn > 1], '[[', 2)]
+  d[is.na(right), right := '']
+  
+  ds = d[, list(left = paste(left, collapse='|')), by=c('i','right')]
+  ds = ds[, list(right = paste(right, collapse='|')), by=c('i','left')]
+  ds[, term := left]
+  ds[!right == '', term := paste(left, right, sep=' & ')]
+  ds = ds[, list(term = paste(term, collapse=' & ')), by=c('i')]
+  if (!identical(1:length(voc), ds$i)) stop('test error in merge_vocabulary_terms')
+  ds$term
 }

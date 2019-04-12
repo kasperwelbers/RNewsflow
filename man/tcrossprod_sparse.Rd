@@ -6,7 +6,8 @@
 \usage{
 tcrossprod_sparse(m, m2 = NULL, min_value = NULL, max_value = NULL,
   only_upper = F, diag = T, top_n = NULL, rowsum_div = F,
-  zscore = F, normalize = c("none", "l2", "softl2"),
+  pvalue = c("none", "normal", "lognormal", "nz_normal", "nz_lognormal",
+  "disparity"), normalize = c("none", "l2", "softl2"),
   crossfun = c("prod", "min", "softprod", "maxproduct"), group = NULL,
   group2 = NULL, date = NULL, date2 = NULL, lwindow = -1,
   rwindow = 1, date_unit = c("days", "hours", "minutes", "seconds"),
@@ -30,7 +31,10 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, max_value = NULL,
 
 \item{rowsum_div}{if true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering)}
 
-\item{zscore}{if true, transform the similarity scores for each row in m to z-scores. The min_value and max_value filters will in that case apply to the zscore value.}
+\item{pvalue}{If used, transform the similarity score to a p-value. The value is reversed, so that higher means more similar 
+(and thus the min.similarity still makes sense). Currently supports "normal" and "lognormal" distribution, and the uniform distribution 
+used in the "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}). Also "nz_normal" and "nz_lognormal" can be used
+to only consider the nonzero values.}
 
 \item{normalize}{normalize rows by a given norm score. Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine)}
 

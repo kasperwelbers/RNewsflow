@@ -69,7 +69,7 @@ SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
                              NumericVector order1, NumericVector order2,
                              const SpMat& simmat,
                              bool use_min=true, NumericVector min_value=0, bool use_max=false, NumericVector max_value=1, int top_n=0, bool diag=true, bool only_upper=false, 
-                             bool rowsum_div=false, bool zscore=false, std::string normalize="none", std::string crossfun="prod",
+                             bool rowsum_div=false, std::string pvalue="NA", std::string normalize="none", std::string crossfun="prod",
                              int lwindow=0, int rwindow=0,
                              bool verbose=false, int batchsize = 1000) {
   if (m1.cols() != m2.cols()) stop("m1 and m2 need to have the same number of columns");
@@ -156,7 +156,11 @@ SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
     if (crossfun == "softprod") sim_softprod(i, m1, m2_batch, res, use_pair, batch_simmat);      
     
     if (rowsum_div) as_pct(i, m1, res); 
-    if (zscore) as_pnorm(res, false);
+    if (pvalue == "normal") as_pnorm(res, false, false);
+    if (pvalue == "lognormal") as_pnorm(res, true, false);
+    if (pvalue == "nz_normal") as_pnorm(res, false, true);
+    if (pvalue == "nz_lognormal") as_pnorm(res, true, true);
+    if (pvalue == "disparity") as_pdisparity(res);
       
     // SAVE VALUES WITH CORRECT POSITIONS (using offset and index)
     fill_triples(tl, res, index1, index2, offset, i, use_min, min_value, use_max, max_value, top_n);

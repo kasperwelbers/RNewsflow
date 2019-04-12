@@ -8,20 +8,22 @@
 #' @param g       The output of newsflow.compare (either as "igraph" or "edgelist")
 #' @param breaks  The number of breaks for the weight threshold
 #' @param hourdiff_range The time period (hourdiff range) in which the match 'should' occur.
+#' @param min_weight   Optionally, filter out all value below the given weight
 #' @param min_hourdiff the lowest possible hourdiff value. This is used to estimate noise. If not specified, will be estimated based on data.
 #' @param max_hourdiff the highest possible hourdiff value. 
 #'
 #' @return Nothing... just plots
 #' @export
-hourdiff_range_thresholds <- function(g, breaks=25, hourdiff_range=c(0,Inf), min_hourdiff=NA, max_hourdiff=NA) {
+hourdiff_range_thresholds <- function(g, breaks=20, hourdiff_range=c(0,Inf), min_weight=NA, min_hourdiff=NA, max_hourdiff=NA) {
   weight = if(methods::is(g,'igraph')) E(g)$weight else g$weight
   hourdiff = if(methods::is(g,'igraph')) E(g)$hourdiff else g$hourdiff
   
-  graphics::layout(matrix(c(1,3,2,3), nrow=2))
-  graphics::hist(weight, main=sprintf('Histogram of weight'))
-  graphics::hist(hourdiff, main=sprintf('Histogram of hourdiff'))
-  
-  
+  if (!is.na(min_weight)) {
+    filter = weight >= min_weight
+    weight = weight[filter]
+    hourdiff = hourdiff[filter]
+  }
+
   if (is.na(min_hourdiff)) min_hourdiff = min(hourdiff)
   if (is.na(max_hourdiff)) max_hourdiff = max(hourdiff)
   
@@ -43,7 +45,18 @@ hourdiff_range_thresholds <- function(g, breaks=25, hourdiff_range=c(0,Inf), min
     res$est_noise[i] = (sum(!bz) / r) / sum(bz)
     if (res$est_noise[i] > 1) res$est_noise[i] = 1
   }
-
+  res$n[is.na(res$n)] = 0
+  
+  graphics::layout(matrix(c(1,3,2,3), nrow=2))
+  bars = graphics::hist(weight, main=sprintf('Histogram of weight'), breaks=res$threshold)
+  for (i in 2:length(bars$breaks)) {
+    graphics::rect(xleft = bars$breaks[i-1], ybottom = 0, xright = bars$breaks[i], ytop = res$n[i-1] - sum(res$n[i]), col='blue')
+  }
+  
+  graphics::hist(hourdiff, main=sprintf('Histogram of hourdiff'), breaks=nrow(res))
+  graphics::rect(xleft = hourdiff_range[1], ybottom = 0, xright = hourdiff_range[2], ytop = res$n[1], col='blue')
+  graphics::rect(xleft = hourdiff_range[1], ybottom = 0, xright = hourdiff_range[2], ytop = res$n[1]*res$est_noise[1], col='red')
+  
   graphics::par(mar = c(5,5,2,5))
   graphics::plot(as.numeric(res$threshold), res$after_event, type='l', col='blue', xlab='weight threshold', ylab='pct in range / est noice', ylim=c(0,1))
   graphics::lines(as.numeric(res$threshold), res$est_noise, type='l', lty=2, col='red', xlab='weight threshold', ylab='pct in range / est noice')

@@ -6,8 +6,10 @@
 \usage{
 create_queries(dtm, ref_dtm = NULL, min_docfreq = 2,
   max_docprob = 0.001, weight = c("tfidf", "binary"),
-  min_obs_exp = NA, union_sim_thres = NA, verbose = F,
-  combine_all = T, only_dtm_combs = T)
+  norm_weight = c("max", "doc_max", "dtm_max", "none"),
+  min_obs_exp = NA, union_sim_thres = NA, union_sim_thres2 = NA,
+  combine_all = T, only_dtm_combs = T, use_dtm_and_ref = T,
+  verbose = F)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}}
@@ -19,18 +21,24 @@ create_queries(dtm, ref_dtm = NULL, min_docfreq = 2,
 \item{max_docprob}{The maximum probability (document frequency / N) for terms or combinations of terms}
 
 \item{weight}{Determine how to weight the queries (if ref_dtm is used, uses the idf of the ref_dtm). 
-Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting. "docprob" scores the query term as the probability that it occurs in a document in the lookup dtm (note that here rarer terms have a lower value).
+Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting (actually just idf, since scores are binary). 
 The ref_dfm will always be binary.}
+
+\item{norm_weight}{Normalize the weight score so that the highest value is 1. If "max" is used, max is the highest possible value. "doc_max" uses the highest value within each document, and "dtm_max" uses the highest observed value in the dtm.}
 
 \item{min_obs_exp}{The minimum ratio of the observed and expected frequency of a term combination}
 
 \item{union_sim_thres}{If given, a number between 0 and 1, used as the cosine similarity threshold for combining clusters of terms}
 
-\item{verbose}{If true, report progress}
+\item{union_sim_thres2}{Like union_sim_thres, but after combining terms}
 
 \item{combine_all}{If True, combine all terms. If False (default), terms that are included as unigrams (i.e. that are within the min_docfreq and max_docprob) are not combined with other terms.}
 
-\item{only_dtm_combs}{Only include term combinations that occur in dtm. This makes sense if we are only interested in assymetric similarity measures based on the query}
+\item{only_dtm_combs}{Only include term combinations that occur in dtm. This makes sense (and saves a lot of memory) if you are only interested in assymetric similarity measures based on the query}
+
+\item{use_dtm_and_ref}{if a ref_dtm is used, both the dtm and ref_dtm are used to compute the docfreq and docprob values used for filtering and weighting. If use_dtm_and_ref is set o FALSE, only the ref_dtm is used.}
+
+\item{verbose}{If true, report progress}
 }
 \value{
 a list with a query dtm and lookup dtm.
@@ -52,7 +60,7 @@ This is an OR (union) combination, meaning that if at least one column is nonzer
 Second, all columns will be combined to get the co-occurences (AND, or intersect).
 
 To keep the vocabulary size manageable, only terms with at least min_docfreq (minimum document frequency) and max_docprob (max document probability) are returned.
-If a ref_dtm is given, the ref_dtm will be used to compute the docfreq and docprob values, used for filtering and weighting.
+If a ref_dtm is given, both the dtm and ref_dtm will be used to compute the docfreq and docprob values, used for filtering and weighting (unless use_dtm_and_ref = F).
 }
 \examples{
  q = create_queries(rnewsflow_dfm, min_docfreq = 2, union_sim_thres = 0.9, 

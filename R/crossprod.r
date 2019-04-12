@@ -16,7 +16,10 @@
 #' @param diag if false, the diagonal of the matrix is not returned. Only possible for symmetrical output (m and m2 have same number of columns)
 #' @param top_n an integer, specifying the top number of strongest scores for each column in m
 #' @param rowsum_div if true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering)
-#' @param zscore if true, transform the similarity scores for each row in m to z-scores. The min_value and max_value filters will in that case apply to the zscore value.
+#' @param pvalue If used, transform the similarity score to a p-value. The value is reversed, so that higher means more similar 
+#'               (and thus the min.similarity still makes sense). Currently supports "normal" and "lognormal" distribution, and the uniform distribution 
+#'               used in the "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}). Also "nz_normal" and "nz_lognormal" can be used
+#'               to only consider the nonzero values.
 #' @param normalize normalize rows by a given norm score. Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine) 
 #' @param crossfun The function used in the vector operations. 
 #'                 Normally this is the "prod", for product (dot product). 
@@ -47,11 +50,12 @@
 #' tcrossprod_sparse(m, min_value = 0, only_upper = TRUE, diag = FALSE)
 #' tcrossprod_sparse(m, min_value = 0.2, only_upper = TRUE, diag = FALSE)
 #' tcrossprod_sparse(m, min_value = 0, only_upper = TRUE, diag = FALSE, top_n = 1)
-tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, max_value=NULL, only_upper=F, diag=T, top_n=NULL, rowsum_div=F, zscore=F, normalize=c('none','l2','softl2'), crossfun=c('prod','min','softprod','maxproduct'), group=NULL, group2=NULL, date=NULL, date2=NULL, lwindow=-1, rwindow=1, date_unit=c('days','hours','minutes','seconds'), simmat=NULL, simmat_thres=NULL, batchsize=1000, verbose=F) {
+tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, max_value=NULL, only_upper=F, diag=T, top_n=NULL, rowsum_div=F, pvalue=c("none", "normal", "lognormal", "nz_normal", "nz_lognormal", "disparity"), normalize=c('none','l2','softl2'), crossfun=c('prod','min','softprod','maxproduct'), group=NULL, group2=NULL, date=NULL, date2=NULL, lwindow=-1, rwindow=1, date_unit=c('days','hours','minutes','seconds'), simmat=NULL, simmat_thres=NULL, batchsize=1000, verbose=F) {
   date_unit = match.arg(date_unit)
   crossfun = match.arg(crossfun)
   normalize = match.arg(normalize)
-  
+  pvalue=match.arg(pvalue)
+
   if (crossfun == 'min' && min(m) < 0) stop('The "min" crossfun cannot be used if the dtm contains negative values')
   if (is.null(top_n)) top_n = 0
   if (is.null(m2)) {
@@ -136,7 +140,7 @@ tcrossprod_sparse <- function(m, m2=NULL, min_value=NULL, max_value=NULL, only_u
   cp = batched_tcrossprod_cpp(m, m2, group1=group, group2=group2, order1=order1, order2=order2, simmat=simmat, 
                               use_min=use_min, min_value=min_value, use_max=use_max, max_value=max_value, 
                               top_n=top_n, diag=diag, only_upper=only_upper, 
-                              rowsum_div=rowsum_div, zscore=zscore, normalize=normalize, crossfun=crossfun,
+                              rowsum_div=rowsum_div, pvalue=pvalue, normalize=normalize, crossfun=crossfun,
                               lwindow=lwindow, rwindow=rwindow, verbose=verbose, batchsize=batchsize)
   rownames(cp) = rownames(m)
   colnames(cp) = rownames(m2)

@@ -4,7 +4,8 @@
 \alias{term_intersect}
 \title{Combine terms in a dtm}
 \usage{
-term_intersect(dtm, simmat, as_dfm = T, verbose = F)
+term_intersect(dtm, simmat, as_dfm = T, verbose = F, par = NA,
+  sep = " & ")
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm} or a dgCMatrix.}
@@ -14,6 +15,8 @@ term_intersect(dtm, simmat, as_dfm = T, verbose = F)
 \item{as_dfm}{If True, return as quanteda dfm}
 
 \item{verbose}{If True, report progress}
+
+\item{sep}{The separator used for pasting the terms}
 }
 \value{
 A dgCMatrix or quanteda dfm
