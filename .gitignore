@@ -1,0 +1,21 @@
+# History files
+.Rhistory
+.Rapp.history
+
+# Example code in package build process
+*-Ex.R
+# RStudio files
+.Rproj.user/
+.RData
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+.Rproj.user
+
+journal_version/*
+tex_version/*
+
+# Rcpp files
+src/*.o
+src/*.so
+src/*.dll
