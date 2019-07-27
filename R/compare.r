@@ -165,7 +165,7 @@ newsflow.compare <- function(dtm, dtm.y=NULL, meta=NULL, meta.y=NULL, date.var='
     dtm.y = quanteda::as.dfm(dtm.y)
     if (!identical(quanteda::featnames(dtm), quanteda::featnames(dtm.y))) 
       dtm.y <- quanteda::dfm_match(dtm.y, quanteda::featnames(dtm))
-    
+
     meta.y$document_id = rownames(dtm.y)
     measure = match.arg(measure)
     return_as = match.arg(return_as)

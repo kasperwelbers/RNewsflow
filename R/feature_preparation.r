@@ -198,7 +198,7 @@ term_union <- function(dtm, simmat, as_dfm=T, verbose=F, sep='|', par=NA) {
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
   #simmat = match_simmat_terms(dtm, simmat)
   dtm = quanteda::dfm_match(dtm, colnames(simmat))
-  
+
   parentheses = if (is.na(par)) grepl('[&]', colnames(dtm)) else par
   ml = term_union_cpp(dtm, simmat, colnames(dtm), parentheses, verbose, sep)
   colnames(ml$m) = ml$colnames
@@ -232,7 +232,7 @@ term_intersect <- function(dtm, simmat, as_dfm=T, verbose=F, par=NA, sep=' & ') 
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
   #simmat = match_simmat_terms(dtm, simmat)
   dtm <- quanteda::dfm_match(dtm, colnames(simmat))
-  
+
   parentheses = if (is.na(par)) grepl('[|]', colnames(dtm)) else par
   ml = term_intersect_cpp(dtm, simmat, colnames(dtm), parentheses, verbose, sep)
   colnames(ml$m) = ml$colnames
