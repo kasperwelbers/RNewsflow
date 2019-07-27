@@ -185,6 +185,7 @@ match_simmat_terms <- function(dtm, simmat) {
 #' @param as_dfm       If True, return as quanteda dfm
 #' @param verbose      If True, report progress
 #' @param sep          The separator used for pasting the terms
+#' @param par          argument needing description
 #'
 #' @return  A dgCMatrix or quanteda dfm
 #' @export
@@ -224,7 +225,8 @@ term_union <- function(dtm, simmat, as_dfm=T, verbose=F, sep='|', par=NA) {
 #' @param simmat       A similarity matrix in dgCMatrix format. For instance, created with \link{term_char_sim}
 #' @param as_dfm       If True, return as quanteda dfm
 #' @param verbose      If True, report progress
-#' @param sep          The separator used for pasting the terms 
+#' @param par          argument needing description
+#' @inheritParams term_union
 #'
 #' @return  A dgCMatrix or quanteda dfm
 #' @export
@@ -371,7 +373,7 @@ term_char_sim <- function(voc, type=c('tri','bi'), min_overlap=2/3, max_diff=4, 
 get_doc_terms <- function(dtm, docname=NULL, doc_i=NULL) {
   if (is.null(docname) && is.null(doc_i)) stop('either docname or doc_i has to be specified')
   if (!is.null(docname) && !is.null(doc_i)) stop('either (not both) docname or doc_i has to be specified')
-  if (!is.null(doc_i)) docname = docnames(dtm)[doc_i]
+  if (!is.null(doc_i)) docname = quanteda::docnames(dtm)[doc_i]
   r = dtm[quanteda::docnames(dtm) == docname]
   if (nrow(r) == 0) stop('docname is not a document in dtm')
   cs = colSums(r)

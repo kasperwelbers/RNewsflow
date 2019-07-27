@@ -17,6 +17,8 @@ term_union(dtm, simmat, as_dfm = T, verbose = F, sep = "|",
 \item{verbose}{If True, report progress}
 
 \item{sep}{The separator used for pasting the terms}
+
+\item{par}{argument needing description}
 }
 \value{
 A dgCMatrix or quanteda dfm

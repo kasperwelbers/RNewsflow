@@ -24,7 +24,7 @@ term_innovation <- function(m, date, m2=NULL, date2=NULL, lwindow=-7, rwindow=7,
   } else {
     m2 = quanteda::as.dfm(m2)
     if (!identical(quanteda::featnames(m), quanteda::featnames(m2))) 
-      m2 = dfm_match(m2, quanteda::featnames(m))
+      m2 <- quanteda::dfm_match(m2, quanteda::featnames(m))
   }
   if (!methods::is(date, 'POSIXct')) stop("Date has to be of type POSIXct (use as.POSIXct)")
   if (!methods::is(date2, 'POSIXct')) stop("Date has to be of type POSIXct (use as.POSIXct)")
