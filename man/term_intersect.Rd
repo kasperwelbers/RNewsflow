@@ -16,6 +16,8 @@ term_intersect(dtm, simmat, as_dfm = T, verbose = F, par = NA,
 
 \item{verbose}{If True, report progress}
 
+\item{par}{argument needing description}
+
 \item{sep}{The separator used for pasting the terms}
 }
 \value{

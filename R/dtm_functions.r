@@ -5,29 +5,6 @@ dtmToSparseMatrix <- function(dtm){
   sm
 }
 
-pad_dfm <- function(dfm, cnames) {
-  ## not pretty, but quanteda:::pad_dfm is not exported
-  is_dfm = methods::is(dfm, 'dfm')
-  if (is_dfm) dv = quanteda::docvars(dfm)
-  rnames = rownames(dfm)
-  dfm = methods::as(dfm, 'dgTMatrix')
-  colindex = match(colnames(dfm), cnames)
-  isna = is.na(colindex[dfm@j+1])
-  out = Matrix::spMatrix(nrow(dfm), length(cnames), i=dfm@i[!isna]+1, j=colindex[dfm@j[!isna]+1], x = dfm@x[!isna])
-  out = methods::as(out, 'dgCMatrix')
-  if (is_dfm) out = quanteda::as.dfm(out)
-  rownames(out) = rnames
-  colnames(out) = cnames
-  if (is_dfm)
-    if (nrow(dv) > 0) quanteda::docvars(out) = dv
-  out
-}
-
-match.dtm.meta <- function(dtm, meta, id.var){
-  if(!all(rownames(dtm) %in% meta[,id.var])) stop('Not all documents in DTM match with a document in the meta data.frame')
-  meta[match(rownames(dtm), meta[,id.var]),]
-}
-
 #' Calculate statistics for term occurence across days
 #'
 #' @param dtm A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually
