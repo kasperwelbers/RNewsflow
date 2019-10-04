@@ -60,5 +60,8 @@ Eigen::SparseMatrix<double> sm_prepare(Eigen::SparseMatrix<double>& m, std::vect
 
 std::vector<std::tuple<double,double,int> > create_index(Rcpp::IntegerVector group, 
                                                          Rcpp::NumericVector order);
+
+double sum_std_vec(std::vector<double>& x);
+double nz_std_vec(std::vector<double>& x);
   
 #endif

@@ -182,6 +182,19 @@ std::pair<int,int> find_positions(Index& xi, const double min_g, const double ma
   return(out);
 }
 
+double sum_std_vec(std::vector<double>& x) {
+  double out = 0;
+  for (auto& v : x)
+    out += v;
+  return(out);
+}
+
+double nz_std_vec(std::vector<double>& x) {
+  double out = 0;
+  for (auto& v : x)
+    if (!v == 0) out += 1;
+  return(out);
+}
 
 /*** R
 */

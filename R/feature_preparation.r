@@ -374,7 +374,7 @@ get_doc_terms <- function(dtm, docname=NULL, doc_i=NULL) {
   if (is.null(docname) && is.null(doc_i)) stop('either docname or doc_i has to be specified')
   if (!is.null(docname) && !is.null(doc_i)) stop('either (not both) docname or doc_i has to be specified')
   if (!is.null(doc_i)) docname = quanteda::docnames(dtm)[doc_i]
-  r = dtm[quanteda::docnames(dtm) == docname]
+  r = dtm[quanteda::docnames(dtm) == docname,]
   if (nrow(r) == 0) stop('docname is not a document in dtm')
   cs = colSums(r)
   cs[cs > 0]

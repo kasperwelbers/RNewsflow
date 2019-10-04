@@ -11,7 +11,7 @@ columnEntropy <- function(m){
 }
 
 # get 1-day halflife decay
-exp.decay <- function(r, decay_constant=0.6931472, halflife=NULL) {
+exp.decay <- function(r, decay_constant=log(2), halflife=NULL) {
   if(!is.null(halflife)) decay_constant = -(log(0.5) / halflife) 
   exp(-r*decay_constant)
 }

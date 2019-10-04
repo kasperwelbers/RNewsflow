@@ -45,32 +45,67 @@ void fill_triples(Triplet& tl, std::vector<double>& res,
 }
 
 // used in batched_tcrossprod_cpp
-std::vector<bool> create_use_pair(int i, int offset, Index& index1, Index& index2, SpMat& m2_batch, bool diag, bool only_upper, int lwindow, int rwindow) {
-  std::vector<bool> use_pair(m2_batch.rows());
+void fill_pair_information(std::vector<bool>& use_pair, std::vector<bool>& is_lag, 
+                                        int i, int offset, Index& index1, Index& index2, SpMat& m2_batch, bool diag, bool only_upper, int lwindow, int rwindow) {
+  use_pair = std::vector<bool>(m2_batch.rows());
+  is_lag = std::vector<bool>(m2_batch.rows());
   double group1_val = std::get<0>(index1[i]);
   double order1_val = std::get<1>(index1[i]);
   double group2_val, order2_val;
   for (int j = 0; j < use_pair.size(); j++) {
     group2_val = std::get<0>(index2[j + offset]);
-    if (group2_val != group1_val) continue;
     order2_val = std::get<1>(index2[j + offset]);
+    if (order2_val < order1_val) is_lag[j] = true;
+    if (group2_val != group1_val) continue;
     if (order2_val < order1_val+lwindow) continue;
     if (order2_val > order1_val+rwindow) continue;
     if (!diag) if (i == j + offset) continue;
     if (only_upper) if (i > j + offset) continue;
     use_pair[j] = true;
   }
-  return(use_pair);
 }
 
+void fill_row_attributes(int i, bool row_attr, bool col_attr, bool lag_attr,
+                         Index& index1, Index& index2, int offset,
+                         std::vector<double> res, std::vector<bool> use_pair, std::vector<bool> is_lag, 
+                         NumericVector& row_n, NumericVector& row_sum, NumericVector& row_nz,
+                         NumericVector& col_n, NumericVector& col_sum, NumericVector& col_nz,
+                         NumericVector& lag_n, NumericVector& lag_sum, NumericVector& lag_nz) {
+  if (row_attr) {
+    row_n[std::get<2>(index1[i])] = count(use_pair.begin(), use_pair.end(), true);
+    row_sum[std::get<2>(index1[i])] = sum_std_vec(res);
+    row_nz[std::get<2>(index1[i])] = nz_std_vec(res);
+  }
+  if (col_attr) {
+    for (int res_i = 0; res_i < res.size(); res_i++) {
+      col_n[std::get<2>(index2[res_i+offset])] += use_pair[res_i];
+      col_sum[std::get<2>(index2[res_i+offset])] += res[res_i];
+      if (!res[res_i] == 0) col_nz[std::get<2>(index2[res_i+offset])] += 1;
+    }
+  }
+  if (lag_attr) {
+    for (int pair_i = 0; pair_i < use_pair.size(); pair_i++) {
+      if (use_pair[pair_i]) {
+        if (is_lag[pair_i]) {
+          lag_n[std::get<2>(index1[i])] += 1;
+          lag_sum[std::get<2>(index1[i])] += res[pair_i];
+          if (!res[pair_i] == 0) lag_nz[std::get<2>(index1[i])] += 1;
+        } 
+      }
+    }
+  }
+}
+
+
 // [[Rcpp::export]]
-SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2, 
+List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2, 
                              IntegerVector group1, IntegerVector group2, 
                              NumericVector order1, NumericVector order2,
                              const SpMat& simmat,
                              bool use_min=true, NumericVector min_value=0, bool use_max=false, NumericVector max_value=1, int top_n=0, bool diag=true, bool only_upper=false, 
                              bool rowsum_div=false, std::string pvalue="NA", std::string normalize="none", std::string crossfun="prod",
                              int lwindow=0, int rwindow=0,
+                             bool row_attr=false, bool col_attr=false, bool lag_attr=false,
                              bool verbose=false, int batchsize = 1000) {
   if (m1.cols() != m2.cols()) stop("m1 and m2 need to have the same number of columns");
   if (min_value.size() != 1) 
@@ -111,6 +146,27 @@ SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
   int i_end;
   int offset = 0;
   std::pair<int,int> batch_indices;
+  
+  
+  // optional row attributes
+  NumericVector row_n, row_sum, row_nz, col_n, col_sum, col_nz, lag_n, lag_sum, lag_nz;
+  if (row_attr) {
+    row_n =   NumericVector(rows);
+    row_sum = NumericVector(rows);
+    row_nz =  NumericVector(rows);
+  }
+  if (col_attr) {
+    col_n =   NumericVector(cols);
+    col_sum = NumericVector(cols);
+    col_nz = NumericVector(cols);
+  }
+  if (lag_attr) {
+    lag_n =   NumericVector(rows);
+    lag_sum = NumericVector(rows);
+    lag_nz =  NumericVector(rows);
+  }
+
+  
   for (int i = 0; i < rows; i++) {
     
     // CREATE BATCH
@@ -139,8 +195,9 @@ SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
     
     std::vector<double> res(m2_batch.rows());
 
-    // FIND ALL MATCHES FOR i IN BATCH
-    std::vector<bool> use_pair = create_use_pair(i, offset, index1, index2, m2_batch, diag, only_upper, lwindow, rwindow);
+    // FIND ALL MATCHES FOR i IN BATCH (look up once, instead of for each iteration in the crossprod)
+    std::vector<bool> use_pair, is_lag; 
+    fill_pair_information(use_pair, is_lag, i, offset, index1, index2, m2_batch, diag, only_upper, lwindow, rwindow);
     
     // MANAGE TRIPLET VECTOR CAPACITY
     if (tl.capacity() < tl.size() + res.size()) {
@@ -155,12 +212,23 @@ SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
     if (crossfun == "min") sim_min(i, m1, m2_batch, res, use_pair);
     if (crossfun == "softprod") sim_softprod(i, m1, m2_batch, res, use_pair, batch_simmat);      
     
+    // IF PVALUE IS USED
     if (rowsum_div) as_pct(i, m1, res); 
     if (pvalue == "normal") as_pnorm(res, false, false);
     if (pvalue == "lognormal") as_pnorm(res, true, false);
     if (pvalue == "nz_normal") as_pnorm(res, false, true);
     if (pvalue == "nz_lognormal") as_pnorm(res, true, true);
     if (pvalue == "disparity") as_pdisparity(res);
+    
+    // SAVE COL/ROW ATTRIBUTES WITH CORRECT POSITIONS (using index)
+    // (fill by reference)
+    fill_row_attributes(i, row_attr, col_attr, lag_attr,
+                        index1, index2, offset,
+                        res, use_pair, is_lag,
+                        row_n, row_sum, row_nz,
+                        col_n, col_sum, col_nz,
+                        lag_n, lag_sum, lag_nz);
+    
       
     // SAVE VALUES WITH CORRECT POSITIONS (using offset and index)
     fill_triples(tl, res, index1, index2, offset, i, use_min, min_value, use_max, max_value, top_n);
@@ -172,7 +240,25 @@ SpMat batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
   
   SpMat out(rows,cols);
   out.setFromTriplets(tl.begin(), tl.end());
-  return out;
+  
+  List row_attributes;
+  if (row_attr) {
+    row_attributes["row_n"] = row_n;
+    row_attributes["row_sum"] = row_sum;
+    row_attributes["row_nz"] = row_nz;
+  }
+  if (col_attr) {
+    row_attributes["col_n"] = col_n;
+    row_attributes["col_sum"] = col_sum;
+    row_attributes["col_nz"] = col_nz;
+  }
+  if (lag_attr) {
+    row_attributes["lag_n"] = lag_n;
+    row_attributes["lag_sum"] = lag_sum;
+    row_attributes["lag_nz"] = lag_nz;
+  }
+    
+  return List::create(Named("cp") = out, Named("margin") = row_attributes);
 }
 
 

@@ -68,7 +68,20 @@ test_that("Matrix multiplication", {
   cp = tcrossprod_sparse(m, date = date, lwindow = -2, rwindow = 3)
   cp_correct = Matrix::tcrossprod(m)
   is_same_m1nonzero(cp,cp_correct) 
+
+  ## different size matrices
+  m1 = Matrix::rsparsematrix(10,10,0.5)
+  m2 = Matrix::rsparsematrix(5,10,0.5)
+  cp = tcrossprod_sparse(m1, m2,
+                    group = c(1,1,1,2,2,2,3,3,3,3), group2=c(1,1,2,2,2),
+                    batchsize = 1, row_attr=T, col_attr=T)
+  attr(cp, 'margin')
   
+  date = seq.Date(as.Date('2010-01-01'), as.Date('2010-01-10'), by=1)
+  date2 = seq.Date(as.Date('2010-01-01'), as.Date('2010-01-5'), by=1)
+  cp = tcrossprod_sparse(m1, m2, date = date, date2=date2, lwindow = -1, 
+                         rwindow = 1, row_attr=T, col_attr=T, lag_attr=T, batchsize = 2) ## use small batch to also test batching
+  mars = attr(cp, 'margin')
   
   ## with batches
   cp = tcrossprod_sparse(m, date = date, lwindow = -1, rwindow = 1, batchsize = 1, verbose = F)
@@ -99,4 +112,11 @@ test_that("Matrix multiplication", {
   tcrossprod_sparse(m, crossfun = 'min')
   tcrossprod_sparse(m, crossfun = 'min', rowsum_div = T) ## what percentage of words in a document also occurs in the other document?
   
+  
+  ## checking the optional row attributes
+  set.seed(1)
+  m = Matrix::rsparsematrix(5,10,0.5)
+  # should be equal if no filter is used
+  cp = tcrossprod_sparse(m, only_upper = FALSE, diag = TRUE, row_attr=T)
+  testthat::expect_equal(rowSums(cp), attr(cp, 'margin')[['row_sum']])
 })
