@@ -103,7 +103,8 @@ List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
                              NumericVector order1, NumericVector order2,
                              const SpMat& simmat,
                              bool use_min=true, NumericVector min_value=0, bool use_max=false, NumericVector max_value=1, int top_n=0, bool diag=true, bool only_upper=false, 
-                             bool rowsum_div=false, std::string pvalue="NA", std::string normalize="none", std::string crossfun="prod",
+                             bool rowsum_div=false, std::string pvalue="NA", double max_p=1, 
+                             std::string normalize="none", std::string crossfun="prod",
                              int lwindow=0, int rwindow=0,
                              bool row_attr=false, bool col_attr=false, bool lag_attr=false,
                              bool verbose=false, int batchsize = 1000) {
@@ -127,7 +128,7 @@ List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
   if (rows != cols && only_upper) stop("using 'only_upper = true' is only possible if m1 and m2 have the same number of rows (so output is symmetric)");
   if (rows != cols && !diag) stop("using 'diag = false' is only possible if m1 and m2 have the same number of rows (so output is symmetric)");
   
-  if (crossfun != "prod" && crossfun != "min" && crossfun != "softprod" && crossfun != "maxproduct") stop("Not a valid crossfun (currently supports prod, min, softcos and maxproduct)");
+  if (crossfun != "prod" && crossfun != "min" && crossfun != "softprod" && crossfun != "maxproduct" && crossfun != "lookup") stop("Not a valid crossfun (currently supports prod, min, softcos and maxproduct)");
   if (normalize != "none" && normalize != "l2" && normalize != "softl2") stop("Not a valid normalize function (currently supports none, l2 and softl2)");
   
   Triplet tl;
@@ -211,14 +212,21 @@ List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
     if (crossfun == "maxproduct") sim_maxproduct(i, m1, m2_batch, res, use_pair);      
     if (crossfun == "min") sim_min(i, m1, m2_batch, res, use_pair);
     if (crossfun == "softprod") sim_softprod(i, m1, m2_batch, res, use_pair, batch_simmat);      
+    if (crossfun == "lookup") sim_lookup(i, m1, m2_batch, res, use_pair);
+    
+    if (rowsum_div) as_pct(i, m1, res); 
     
     // IF PVALUE IS USED
-    if (rowsum_div) as_pct(i, m1, res); 
-    if (pvalue == "normal") as_pnorm(res, false, false);
-    if (pvalue == "lognormal") as_pnorm(res, true, false);
-    if (pvalue == "nz_normal") as_pnorm(res, false, true);
-    if (pvalue == "nz_lognormal") as_pnorm(res, true, true);
-    if (pvalue == "disparity") as_pdisparity(res);
+    if (max_p < 1) {
+      if (pvalue == "normal") pnorm_filter(res, false, false, max_p);
+      if (pvalue == "beta") pbeta_filter(res, false, max_p);
+      if (pvalue == "lognormal") pnorm_filter(res, true, false, max_p);
+      if (pvalue == "nz_normal") pnorm_filter(res, false, true, max_p);
+      if (pvalue == "nz_lognormal") pnorm_filter(res, true, true, max_p);
+      
+      double k = count(use_pair.begin(), use_pair.end(), true);
+      if (pvalue == "disparity") pdisparity_filter(res, k, max_p);
+    }
     
     // SAVE COL/ROW ATTRIBUTES WITH CORRECT POSITIONS (using index)
     // (fill by reference)

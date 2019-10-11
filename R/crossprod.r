@@ -1,9 +1,9 @@
-#' tcrossprod with benefits, for people that like drowning in parameters
+#' tcrossprod with benefits, for people that like parameters
 #'
 #' This function (including the underlying cpp function batched_tcrossprod_cpp) 
-#' is the workhorse of the RNewsflow package. It is rather complex because it needs to be able to do many thing efficiently.
-#' I exported it because it has applications outside of RNewsflow, but I make no excuses for the fact that readability is very
-#' much sacrificed here for the convenience of me being able to keep adding features that I need (or want?) for RNewsflow.
+#' is the workhorse of the RNewsflow package. It has unnervingly many arguments for a tcrossprod because it needs to be able to do many thing efficiently.
+#' While its mostly a backend function, we expose it because it has applications outside of RNewsflow, but we make no excuses for the fact that readability is very
+#' much sacrificed here for the convenience of being able to keep adding features that we need for RNewsflow.
 #' 
 #' Enables limiting row combinations to within specified groups 
 #' and date windows, and filters results that do not pass the threshold on the fly.
@@ -24,12 +24,11 @@
 #' @param max_value   Optionally, a numerical value for the upper limit for including a score in the output.
 #' @param only_upper  If true, only the upper triangle of the matrix is returned. Only possible for symmetrical output (m and m2 have same number of columns)
 #' @param diag        If false, the diagonal of the matrix is not returned. Only possible for symmetrical output (m and m2 have same number of columns)
-#' @param top_n       An integer, specifying the top number of strongest scores for each column in m
+#' @param top_n       An integer, specifying the top number of strongest similarities per row. So, for each row in m at most top_n scores are returned.. 
 #' @param rowsum_div  If true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering)
-#' @param pvalue      If used, transform the similarity score to a p-value. The value is reversed, so that higher means more similar 
-#'                    (and thus the min.similarity still makes sense). Currently supports "normal" and "lognormal" distribution, and the uniform distribution 
-#'                    used in the "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}). Also "nz_normal" and "nz_lognormal" can be used
-#'                    to only consider the nonzero values.
+#' @param max_p       A threshold for maximium p value. 
+#' @param pvalue      If max_p < 1, edges are removed based on a p value. For each document in dtm, a p value is calculated over its outward edges. 
+#'                    Default is the p-value based on uniform distribution, akin to a "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}) but without filtering on inward edges.
 #' @param normalize   Normalize rows by a given norm score. Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine) 
 #' @param crossfun    The function used in the vector operations. 
 #'                    Normally this is the "prod", for product (dot product). 
@@ -39,7 +38,7 @@
 #'                    And, the "maxproduct" is a special case used in the query_lookup measure, that uses product but only returns the score of the strongest matching term. 
 #' @param group       Optionally, a character vector that specifies a group (e.g., source) for each row in m. If given, only pairs of rows with the same group are calculated. 
 #' @param group2      If m2 and group are used, group2 has to be used to specify the groups for the rows in m2 (otherwise group will be ignored)
-#' @param date        Optionally, a character vector that specifies a date for each row in m. If given, only pairs of rows within a given date range (see lwindow, rwindow and date_unit) are calculated. 
+#' @param date        Optionally, a POSIXct vector (or a vector that can be converted to as.POSIXct) that specifies a date for each row in m. If given, only pairs of rows within a given date range (see lwindow, rwindow and date_unit) are calculated. 
 #' @param date2       If m2 and date are used, date2 has to be used to specify the date for the rows in m2 (otherwise date will be ignored)
 #' @param lwindow     If date (and date2) are used, lwindow determines the left side of the date window. e.g. -10 means that rows are only matched with rows for which date is within 10 [date_units] before.
 #' @param rwindow     Like lwindow, but for the right side. e.g. an lwindow of -1 and rwindow of 1, with date_unit is "days", means that only rows are matched for which the dates are within a 1 day distance
@@ -66,8 +65,8 @@
 #' tcrossprod_sparse(m, min_value = 0, only_upper = TRUE, diag = FALSE, top_n = 1)
 tcrossprod_sparse <- function(m, m2=NULL, 
                               min_value=NULL, max_value=NULL, only_upper=F, diag=T, top_n=NULL, 
-                              rowsum_div=F, pvalue=c("none", "normal", "lognormal", "nz_normal", "nz_lognormal", "disparity"), 
-                              normalize=c('none','l2','softl2'), crossfun=c('prod','min','softprod','maxproduct'), 
+                              rowsum_div=F, max_p=1, pvalue=c("none", "normal", "lognormal", "nz_normal", "nz_lognormal", "disparity"), 
+                              normalize=c('none','l2','softl2'), crossfun=c('prod','min','softprod','maxproduct','lookup'), 
                               group=NULL, group2=NULL, date=NULL, date2=NULL, lwindow=-1, rwindow=1, 
                               date_unit=c('days','hours','minutes','seconds'), 
                               simmat=NULL, simmat_thres=NULL, 
@@ -163,7 +162,7 @@ tcrossprod_sparse <- function(m, m2=NULL,
   l = batched_tcrossprod_cpp(m, m2, group1=group, group2=group2, order1=order1, order2=order2, simmat=simmat, 
                              use_min=use_min, min_value=min_value, use_max=use_max, max_value=max_value, 
                              top_n=top_n, diag=diag, only_upper=only_upper, 
-                             rowsum_div=rowsum_div, pvalue=pvalue, normalize=normalize, crossfun=crossfun,
+                             rowsum_div=rowsum_div, pvalue=pvalue, max_p=max_p, normalize=normalize, crossfun=crossfun,
                              lwindow=lwindow, rwindow=rwindow, 
                              row_attr=row_attr, col_attr=col_attr, lag_attr=lag_attr,
                              verbose=verbose, batchsize=batchsize)
@@ -175,11 +174,10 @@ tcrossprod_sparse <- function(m, m2=NULL,
   cp
 }
 
-function() {
-  m = Matrix::rsparsematrix(5,10,0.5)
-  cp = tcrossprod_sparse(m, min_value = -20, only_upper = FALSE, diag = TRUE, row_attr=T)
-  cp
-  rowSums(cp)
-  attr(cp, 'row_attr')
+reindexTerms <- function(dtm, terms){
+  dtm = methods::as(dtm, 'dgTMatrix')
+  documents = rownames(dtm)
+  dtm = Matrix::spMatrix(nrow(dtm), length(terms), dtm@i+1, match(colnames(dtm)[dtm@j+1], terms), dtm@x)
+  dimnames(dtm) = list(documents, terms)
+  dtm
 }
-

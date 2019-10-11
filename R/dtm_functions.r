@@ -23,10 +23,10 @@ dtmToSparseMatrix <- function(dtm){
 #' @export
 #'
 #' @examples
-#' tdd = term.day.dist(rnewsflow_dfm, date.var='date')
+#' tdd = term_day_dist(rnewsflow_dfm, date.var='date')
 #' head(tdd)
 #' tail(tdd)
-term.day.dist <- function(dtm, meta=NULL, date.var='date'){
+term_day_dist <- function(dtm, meta=NULL, date.var='date'){
   if (is.null(meta)) meta = quanteda::docvars(dtm)
   dtm = quanteda::as.dfm(dtm)
   dtm = methods::as(dtm, 'dgTMatrix')

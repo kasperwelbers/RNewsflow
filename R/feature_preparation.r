@@ -1,21 +1,33 @@
-#' (experimental) Automatically infer queries from combinations of terms in a dtm
+#' Automatically infer queries from combinations of terms in a dtm
 #'
-#' Prepares query terms with high sparsity. Returns two matrices: a query and lookup dtm.
-#' Can either be used with one dtm as input (which becomes both the query and lookup dtm) or
-#' with a dtm and ref_dtm (reference), in which case dtm represents the queries and ref_dtm the lookup dtm.
-#' 
-#' The query dtm will contain the weighted term scores of the queries,
-#' and the lookup dtm will contain binary values for whether or not terms occured.
-#' This is designed to be used with the document.compare or newsflow.compare functions to compare the query matrix to the lookup matrix,
-#' using the special 'query_lookup' similarity measure. 
+#' This function was designed for the task of matching short event descriptions to news articles, but can more generally
+#' be used for document matching tasks. However, it should be noted that it will require exponentially more
+#' memory for dtms with more unique terms, which is why it is less suitable for matching larger documents. This only applies to
+#' the dtm, not the ref_dtm. Thus, if your goal is to match smaller documents such as event descriptions to news, this function
+#' might be usefull. 
 #'
-#' Performs two operations. 
-#' First, clusters of very similar columns (high cosine similarity) can be merged into a single column.
-#' This is an OR (union) combination, meaning that if at least one column is nonzero, the value will be one.
-#' Second, all columns will be combined to get the co-occurences (AND, or intersect). 
+#' The main purpose of the function is that it intersects the terms in a dtm based to increase sparsity. 
+#' This can improve certain document matching tasks, but at the cost of creating a bigger dtm. 
+#' If all terms are combined this would be a quadratic increase of columns.
+#' However, only term combinations that occur in dtm (not ref_dtm) will be used.
+#' This is not a problem as long as the similarity of the documents in dtm to documents in dtm_y is calculated
+#' as an assymetric similarity measure (i.e. in which the sum of terms in dtm_y is not used). 
 #' 
-#' To keep the vocabulary size manageable, only terms with at least min_docfreq (minimum document frequency) and max_docprob (max document probability) are returned.
-#' If a ref_dtm is given, both the dtm and ref_dtm will be used to compute the docfreq and docprob values, used for filtering and weighting (unless use_dtm_and_ref = F).
+#' To emphasize that this feature preparation step is geared towards the task of 'looking up' documents,
+#' we use the terminolog of a 'query'. The output of the function is a list of two dtm: query_dtm and ref_dtm.
+#' Both dtms have the exact same columns that contain the query terms.
+#' The values in query_dtm are by default tfidf weighted, and the values in ref_dtm are binary.
+#' 
+#' The special `query_lookup` measure in the \code{\link{compare_documents}} function can be used to
+#' perform the lookup. Note that a more common approach is to weigh both the queries and documents and then match queries to documents
+#' with cosine similarity. However, for event matching we only want to see whether a query 'suffiently' matches a
+#' document. The query_lookup function calculates a query->document weight as the sum of query terms that occur in the document.
+#'  
+#' Several options are given to only create term combinations that are informative. Firstly, a minimum and maximum document frequency of term combinations can be defined. 
+#' Secondly, a minimum observed/expected ratio can be given. The expected probability of a combination of term A and term B
+#' is the joint probability. If the observed probability is not higher, the combination is not more informative than chance.
+#' Thirdly, before intersecting terms, one can first cluster very similar terms together as single columns to reduct the number
+#' of possible combinations. 
 #'
 #' @param dtm          A quanteda \link[quanteda]{dfm}
 #' @param ref_dtm      Optionally, another quanteda \link[quanteda]{dfm}. If given, the ref_dtm will be used to calculate the docfreq/docprob scores.
@@ -27,20 +39,19 @@
 #' @param norm_weight  Normalize the weight score so that the highest value is 1. If "max" is used, max is the highest possible value. "doc_max" uses the highest value within each document, and "dtm_max" uses the highest observed value in the dtm.
 #' @param min_obs_exp  The minimum ratio of the observed and expected frequency of a term combination
 #' @param union_sim_thres If given, a number between 0 and 1, used as the cosine similarity threshold for combining clusters of terms 
-#' @param union_sim_thres2 Like union_sim_thres, but after combining terms
 #' @param combine_all  If True, combine all terms. If False (default), terms that are included as unigrams (i.e. that are within the min_docfreq and max_docprob) are not combined with other terms.
 #' @param only_dtm_combs Only include term combinations that occur in dtm. This makes sense (and saves a lot of memory) if you are only interested in assymetric similarity measures based on the query
 #' @param use_dtm_and_ref if a ref_dtm is used, both the dtm and ref_dtm are used to compute the docfreq and docprob values used for filtering and weighting. If use_dtm_and_ref is set o FALSE, only the ref_dtm is used.
 #' @param verbose      If true, report progress
 #'
-#' @return a list with a query dtm and lookup dtm.
+#' @return a list with a query dtm and ref_dtm. Designed for use in \code{\link{compare_documents}} using the special `query_lookup` measure
 #' @export
 #'
 #' @examples
 #'  q = create_queries(rnewsflow_dfm, min_docfreq = 2, union_sim_thres = 0.9, 
 #'                     max_docprob = 0.05, verbose = FALSE)
 #'  head(colnames(q$query_dtm),100)
-create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, weight=c('tfidf','binary'), norm_weight=c('max','doc_max','dtm_max','none'), min_obs_exp=NA, union_sim_thres=NA, union_sim_thres2=NA, combine_all=T, only_dtm_combs=T, use_dtm_and_ref=T, verbose=F) {
+create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.01, weight=c('tfidf','binary'), norm_weight=c('max','doc_max','dtm_max','none'), min_obs_exp=NA, union_sim_thres=NA, combine_all=T, only_dtm_combs=T, use_dtm_and_ref=T, verbose=F) {
   weight = match.arg(weight)
   norm_weight = match.arg(norm_weight)
   if (!methods::is(dtm, 'dfm')) stop('dtm has to be a quanteda dfm')
@@ -105,21 +116,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
     m = term_intersect(methods::as(m, 'dgCMatrix'), methods::as(simmat2, 'dgCMatrix'), as_dfm=F)
     m_ref = NULL
   }
-  
-  ## second merging of similar terms after combining
-  if (!is.na(union_sim_thres2)) {
-    if (!is.null(m_ref)) {
-      simmat3 = term_occur_sim(methods::as(m_ref, 'dgCMatrix'), union_sim_thres2, verbose=verbose)
-      m = term_union(methods::as(m,'dgCMatrix'), methods::as(simmat3,'dgCMatrix'), as_dfm=F, sep=' #&# ', par=F)
-      m_ref = term_union(methods::as(m_ref, 'dgCMatrix'), methods::as(simmat3,'dgCMatrix'), as_dfm=F, sep=' #&# ', par=F)
-    } else {
-      simmat3 = term_occur_sim(m, union_sim_thres2, verbose=verbose)
-      m = term_union(m, methods::as(simmat3,'dgCMatrix'), as_dfm=F, sep=' #&# ', par=F)
-    }
-    newvoc = merge_vocabulary_terms(colnames(m))
-    colnames(m) = colnames(m_ref) = newvoc
-  }
-    
+   
   if (!ncol(m) == 0) m = weight_queries(m, m_ref, weight, norm_weight)
 
   m = quanteda::as.dfm(m)
@@ -133,7 +130,9 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.001, 
     m_ref = m > 0
   }
   
-  list(query_dtm=m, ref_dtm=m_ref)
+  l = list(query_dtm=m, ref_dtm=m_ref)
+  class(l) = c('RNewflow_queries', class(l))
+  l
 }
 
 weight_queries <- function(dfm_x, dfm_y=NULL, weight, norm_weight) {
@@ -159,9 +158,6 @@ weight_queries <- function(dfm_x, dfm_y=NULL, weight, norm_weight) {
   return(dfm_x)
 }
 
-dfm_x = abs(rsparsematrix(10,11,0.2))
-
-
 
 match_simmat_terms <- function(dtm, simmat) {
   if (!all(colnames(dtm) %in% colnames(simmat))) stop('not all terms in dtm are in  simmat')
@@ -185,7 +181,9 @@ match_simmat_terms <- function(dtm, simmat) {
 #' @param as_dfm       If True, return as quanteda dfm
 #' @param verbose      If True, report progress
 #' @param sep          The separator used for pasting the terms
-#' @param par          argument needing description
+#' @param par          If TRUE, add parentheses to colnames before combining. This is mainly for internal use, as it allows
+#'                     specification if OR (term_union) and AND (term_intersect) operations are combined. 
+#'                     If NA, this is based on whether parenthese are present. 
 #'
 #' @return  A dgCMatrix or quanteda dfm
 #' @export
@@ -225,12 +223,14 @@ term_union <- function(dtm, simmat, as_dfm=T, verbose=F, sep='|', par=NA) {
 #' @param simmat       A similarity matrix in dgCMatrix format. For instance, created with \link{term_char_sim}
 #' @param as_dfm       If True, return as quanteda dfm
 #' @param verbose      If True, report progress
-#' @param par          argument needing description
-#' @inheritParams term_union
+#' @param sep          The separator used for pasting the terms
+#' @param par          If TRUE, add parentheses to colnames before combining. This is mainly for internal use, as it allows
+#'                     specification if OR (term_union) and AND (term_intersect) operations are combined. 
+#'                     If NA, this is based on whether parenthese are present.
 #'
 #' @return  A dgCMatrix or quanteda dfm
 #' @export
-term_intersect <- function(dtm, simmat, as_dfm=T, verbose=F, par=NA, sep=' & ') {
+term_intersect <- function(dtm, simmat, as_dfm=T, verbose=F, sep=' & ', par=NA) {
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
   #simmat = match_simmat_terms(dtm, simmat)
   dtm <- quanteda::dfm_match(dtm, colnames(simmat))

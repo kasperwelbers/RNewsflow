@@ -18,7 +18,9 @@ term_union(dtm, simmat, as_dfm = T, verbose = F, sep = "|",
 
 \item{sep}{The separator used for pasting the terms}
 
-\item{par}{argument needing description}
+\item{par}{If TRUE, add parentheses to colnames before combining. This is mainly for internal use, as it allows
+specification if OR (term_union) and AND (term_intersect) operations are combined. 
+If NA, this is based on whether parenthese are present.}
 }
 \value{
 A dgCMatrix or quanteda dfm

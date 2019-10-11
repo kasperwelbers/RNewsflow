@@ -4,8 +4,8 @@
 \alias{term_intersect}
 \title{Combine terms in a dtm}
 \usage{
-term_intersect(dtm, simmat, as_dfm = T, verbose = F, par = NA,
-  sep = " & ")
+term_intersect(dtm, simmat, as_dfm = T, verbose = F, sep = " & ",
+  par = NA)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm} or a dgCMatrix.}
@@ -16,9 +16,11 @@ term_intersect(dtm, simmat, as_dfm = T, verbose = F, par = NA,
 
 \item{verbose}{If True, report progress}
 
-\item{par}{argument needing description}
-
 \item{sep}{The separator used for pasting the terms}
+
+\item{par}{If TRUE, add parentheses to colnames before combining. This is mainly for internal use, as it allows
+specification if OR (term_union) and AND (term_intersect) operations are combined. 
+If NA, this is based on whether parenthese are present.}
 }
 \value{
 A dgCMatrix or quanteda dfm

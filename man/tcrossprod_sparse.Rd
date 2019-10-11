@@ -2,16 +2,17 @@
 % Please edit documentation in R/crossprod.r
 \name{tcrossprod_sparse}
 \alias{tcrossprod_sparse}
-\title{The tcrossprod function for sparse matrices, for people that like drowning in parameters}
+\title{tcrossprod with benefits, for people that like parameters}
 \usage{
 tcrossprod_sparse(m, m2 = NULL, min_value = NULL, max_value = NULL,
   only_upper = F, diag = T, top_n = NULL, rowsum_div = F,
-  pvalue = c("none", "normal", "lognormal", "nz_normal", "nz_lognormal",
-  "disparity"), normalize = c("none", "l2", "softl2"),
-  crossfun = c("prod", "min", "softprod", "maxproduct"), group = NULL,
-  group2 = NULL, date = NULL, date2 = NULL, lwindow = -1,
-  rwindow = 1, date_unit = c("days", "hours", "minutes", "seconds"),
-  simmat = NULL, simmat_thres = NULL, batchsize = 1000,
+  max_p = 1, pvalue = c("none", "normal", "lognormal", "nz_normal",
+  "nz_lognormal", "disparity"), normalize = c("none", "l2", "softl2"),
+  crossfun = c("prod", "min", "softprod", "maxproduct", "lookup"),
+  group = NULL, group2 = NULL, date = NULL, date2 = NULL,
+  lwindow = -1, rwindow = 1, date_unit = c("days", "hours",
+  "minutes", "seconds"), simmat = NULL, simmat_thres = NULL,
+  row_attr = F, col_attr = F, lag_attr = F, batchsize = 1000,
   verbose = F)
 }
 \arguments{
@@ -23,20 +24,20 @@ tcrossprod_sparse(m, m2 = NULL, min_value = NULL, max_value = NULL,
 
 \item{max_value}{Optionally, a numerical value for the upper limit for including a score in the output.}
 
-\item{only_upper}{if true, only the upper triangle of the matrix is returned. Only possible for symmetrical output (m and m2 have same number of columns)}
+\item{only_upper}{If true, only the upper triangle of the matrix is returned. Only possible for symmetrical output (m and m2 have same number of columns)}
 
-\item{diag}{if false, the diagonal of the matrix is not returned. Only possible for symmetrical output (m and m2 have same number of columns)}
+\item{diag}{If false, the diagonal of the matrix is not returned. Only possible for symmetrical output (m and m2 have same number of columns)}
 
-\item{top_n}{an integer, specifying the top number of strongest scores for each column in m}
+\item{top_n}{An integer, specifying the top number of strongest similarities per row. So, for each row in m at most top_n scores are returned..}
 
-\item{rowsum_div}{if true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering)}
+\item{rowsum_div}{If true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering)}
 
-\item{pvalue}{If used, transform the similarity score to a p-value. The value is reversed, so that higher means more similar 
-(and thus the min.similarity still makes sense). Currently supports "normal" and "lognormal" distribution, and the uniform distribution 
-used in the "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}). Also "nz_normal" and "nz_lognormal" can be used
-to only consider the nonzero values.}
+\item{max_p}{A threshold for maximium p value.}
 
-\item{normalize}{normalize rows by a given norm score. Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine)}
+\item{pvalue}{If max_p < 1, edges are removed based on a p value. For each document in dtm, a p value is calculated over its outward edges. 
+Default is the p-value based on uniform distribution, akin to a "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}) but without filtering on inward edges.}
+
+\item{normalize}{Normalize rows by a given norm score. Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine)}
 
 \item{crossfun}{The function used in the vector operations. 
 Normally this is the "prod", for product (dot product). 
@@ -49,7 +50,7 @@ And, the "maxproduct" is a special case used in the query_lookup measure, that u
 
 \item{group2}{If m2 and group are used, group2 has to be used to specify the groups for the rows in m2 (otherwise group will be ignored)}
 
-\item{date}{Optionally, a character vector that specifies a date for each row in m. If given, only pairs of rows within a given date range (see lwindow, rwindow and date_unit) are calculated.}
+\item{date}{Optionally, a POSIXct vector (or a vector that can be converted to as.POSIXct) that specifies a date for each row in m. If given, only pairs of rows within a given date range (see lwindow, rwindow and date_unit) are calculated.}
 
 \item{date2}{If m2 and date are used, date2 has to be used to specify the date for the rows in m2 (otherwise date will be ignored)}
 
@@ -59,9 +60,16 @@ And, the "maxproduct" is a special case used in the query_lookup measure, that u
 
 \item{date_unit}{The date unit used in lwindow and rwindow. Supports "days", "hours", "minutes" and "seconds". Note that refers to the time distance between two rows ("days" doesn't refer to calendar days, but to a time of 24 hours)}
 
-\item{simmat}{if softcos is used, a symmetric matrix with terms that indicates the similarity of terms (i.e. adjacency matrix). If NULL, a cosine similarity matrix will be created on the go}
+\item{simmat}{If softcos is used, a symmetric matrix with terms that indicates the similarity of terms (i.e. adjacency matrix). If NULL, a cosine similarity matrix will be created on the go}
 
-\item{simmat_thres}{if softcos is used, a threshold for the term similarity.}
+\item{simmat_thres}{If softcos is used, a threshold for the term similarity.}
+
+\item{row_attr}{If TRUE, add the "row_n" and "row_sum" elements to the "margin" attribute.}
+
+\item{col_attr}{Like row_attr, but adding "col_n" and "col_sum" to the "margin" attribute.}
+
+\item{lag_attr}{If TRUE, adds "lag_n" and "lag_sum" to the "margin" attribute. These are the margin scores for rows, 
+where the date of the column is before (lag) the date of the row. Only possible if date argument is given.}
 
 \item{batchsize}{If group and/or date are used, size of batches.}
 
@@ -71,14 +79,24 @@ And, the "maxproduct" is a special case used in the query_lookup measure, that u
 A dgCMatrix
 }
 \description{
-tcrossprod with benefits. Enables limiting row combinations to within specified groups 
+This function (including the underlying cpp function batched_tcrossprod_cpp) 
+is the workhorse of the RNewsflow package. It has unnervingly many arguments for a tcrossprod because it needs to be able to do many thing efficiently.
+While its mostly a backend function, we expose it because it has applications outside of RNewsflow, but we make no excuses for the fact that readability is very
+much sacrificed here for the convenience of being able to keep adding features that we need for RNewsflow.
+}
+\details{
+Enables limiting row combinations to within specified groups 
 and date windows, and filters results that do not pass the threshold on the fly.
 To achieve this, options for similarity measures are included in the function.
 For example, to get the cosine similarity, you can normalize with "l2" and use the "prod" (product) function for the
-}
-\details{
+
 This function is called by the document comparison functions (documents.compare, newsflow.compare, delete.duplicates).
 We only expose it here for additional flexibility, and because it could be usefull outside of the purpose of this package.
+
+The output matrix also has an attribute "margin", which contains margin scores (e.g., row_sum) if the row_attr or col_attr arguments are used.
+The reason for including this is that some values that are normally available in the output of a cross product are broken if certain filter options are used.
+If group or date is used, we don't know how many columns a rows has been compared to (normally this is all columns).
+If a min/max or top_n filter is used, we don't know the true row sums (and thus row means).
 }
 \examples{
 set.seed(1)

@@ -2,14 +2,13 @@
 % Please edit documentation in R/feature_preparation.r
 \name{create_queries}
 \alias{create_queries}
-\title{(experimental) Automatically infer queries from combinations of terms in a dtm}
+\title{Automatically infer queries from combinations of terms in a dtm}
 \usage{
 create_queries(dtm, ref_dtm = NULL, min_docfreq = 2,
-  max_docprob = 0.001, weight = c("tfidf", "binary"),
+  max_docprob = 0.01, weight = c("tfidf", "binary"),
   norm_weight = c("max", "doc_max", "dtm_max", "none"),
-  min_obs_exp = NA, union_sim_thres = NA, union_sim_thres2 = NA,
-  combine_all = T, only_dtm_combs = T, use_dtm_and_ref = T,
-  verbose = F)
+  min_obs_exp = NA, union_sim_thres = NA, combine_all = T,
+  only_dtm_combs = T, use_dtm_and_ref = T, verbose = F)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}}
@@ -30,8 +29,6 @@ The ref_dfm will always be binary.}
 
 \item{union_sim_thres}{If given, a number between 0 and 1, used as the cosine similarity threshold for combining clusters of terms}
 
-\item{union_sim_thres2}{Like union_sim_thres, but after combining terms}
-
 \item{combine_all}{If True, combine all terms. If False (default), terms that are included as unigrams (i.e. that are within the min_docfreq and max_docprob) are not combined with other terms.}
 
 \item{only_dtm_combs}{Only include term combinations that occur in dtm. This makes sense (and saves a lot of memory) if you are only interested in assymetric similarity measures based on the query}
@@ -41,26 +38,38 @@ The ref_dfm will always be binary.}
 \item{verbose}{If true, report progress}
 }
 \value{
-a list with a query dtm and lookup dtm.
+a list with a query dtm and ref_dtm. Designed for use in \code{\link{compare_documents}} using the special `query_lookup` measure
 }
 \description{
-Prepares query terms with high sparsity. Returns two matrices: a query and lookup dtm.
-Can either be used with one dtm as input (which becomes both the query and lookup dtm) or
-with a dtm and ref_dtm (reference), in which case dtm represents the queries and ref_dtm the lookup dtm.
+This function was designed for the task of matching short event descriptions to news articles, but can more generally
+be used for document matching tasks. However, it should be noted that it will require exponentially more
+memory for dtms with more unique terms, which is why it is less suitable for matching larger documents. This only applies to
+the dtm, not the ref_dtm. Thus, if your goal is to match smaller documents such as event descriptions to news, this function
+might be usefull.
 }
 \details{
-The query dtm will contain the weighted term scores of the queries,
-and the lookup dtm will contain binary values for whether or not terms occured.
-This is designed to be used with the document.compare or newsflow.compare functions to compare the query matrix to the lookup matrix,
-using the special 'query_lookup' similarity measure.
+The main purpose of the function is that it intersects the terms in a dtm based to increase sparsity. 
+This can improve certain document matching tasks, but at the cost of creating a bigger dtm. 
+If all terms are combined this would be a quadratic increase of columns.
+However, only term combinations that occur in dtm (not ref_dtm) will be used.
+This is not a problem as long as the similarity of the documents in dtm to documents in dtm_y is calculated
+as an assymetric similarity measure (i.e. in which the sum of terms in dtm_y is not used).
 
-Performs two operations. 
-First, clusters of very similar columns (high cosine similarity) can be merged into a single column.
-This is an OR (union) combination, meaning that if at least one column is nonzero, the value will be one.
-Second, all columns will be combined to get the co-occurences (AND, or intersect).
+To emphasize that this feature preparation step is geared towards the task of 'looking up' documents,
+we use the terminolog of a 'query'. The output of the function is a list of two dtm: query_dtm and ref_dtm.
+Both dtms have the exact same columns that contain the query terms.
+The values in query_dtm are by default tfidf weighted, and the values in ref_dtm are binary.
 
-To keep the vocabulary size manageable, only terms with at least min_docfreq (minimum document frequency) and max_docprob (max document probability) are returned.
-If a ref_dtm is given, both the dtm and ref_dtm will be used to compute the docfreq and docprob values, used for filtering and weighting (unless use_dtm_and_ref = F).
+The special `query_lookup` measure in the \code{\link{compare_documents}} function can be used to
+perform the lookup. Note that a more common approach is to weigh both the queries and documents and then match queries to documents
+with cosine similarity. However, for event matching we only want to see whether a query 'suffiently' matches a
+document. The query_lookup function calculates a query->document weight as the sum of query terms that occur in the document.
+ 
+Several options are given to only create term combinations that are informative. Firstly, a minimum and maximum document frequency of term combinations can be defined. 
+Secondly, a minimum observed/expected ratio can be given. The expected probability of a combination of term A and term B
+is the joint probability. If the observed probability is not higher, the combination is not more informative than chance.
+Thirdly, before intersecting terms, one can first cluster very similar terms together as single columns to reduct the number
+of possible combinations.
 }
 \examples{
  q = create_queries(rnewsflow_dfm, min_docfreq = 2, union_sim_thres = 0.9, 

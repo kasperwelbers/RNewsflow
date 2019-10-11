@@ -9,8 +9,8 @@ term_intersect_cpp <- function(m, simmat, terms, parentheses, verbose = TRUE, se
     .Call('_RNewsflow_term_intersect_cpp', PACKAGE = 'RNewsflow', m, simmat, terms, parentheses, verbose, sep)
 }
 
-batched_tcrossprod_cpp <- function(m1, m2, group1, group2, order1, order2, simmat, use_min = TRUE, min_value = 0L, use_max = FALSE, max_value = 1L, top_n = 0L, diag = TRUE, only_upper = FALSE, rowsum_div = FALSE, pvalue = "NA", normalize = "none", crossfun = "prod", lwindow = 0L, rwindow = 0L, row_attr = FALSE, col_attr = FALSE, lag_attr = FALSE, verbose = FALSE, batchsize = 1000L) {
-    .Call('_RNewsflow_batched_tcrossprod_cpp', PACKAGE = 'RNewsflow', m1, m2, group1, group2, order1, order2, simmat, use_min, min_value, use_max, max_value, top_n, diag, only_upper, rowsum_div, pvalue, normalize, crossfun, lwindow, rwindow, row_attr, col_attr, lag_attr, verbose, batchsize)
+batched_tcrossprod_cpp <- function(m1, m2, group1, group2, order1, order2, simmat, use_min = TRUE, min_value = 0L, use_max = FALSE, max_value = 1L, top_n = 0L, diag = TRUE, only_upper = FALSE, rowsum_div = FALSE, pvalue = "NA", max_p = 1, normalize = "none", crossfun = "prod", lwindow = 0L, rwindow = 0L, row_attr = FALSE, col_attr = FALSE, lag_attr = FALSE, verbose = FALSE, batchsize = 1000L) {
+    .Call('_RNewsflow_batched_tcrossprod_cpp', PACKAGE = 'RNewsflow', m1, m2, group1, group2, order1, order2, simmat, use_min, min_value, use_max, max_value, top_n, diag, only_upper, rowsum_div, pvalue, max_p, normalize, crossfun, lwindow, rwindow, row_attr, col_attr, lag_attr, verbose, batchsize)
 }
 
 window_corp_comp <- function(m1, m2, order1, order2, lwindow = 0L, rwindow = 0L, min_chi = 0, min_ratio = 0, smooth = 1) {
