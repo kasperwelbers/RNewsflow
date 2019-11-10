@@ -42,7 +42,7 @@ newsflow_compare <- function(dtm, dtm_y=NULL, date_var='date', hour_window=c(-24
   if (!is.null(dtm_y))
     if (!'date' %in% colnames(quanteda::docvars(dtm_y))) stop(sprintf('date_var "%s" is not a valid column in quanteda::docvars(dtm_y)', date_var))
   
-  el = compare_documents(dtm, dtm_y, date_var=date_var, hour_window=hour_window, group_var=group_var, 
+  el = compare_documents(dtm, dtm_y, date_var=date_var, hour_window=hour_window, group_var=group_var, copy_meta = T,
                          measure=measure, tf_idf=tf_idf, min_similarity=min_similarity, n_topsim=n_topsim, only_complete_window=only_complete_window, ...) 
   as_document_network(el)
 }

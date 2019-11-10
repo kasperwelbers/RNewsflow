@@ -8,8 +8,9 @@ compare_documents(dtm, dtm_y = NULL, date_var = NULL,
   hour_window = c(-24, 24), group_var = NULL, measure = c("cosine",
   "overlap_pct", "overlap", "crossprod", "softcosine", "query_lookup",
   "query_lookup_pct"), tf_idf = F, min_similarity = 0,
-  n_topsim = NULL, only_complete_window = T, backbone_p = 1,
-  simmat = NULL, simmat_thres = NULL, verbose = FALSE)
+  n_topsim = NULL, only_complete_window = T, copy_meta = F,
+  backbone_p = 1, simmat = NULL, simmat_thres = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Note that it is common to first weight the dtm(s) before calculating document similarity,
@@ -39,6 +40,8 @@ we recommend using quanteda's \link[quanteda]{dfm_tfidf} or \link[quanteda]{dfm_
 \item{n_topsim}{An alternative or additional sort of threshold for similarity. Only keep the [n_topsim] highest similarity scores for x. Can return more than [n_topsim] similarity scores in the case of duplicate similarities.}
 
 \item{only_complete_window}{If True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.}
+
+\item{copy_meta}{If TRUE, copy the dtm docvars to the from_meta and to_meta data.tables}
 
 \item{backbone_p}{Apply backbone filtering with a "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}).
 It is different from the original disparity filter algorithm in that it only looks at outward edges. Also, the outward degree k is
@@ -72,7 +75,8 @@ set to limit comparisons and filter output:
    \item{As an alternative or additional filter, you can limit the results for each row in dtm to the highest top_n similarity scores}
 }
  
-The dtm docvars are included as from_meta and to_meta data.tables in the output. Margin attributes are also added added to the meta tables. see details.
+Margin attributes are also included in the output in the from_meta and to_meta data.tables (see details).
+If copy_meta = TRUE, The dtm docvars are also included in from_meta and to_meta.
 
 
 Margin attributes are added to the meta data.

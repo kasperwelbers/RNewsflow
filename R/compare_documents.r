@@ -17,8 +17,9 @@
 #'    \item{As an alternative or additional filter, you can limit the results for each row in dtm to the highest top_n similarity scores}
 #' }
 #'  
-#' The dtm docvars are included as from_meta and to_meta data.tables in the output. Margin attributes are also added added to the meta tables. see details.
-#'  
+#' Margin attributes are also included in the output in the from_meta and to_meta data.tables (see details).
+#' If copy_meta = TRUE, The dtm docvars are also included in from_meta and to_meta.
+#' 
 #' @param dtm         A quanteda \link[quanteda]{dfm}. Note that it is common to first weight the dtm(s) before calculating document similarity,
 #'                    For this you can use quanteda's \link[quanteda]{dfm_tfidf} and \link[quanteda]{dfm_weight} 
 #' @param dtm_y       Optionally, another dtm. If given, the documents in dtm will be compared to the documents in dtm_y. 
@@ -37,6 +38,7 @@
 #' @param min_similarity A threshold for similarity. lower values are deleted. For all available similarity measures zero means no similarity.
 #' @param n_topsim    An alternative or additional sort of threshold for similarity. Only keep the [n_topsim] highest similarity scores for x. Can return more than [n_topsim] similarity scores in the case of duplicate similarities.
 #' @param only_complete_window If True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.
+#' @param copy_meta   If TRUE, copy the dtm docvars to the from_meta and to_meta data.tables
 #' @param backbone_p  Apply backbone filtering with a "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}).
 #'                    It is different from the original disparity filter algorithm in that it only looks at outward edges. Also, the outward degree k is
 #'                    measured as all possible edges (within a window), not just the non-zero edges.
@@ -63,9 +65,8 @@
 #' el = compare_documents(dtm, date_var='date', hour_window = c(0.1, 36))
 compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,24), group_var=NULL, 
                               measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct'), tf_idf=F,
-                              min_similarity=0, n_topsim=NULL, only_complete_window=T,
+                              min_similarity=0, n_topsim=NULL, only_complete_window=T, copy_meta=F,
                               backbone_p=1, simmat=NULL, simmat_thres=NULL, verbose=FALSE){
-  
     
     measure = match.arg(measure)
     batchsize = 1000
@@ -115,6 +116,8 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
     dtm date range:          %s - %s
     comparison window range: %s - %s',
                         nrow(dtm)-sum(keep), min(date), max(date), mindate, maxdate))
+        if (!any(keep)) stop('No possible comparisons remain with current settings')
+        
         dtm = dtm[keep,]
         meta$.complete_window = keep
         #meta = meta[keep,]
@@ -128,6 +131,7 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
     
     diag = !is.null(dtm_y)
     lag_attr = !is.null(date) && hour_window[1] < 0
+    
     if (measure == 'cosine')       cp = tcrossprod_sparse(dtm, dtm_y, max_p=backbone_p, pvalue="disparity", normalize='l2', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2=group_y,
                                                           date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
                                                           row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
@@ -152,7 +156,14 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
     
     ## meta data is returned as data.table 
     meta = data.table::as.data.table(meta)
-    meta_y = if (!is.null(meta_y)) data.table::as.data.table(meta_y) else meta_y = meta
+    if (!copy_meta) meta = subset(meta, select='document_id') 
+    if (!is.null(meta_y)) {
+      meta_y = data.table::as.data.table(meta_y) 
+      if (!copy_meta) meta_y = subset(meta_y, select='document_id') 
+    } else {
+      meta_y = meta
+    }
+    
     data.table::setcolorder(meta, 'document_id')
     data.table::setcolorder(meta_y, 'document_id')
     

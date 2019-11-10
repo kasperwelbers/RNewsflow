@@ -5,7 +5,7 @@
 \title{Automatically infer queries from combinations of terms in a dtm}
 \usage{
 create_queries(dtm, ref_dtm = NULL, min_docfreq = 2,
-  max_docprob = 0.01, weight = c("tfidf", "binary"),
+  max_docprob = 0.01, weight = c("tfidf", "tfidf_sq", "binary"),
   norm_weight = c("max", "doc_max", "dtm_max", "none"),
   min_obs_exp = NA, union_sim_thres = NA, combine_all = T,
   only_dtm_combs = T, use_dtm_and_ref = T, verbose = F)
@@ -21,7 +21,9 @@ create_queries(dtm, ref_dtm = NULL, min_docfreq = 2,
 
 \item{weight}{Determine how to weight the queries (if ref_dtm is used, uses the idf of the ref_dtm). 
 Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting (actually just idf, since scores are binary). 
-The ref_dfm will always be binary.}
+The ref_dfm will always be binary. "tfidf_sq" uses the squared tfidf. This weight even heavier by idf, and makes sense because 
+the query_lookup function will only count the occurences in query_dfm (if both the query_dfm and ref_dfm would be weighted and a crossprod
+based similarity measure is used, terms are also multiplied)}
 
 \item{norm_weight}{Normalize the weight score so that the highest value is 1. If "max" is used, max is the highest possible value. "doc_max" uses the highest value within each document, and "dtm_max" uses the highest observed value in the dtm.}
 

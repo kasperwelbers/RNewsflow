@@ -110,6 +110,7 @@ tcrossprod_sparse <- function(m, m2=NULL,
     date2 = as.POSIXct(date2)
     order1 = as.numeric(date)
     order2 = as.numeric(date2)
+    
     startorder = min(c(order1, order2))
     order1 = order1 - startorder
     order2 = order2 - startorder
