@@ -1,7 +1,7 @@
 CRAN v1.2.1 (Release date: 2019-10-08)
 ================
   
-This update introduces rather big changes, but we have tried to make it as painless as possible. 
+This update introduces rather big changes, but we have tried to make it as painless as possible. No functionalities are lost, but some function names have changed, and the old versions will be removed in the next update.
 
 * We are working towards dropping support for the tm package style DTMs. RNewsflow started out using the tm package for managing the DTM, but at present the quanteda package is much more suitable. The current version still supports tm, but all functions that use it have been marked as deprecated, and will be removed in the future.
 * This major change was a nice opportunity to do some refactoring. The now deprecated functions used a style in which function and argument names used dots to separate words. The new functions instead use underscores. 

@@ -189,7 +189,8 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
       }
     } else hourdiff = NULL
     
-    cp = data.table::data.table(from=rownames(cp)[cp@i+1], to=colnames(cp)[cp@j+1], weight=cp@x, hourdiff=hourdiff)
+    cp = data.table::data.table(from=rownames(cp)[cp@i+1], to=colnames(cp)[cp@j+1], weight=cp@x)
+    if (!is.null(hourdiff)) cp[, hourdiff := hourdiff]
     
     cp = data.table::setorderv(cp, cols='weight', order = -1)
     cp = cp[!as.character(cp$from) == as.character(cp$to),]

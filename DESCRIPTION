@@ -2,12 +2,12 @@ Package: RNewsflow
 Type: Package
 Title: Tools for Comparing Text Messages Across Time and Media
 Version: 1.2.1
-Date: 2019-07-27
+Date: 2019-11-11
 Author: Kasper Welbers & Wouter van Atteveldt
 Maintainer: Kasper Welbers <kasperwelbers@gmail.com>
 Description: A collection of tools for measuring the similarity of text messages and tracing the flow of messages over
     time and across media. 
-License: MIT + file LICENSE
+License: GPL-3
 Depends: 
     R (>= 3.2.0), 
     igraph,

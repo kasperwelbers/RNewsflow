@@ -145,8 +145,7 @@ head(docXsource)
 #                       min_similarity = 0.4)
 #  g = filter_window(g, hour_window = c(6, 36),
 #                    to_vertices = V(g)$sourcetype == 'Print NP')
-#  
-#  show.window(g, to_attribute = 'source')
+#  show_window(g, to_attribute = 'source')
 #  
 #  g_subcomps = decompose(g)
 #  document_network_plot(g_subcomps[[55]], dtm=dtm)
