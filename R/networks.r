@@ -8,8 +8,6 @@
 #' @export
 #'
 #' @examples
-#' rnewsflow_dfm 
-#' 
 #' dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
 #' el = compare_documents(dtm, date_var='date', hour_window = c(0.1, 36))
 #' 

@@ -513,8 +513,6 @@ document.network <- function(d, meta, id.var='document_id', date.var='date', min
 #' @import tm
 #' 
 #' @examples
-#' rnewsflow_dfm 
-#' 
 #' comp = documents.compare(rnewsflow_dfm, min.similarity=0.4)
 #' head(comp)
 documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct'), 
@@ -616,8 +614,6 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct',
 #' @export
 #' 
 #' @examples 
-#' rnewsflow_dfm 
-#' 
 #' dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
 #' g = newsflow.compare(dtm, hour.window = c(0.1, 36))
 #' 

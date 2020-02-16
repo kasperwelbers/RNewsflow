@@ -59,10 +59,23 @@
 #' @export
 #' 
 #' @examples 
-#' rnewsflow_dfm 
-#' 
 #' dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
 #' el = compare_documents(dtm, date_var='date', hour_window = c(0.1, 36))
+#' 
+#' 
+#' d = data.frame(text = c('a b c d e', 
+#'                         'e f g h i j k',
+#'                         'a b c'),
+#'                date = as.POSIXct(c('2010-01-01','2010-01-01','2012-01-01')), 
+#'                stringsAsFactors=FALSE)
+#' corp = quanteda::corpus(d, text_field='text')
+#' dtm = quanteda::dfm(corp)
+#' 
+#' g = compare_documents(dtm)
+#' g
+#' 
+#' g = compare_documents(dtm, measure = 'overlap_pct')
+#' g
 compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,24), group_var=NULL, 
                               measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct'), tf_idf=F,
                               min_similarity=0, n_topsim=NULL, only_complete_window=T, copy_meta=F,

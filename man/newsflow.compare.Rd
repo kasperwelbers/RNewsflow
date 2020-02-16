@@ -90,8 +90,6 @@ In addition, there are "lag_n" and "lag_sum". this is a special case where row_n
 This can be used for more refined calculations of edge probabilities before and after (row_n - lag_n) a row document, which is for instance usefull for event matching.
 }
 \examples{
-rnewsflow_dfm 
-
 dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
 g = newsflow.compare(dtm, hour.window = c(0.1, 36))
 

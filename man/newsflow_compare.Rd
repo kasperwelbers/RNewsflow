@@ -49,8 +49,6 @@ This is a wrapper for the \code{\link{compare_documents}} function, specialised 
 The difference is that using date_var is mandatory, and the output is returned as an igraph network (using \code{\link{as_document_network}}).
 }
 \examples{
-rnewsflow_dfm 
-
 dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
 el = newsflow_compare(dtm, date_var='date', hour_window = c(0.1, 36))
 }

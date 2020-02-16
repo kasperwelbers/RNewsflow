@@ -88,8 +88,21 @@ In addition, there are "lag_n" and "lag_sum". this is a special case where row_n
 This can be used for more refined calculations of edge probabilities before and after a row document.
 }
 \examples{
-rnewsflow_dfm 
-
 dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
 el = compare_documents(dtm, date_var='date', hour_window = c(0.1, 36))
+
+
+d = data.frame(text = c('a b c d e', 
+                        'e f g h i j k',
+                        'a b c'),
+               date = as.POSIXct(c('2010-01-01','2010-01-01','2012-01-01')), 
+               stringsAsFactors=FALSE)
+corp = quanteda::corpus(d, text_field='text')
+dtm = quanteda::dfm(corp)
+
+g = compare_documents(dtm)
+g
+
+g = compare_documents(dtm, measure = 'overlap_pct')
+g
 }

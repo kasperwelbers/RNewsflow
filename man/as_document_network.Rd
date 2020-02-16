@@ -16,8 +16,6 @@ A network/graph in the \link[igraph]{igraph} class
 This function can be used to structure the output of the \link[RNewsflow]{compare_documents} function as an igraph network.
 }
 \examples{
-rnewsflow_dfm 
-
 dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
 el = compare_documents(dtm, date_var='date', hour_window = c(0.1, 36))
 

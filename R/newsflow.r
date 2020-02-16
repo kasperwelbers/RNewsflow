@@ -27,8 +27,6 @@
 #' @export
 #' 
 #' @examples 
-#' rnewsflow_dfm 
-#' 
 #' dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
 #' el = newsflow_compare(dtm, date_var='date', hour_window = c(0.1, 36))
 newsflow_compare <- function(dtm, dtm_y=NULL, date_var='date', hour_window=c(-24,24), group_var=NULL, 
