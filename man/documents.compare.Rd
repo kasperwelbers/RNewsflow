@@ -4,11 +4,18 @@
 \alias{documents.compare}
 \title{Compare the documents in two corpora/dtms}
 \usage{
-documents.compare(dtm, dtm.y = NULL, measure = c("cosine",
-  "overlap_pct", "overlap", "crossprod", "softcosine", "query_lookup",
-  "query_lookup_pct"), min.similarity = 0, n.topsim = NULL,
-  max_p = 1, pvalue = c("none", "normal", "lognormal", "nz_normal",
-  "nz_lognormal", "disparity"), simmat = NULL, simmat_thres = NULL)
+documents.compare(
+  dtm,
+  dtm.y = NULL,
+  measure = c("cosine", "overlap_pct", "overlap", "crossprod", "softcosine",
+    "query_lookup", "query_lookup_pct"),
+  min.similarity = 0,
+  n.topsim = NULL,
+  max_p = 1,
+  pvalue = c("none", "normal", "lognormal", "nz_normal", "nz_lognormal", "disparity"),
+  simmat = NULL,
+  simmat_thres = NULL
+)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used.}

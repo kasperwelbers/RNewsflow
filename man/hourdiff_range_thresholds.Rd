@@ -4,8 +4,14 @@
 \alias{hourdiff_range_thresholds}
 \title{Inspect effects of thresholds on matches over time}
 \usage{
-hourdiff_range_thresholds(g, breaks = 20, hourdiff_range = c(0, Inf),
-  min_weight = NA, min_hourdiff = NA, max_hourdiff = NA)
+hourdiff_range_thresholds(
+  g,
+  breaks = 20,
+  hourdiff_range = c(0, Inf),
+  min_weight = NA,
+  min_hourdiff = NA,
+  max_hourdiff = NA
+)
 }
 \arguments{
 \item{g}{The output of newsflow.compare (either as "igraph" or "edgelist")}

@@ -4,9 +4,16 @@
 \alias{network_aggregate}
 \title{Aggregate the edges of a network by vertex attributes}
 \usage{
-network_aggregate(g, by = NULL, by_from = by, by_to = by,
-  edge_attribute = "weight", agg_FUN = mean, return_df = FALSE,
-  keep_isolates = T)
+network_aggregate(
+  g,
+  by = NULL,
+  by_from = by,
+  by_to = by,
+  edge_attribute = "weight",
+  agg_FUN = mean,
+  return_df = FALSE,
+  keep_isolates = T
+)
 }
 \arguments{
 \item{g}{A network/graph in the \link[igraph]{igraph} class}
@@ -35,7 +42,7 @@ Although it was designed specifically for document similarity networks, it can b
 \details{
 The first argument is the network (in the `igraph` class). 
 The second argument, for the `by` parameter, is a character vector to indicate one or more vertex attributes based on which the edges are aggregated.
-Optionally, the `by` parameter can also be specified separately for `by_from` and `by_to`.
+Optionally, the `by` parameter can also be specified separately for `by_from` and `by_to`. 
 
 By default, the function returns the aggregated network as an \link[igraph]{igraph} class.
 The edges in the aggregated network have five standard attributes. 

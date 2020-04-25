@@ -4,8 +4,13 @@
 \alias{document.network}
 \title{Create a document similarity network}
 \usage{
-document.network(d, meta, id.var = "document_id", date.var = "date",
-  min.similarity = NA)
+document.network(
+  d,
+  meta,
+  id.var = "document_id",
+  date.var = "date",
+  min.similarity = NA
+)
 }
 \arguments{
 \item{d}{A data.frame with three columns, that represents an edgelist with weight values. 

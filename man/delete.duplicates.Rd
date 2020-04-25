@@ -4,10 +4,19 @@
 \alias{delete.duplicates}
 \title{Delete duplicate (or similar) documents from a document term matrix}
 \usage{
-delete.duplicates(dtm, meta = NULL, date.var = "date",
-  hour.window = c(-24, 24), group.var = NULL, measure = c("cosine",
-  "overlap_pct"), similarity = 1, keep = "first", tf.idf = FALSE,
-  dup_csv = NULL, verbose = F)
+delete.duplicates(
+  dtm,
+  meta = NULL,
+  date.var = "date",
+  hour.window = c(-24, 24),
+  group.var = NULL,
+  measure = c("cosine", "overlap_pct"),
+  similarity = 1,
+  keep = "first",
+  tf.idf = FALSE,
+  dup_csv = NULL,
+  verbose = F
+)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually}

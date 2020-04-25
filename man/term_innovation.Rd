@@ -4,9 +4,18 @@
 \alias{term_innovation}
 \title{Experimental: Convert dtm scores to a term innovation score, based on changes in term use over time}
 \usage{
-term_innovation(m, date, m2 = NULL, date2 = NULL, lwindow = -7,
-  rwindow = 7, date_unit = c("days", "hours", "minutes", "seconds"),
-  min_chi = 5.024, min_ratio = 2, smooth = 1)
+term_innovation(
+  m,
+  date,
+  m2 = NULL,
+  date2 = NULL,
+  lwindow = -7,
+  rwindow = 7,
+  date_unit = c("days", "hours", "minutes", "seconds"),
+  min_chi = 5.024,
+  min_ratio = 2,
+  smooth = 1
+)
 }
 \arguments{
 \item{m}{A dgCMatrix}

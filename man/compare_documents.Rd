@@ -4,13 +4,24 @@
 \alias{compare_documents}
 \title{Compare the documents in a dtm}
 \usage{
-compare_documents(dtm, dtm_y = NULL, date_var = NULL,
-  hour_window = c(-24, 24), group_var = NULL, measure = c("cosine",
-  "overlap_pct", "overlap", "crossprod", "softcosine", "query_lookup",
-  "query_lookup_pct"), tf_idf = F, min_similarity = 0,
-  n_topsim = NULL, only_complete_window = T, copy_meta = F,
-  backbone_p = 1, simmat = NULL, simmat_thres = NULL,
-  verbose = FALSE)
+compare_documents(
+  dtm,
+  dtm_y = NULL,
+  date_var = NULL,
+  hour_window = c(-24, 24),
+  group_var = NULL,
+  measure = c("cosine", "overlap_pct", "overlap", "crossprod", "softcosine",
+    "query_lookup", "query_lookup_pct", "cp_lookup", "cp_lookup_norm"),
+  tf_idf = F,
+  min_similarity = 0,
+  n_topsim = NULL,
+  only_complete_window = T,
+  copy_meta = F,
+  backbone_p = 1,
+  simmat = NULL,
+  simmat_thres = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Note that it is common to first weight the dtm(s) before calculating document similarity,

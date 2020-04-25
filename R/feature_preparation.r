@@ -82,7 +82,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.01, w
   
   if (verbose) message('Computing term combinations')
   simmat2 = term_cooccurence_docprob(m, max_docfreq = max_docprob * nrow(m), min_obs_exp=min_obs_exp,
-                                    min_docfreq=min_docfreq, verbose=verbose)
+                                    min_docfreq=min_docfreq)
 
 
   if (verbose) message('Building new dtm')
@@ -99,7 +99,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.01, w
     
     if (only_dtm_combs) {
       simmat_filter = term_cooccurence_docprob(m, max_docfreq = nrow(m), min_obs_exp=min_obs_exp,
-                                       min_docfreq=1, verbose=F)
+                                       min_docfreq=1)
       nz = which(simmat2 > 0)
       dropval = nz[simmat_filter[nz] == 0]
       simmat2[dropval] = 0
@@ -262,8 +262,12 @@ term_occur_sim <- function(m, min_cos, verbose=F) {
 ## create a matrix with document probabilities (docfreq / n) for all column combinations
 ## max_docfreq is used to only keep sufficiently rare combinations
 ## typically, min_docfreq is used to drop very sparse terms, and max_docfreq is used to drop terms that are too common to be informative.
-term_cooccurence_docprob <- function(m, max_docfreq, min_docfreq=NULL, min_obs_exp=NA, verbose=F) {
-  simmat = tcrossprod_sparse(methods::as(t(m > 0), 'dgCMatrix'), min_value=min_docfreq, max_value = max_docfreq, verbose=verbose)
+term_cooccurence_docprob <- function(m, max_docfreq, min_docfreq=NULL, min_obs_exp=NA) {
+  #simmat = tcrossprod_sparse(methods::as(t(m > 0), 'dgCMatrix'), min_value=min_docfreq, max_value = max_docfreq, verbose=verbose)
+  simmat = crossprod(m>0)
+  simmat@x[simmat@x < min_docfreq] = 0
+  simmat@x[simmat@x > max_docfreq] = 0
+  simmat = Matrix::drop0(simmat)
   
   if (!is.na(min_obs_exp)) {
     simmat = methods::as(simmat, 'dgTMatrix')

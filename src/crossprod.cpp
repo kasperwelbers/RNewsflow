@@ -128,7 +128,7 @@ List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
   if (rows != cols && only_upper) stop("using 'only_upper = true' is only possible if m1 and m2 have the same number of rows (so output is symmetric)");
   if (rows != cols && !diag) stop("using 'diag = false' is only possible if m1 and m2 have the same number of rows (so output is symmetric)");
   
-  if (crossfun != "prod" && crossfun != "min" && crossfun != "softprod" && crossfun != "maxproduct" && crossfun != "lookup") stop("Not a valid crossfun (currently supports prod, min, softcos and maxproduct)");
+  if (crossfun != "prod" && crossfun != "min" && crossfun != "softprod" && crossfun != "maxproduct" && crossfun != "lookup" && crossfun != "cp_lookup" && crossfun != "cp_lookup_norm") stop("Not a valid crossfun (currently supports prod, min, softcos and maxproduct)");
   if (normalize != "none" && normalize != "l2" && normalize != "softl2") stop("Not a valid normalize function (currently supports none, l2 and softl2)");
   
   Triplet tl;
@@ -169,13 +169,12 @@ List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
 
   
   for (int i = 0; i < rows; i++) {
-    
     // CREATE BATCH
     if (i % batchsize == 0) {
-      i_end = i + (batchsize - 1);
+      i_end = i + (batchsize-1);
       if (i_end > rows) i_end = rows - 1;
-      
-      batch_indices = find_positions(index2, std::get<0>(index1[i]),
+  
+     batch_indices = find_positions(index2, std::get<0>(index1[i]),
                                      std::get<0>(index1[i_end]),
                                      std::get<1>(index1[i]) + lwindow,
                                      std::get<1>(index1[i_end]) + rwindow);
@@ -183,11 +182,11 @@ List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
       // note that batch_indices second is the position after the last item that matches the search (like x.end())
       // therefore batch_indices.second - batch_indices.first correctly gives the number of rows after the row at batch_indices.first.
       if (batch_indices.first >= batch_indices.second) continue;
+      
       m2_batch = m2.middleRows(batch_indices.first, batch_indices.second - batch_indices.first);
       
-      if (crossfun == "softprod") {
+      if (crossfun == "softprod" || crossfun == "cp_lookup" || crossfun == "cp_lookup_norm") {
         batch_simmat = batch_simmat_prepare(m2_batch, simmat);
-        //batch_softcos_mag = batch_softcos_mag_prepare(m2_batch, simmat);
       }
       
       offset = batch_indices.first;
@@ -211,7 +210,9 @@ List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
     if (crossfun == "prod") sim_product(i, m1, m2_batch, res, use_pair);
     if (crossfun == "maxproduct") sim_maxproduct(i, m1, m2_batch, res, use_pair);      
     if (crossfun == "min") sim_min(i, m1, m2_batch, res, use_pair);
-    if (crossfun == "softprod") sim_softprod(i, m1, m2_batch, res, use_pair, batch_simmat);      
+    if (crossfun == "softprod") sim_softprod(i, m1, m2_batch, res, use_pair, batch_simmat);    
+    if (crossfun == "cp_lookup") sim_cp_lookup(i, m1, m2_batch, res, use_pair, batch_simmat, false);
+    if (crossfun == "cp_lookup_norm") sim_cp_lookup(i, m1, m2_batch, res, use_pair, batch_simmat, true);
     if (crossfun == "lookup") sim_lookup(i, m1, m2_batch, res, use_pair);
     
     if (rowsum_div) as_pct(i, m1, res); 
@@ -219,7 +220,6 @@ List batched_tcrossprod_cpp(SpMat& m1, SpMat& m2,
     // IF PVALUE IS USED
     if (max_p < 1) {
       if (pvalue == "normal") pnorm_filter(res, false, false, max_p);
-      if (pvalue == "beta") pbeta_filter(res, false, max_p);
       if (pvalue == "lognormal") pnorm_filter(res, true, false, max_p);
       if (pvalue == "nz_normal") pnorm_filter(res, false, true, max_p);
       if (pvalue == "nz_lognormal") pnorm_filter(res, true, true, max_p);

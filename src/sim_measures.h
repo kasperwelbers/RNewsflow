@@ -25,7 +25,11 @@ void sim_min(int, const Eigen::SparseMatrix<double>& m1, const Eigen::SparseMatr
 void sim_softprod(int, const Eigen::SparseMatrix<double>&, const Eigen::SparseMatrix<double>&, 
                  std::vector<double>&, std::vector<bool>&, const Eigen::SparseMatrix<double>&);
 
+void sim_cp_lookup(int, const Eigen::SparseMatrix<double>&, const Eigen::SparseMatrix<double>&, 
+                     std::vector<double>&, std::vector<bool>&, const Eigen::SparseMatrix<double>&, bool normalize);
+
 void sim_lookup(int, const Eigen::SparseMatrix<double>&, const Eigen::SparseMatrix<double>&,
                  std::vector<double>&, std::vector<bool>&);
+
 
 #endif

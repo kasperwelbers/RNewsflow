@@ -53,7 +53,6 @@ std::vector<std::pair<T,int> > index_and_sort_top_n(std::vector<T>& x, int top_n
   return(xi);
 }
 
-std::vector<double> batch_softcos_mag_prepare(const Eigen::SparseMatrix<double>& m2_batch, const Eigen::SparseMatrix<double>& batch_simmat);
 Eigen::SparseMatrix<double> batch_simmat_prepare(Eigen::SparseMatrix<double>& m2_batch, const Eigen::SparseMatrix<double>& simmat);
 
 Eigen::SparseMatrix<double> sm_prepare(Eigen::SparseMatrix<double>& m, std::vector<std::tuple<double,double,int> > index, const Eigen::SparseMatrix<double>& simmat, bool transpose, std::string normalize);

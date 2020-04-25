@@ -4,11 +4,20 @@
 \alias{create_queries}
 \title{Automatically infer queries from combinations of terms in a dtm}
 \usage{
-create_queries(dtm, ref_dtm = NULL, min_docfreq = 2,
-  max_docprob = 0.01, weight = c("tfidf", "tfidf_sq", "binary"),
+create_queries(
+  dtm,
+  ref_dtm = NULL,
+  min_docfreq = 2,
+  max_docprob = 0.01,
+  weight = c("tfidf", "tfidf_sq", "binary"),
   norm_weight = c("max", "doc_max", "dtm_max", "none"),
-  min_obs_exp = NA, union_sim_thres = NA, combine_all = T,
-  only_dtm_combs = T, use_dtm_and_ref = T, verbose = F)
+  min_obs_exp = NA,
+  union_sim_thres = NA,
+  combine_all = T,
+  only_dtm_combs = T,
+  use_dtm_and_ref = T,
+  verbose = F
+)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}}
@@ -55,7 +64,7 @@ This can improve certain document matching tasks, but at the cost of creating a 
 If all terms are combined this would be a quadratic increase of columns.
 However, only term combinations that occur in dtm (not ref_dtm) will be used.
 This is not a problem as long as the similarity of the documents in dtm to documents in dtm_y is calculated
-as an assymetric similarity measure (i.e. in which the sum of terms in dtm_y is not used).
+as an assymetric similarity measure (i.e. in which the sum of terms in dtm_y is not used). 
 
 To emphasize that this feature preparation step is geared towards the task of 'looking up' documents,
 we use the terminolog of a 'query'. The output of the function is a list of two dtm: query_dtm and ref_dtm.

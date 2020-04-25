@@ -4,9 +4,19 @@
 \alias{term_char_sim}
 \title{Find terms with similar spelling}
 \usage{
-term_char_sim(voc, type = c("tri", "bi"), min_overlap = 2/3,
-  max_diff = 4, pad = F, as_lower = T, same_start = 1,
-  drop_non_alpha = T, min_length = 5, allow_asym = F, verbose = T)
+term_char_sim(
+  voc,
+  type = c("tri", "bi"),
+  min_overlap = 2/3,
+  max_diff = 4,
+  pad = F,
+  as_lower = T,
+  same_start = 1,
+  drop_non_alpha = T,
+  min_length = 5,
+  allow_asym = F,
+  verbose = T
+)
 }
 \arguments{
 \item{voc}{A character vector that gives the vocabulary (e.g., colnames of a dtm)}

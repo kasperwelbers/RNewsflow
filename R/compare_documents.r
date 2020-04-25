@@ -77,7 +77,7 @@
 #' g = compare_documents(dtm, measure = 'overlap_pct')
 #' g
 compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,24), group_var=NULL, 
-                              measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct'), tf_idf=F,
+                              measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct','cp_lookup','cp_lookup_norm'), tf_idf=F,
                               min_similarity=0, n_topsim=NULL, only_complete_window=T, copy_meta=F,
                               backbone_p=1, simmat=NULL, simmat_thres=NULL, verbose=FALSE){
     
@@ -139,7 +139,6 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
       }
     }
     
-
     ############ compare
     
     diag = !is.null(dtm_y)
@@ -163,9 +162,13 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
     if (measure == 'query_lookup_pct') cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = T, max_p=backbone_p, pvalue="disparity", crossfun = 'lookup', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
                                                           date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
                                                           row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
+    if (measure %in% c('cp_lookup','cp_lookup_norm')) cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = measure, min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
+                                                              date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
+                                                              row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
     if (measure == 'softcosine')   cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = T, max_p=backbone_p, pvalue="disparity", normalize='softl2', crossfun = 'softprod', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
                                                           date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
                                                           row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
+    
     
     ## meta data is returned as data.table 
     meta = data.table::as.data.table(meta)
@@ -180,7 +183,7 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
     data.table::setcolorder(meta, 'document_id')
     data.table::setcolorder(meta_y, 'document_id')
     
-    ## add row attributes 
+    ## add margin (col/row) attributes 
     marvars = attr(cp, 'margin')
     rowvars = grep('row\\_|lag\\_', names(marvars), value=T)
     colvars = grep('col\\_', names(marvars), value=T)

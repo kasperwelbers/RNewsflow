@@ -251,10 +251,9 @@ hist(E(g)$hourdiff, main='Time distance of document pairs',
 ```
 
 In the histogram we see that most document pairs with a similarity score above the threshold are about an hour apart (1 on the x-axis). 
-This is mainly because the online newspapers often follow the news agency within a very short amount of time{^delaynote].
+This is mainly because the online newspapers often follow the news agency within a very short amount of time.
 As time distance increases, the number of document pairs decreases, which makes sense because news gets old fast, so news diffusion should occur within a limited time after publication.
 
-[^delaynote]: Actually, many of the online newspapers published nearly simultaneous with the news agency. Since we had reason to believe that the time stamps of our news agency data were occasionally later than the actual publication time, we subtracted one hour from its publication time in general. 
 
 ## Tailoring the document comparison window
 

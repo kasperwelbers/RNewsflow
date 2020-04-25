@@ -4,10 +4,18 @@
 \alias{delete_duplicates}
 \title{Delete duplicate (or similar) documents from a document term matrix}
 \usage{
-delete_duplicates(dtm, date_var = NULL, hour_window = c(-24, 24),
-  group_var = NULL, measure = c("cosine", "overlap_pct"),
-  similarity = 1, keep = "first", tf_idf = FALSE, dup_csv = NULL,
-  verbose = F)
+delete_duplicates(
+  dtm,
+  date_var = NULL,
+  hour_window = c(-24, 24),
+  group_var = NULL,
+  measure = c("cosine", "overlap_pct"),
+  similarity = 1,
+  keep = "first",
+  tf_idf = FALSE,
+  dup_csv = NULL,
+  verbose = F
+)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}.}

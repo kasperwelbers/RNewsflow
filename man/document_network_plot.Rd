@@ -4,11 +4,20 @@
 \alias{document_network_plot}
 \title{Visualize (a subcomponent) of the document similarity network}
 \usage{
-document_network_plot(g, date_attribute = "date",
-  source_attribute = "source", subcomp_i = NULL, dtm = NULL,
-  sources = NULL, only_outer_date = FALSE,
-  date_format = "\%Y-\%m-\%d \%H:\%M", margins = c(5, 8, 1, 13),
-  isolate_color = NULL, source_loops = TRUE, ...)
+document_network_plot(
+  g,
+  date_attribute = "date",
+  source_attribute = "source",
+  subcomp_i = NULL,
+  dtm = NULL,
+  sources = NULL,
+  only_outer_date = FALSE,
+  date_format = "\%Y-\%m-\%d \%H:\%M",
+  margins = c(5, 8, 1, 13),
+  isolate_color = NULL,
+  source_loops = TRUE,
+  ...
+)
 }
 \arguments{
 \item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}}

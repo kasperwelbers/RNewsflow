@@ -24,36 +24,7 @@ std::vector<double> get_row_l2(SpMat& m) {
   return(out);
 }
 
-std::vector<double> batch_softcos_mag_prepare(const SpMat& m2_batch, const SpMat& batch_simmat) {
-  std::vector<double> out(m2_batch.rows());
-  
-  for (int k = 0; k < batch_simmat.cols(); k++){
-    for (SpMat::InnerIterator its(batch_simmat, k); its; ++its) {
-      SpMat::InnerIterator it1(m2_batch, k);
-      SpMat::InnerIterator it2(m2_batch, its.row());
-      while (!it1 && !it2){
-        if (it1.row() < it2.row()) {
-          ++it1;
-          continue;
-        }
-        if (it1.row() > it2.row()) {
-          ++it2;
-          continue;
-        }
-        // if same row (document)
-        out[it1.row()] += it1.value() * it2.value() * its.value();
-        ++it1;
-        ++it2;
-      }
-    }
-  }
-  for (int i=0; i < out.size(); i++) {
-    out[i] = pow(out[i], 0.5);
-    //Rcout << out[i] << std::endl;
-  }
-  
-  return(out);
-} 
+
 
 std::vector<double> softcos_row_mag(const SpMat& m, const SpMat& simmat, bool verbose) {
   SpMat m1(m.transpose());
@@ -172,9 +143,11 @@ std::pair<int,int> find_positions(Index& xi, const double min_g, const double ma
   
   last_group_low = std::lower_bound(xi.begin(), xi.end(), max_g, search_group_l);
   last_group_up = std::upper_bound(xi.begin(), xi.end(), max_g, search_group_u);
-  last = std::lower_bound(last_group_low, last_group_up, max_o, search_order_l);
+  last = std::upper_bound(last_group_low, last_group_up, max_o, search_order_u);
+
+  Index::iterator last_old = std::lower_bound(last_group_low, last_group_up, max_o, search_order_l);
   
-  int firstv = first - xi.begin();
+  int firstv = (first - xi.begin());
   int lastv = (last - xi.begin());
   // note that last isn't strictly the position, it's the position after the last position.
   

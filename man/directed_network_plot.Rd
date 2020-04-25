@@ -4,13 +4,23 @@
 \alias{directed_network_plot}
 \title{A wrapper for \link[igraph]{plot.igraph} for visualizing directed networks.}
 \usage{
-directed_network_plot(g, weight_var = "from.Vprop",
-  weight_thres = NULL, delete_isolates = FALSE, vertex.size = 30,
-  vertex.color = "lightblue", vertex.label.color = "black",
-  vertex.label.cex = 0.7, edge.color = "grey",
-  show.edge.labels = TRUE, edge.label.color = "black",
-  edge.label.cex = 0.6, edge.arrow.size = 1,
-  layout = igraph::layout.davidson.harel, ...)
+directed_network_plot(
+  g,
+  weight_var = "from.Vprop",
+  weight_thres = NULL,
+  delete_isolates = FALSE,
+  vertex.size = 30,
+  vertex.color = "lightblue",
+  vertex.label.color = "black",
+  vertex.label.cex = 0.7,
+  edge.color = "grey",
+  show.edge.labels = TRUE,
+  edge.label.color = "black",
+  edge.label.cex = 0.6,
+  edge.arrow.size = 1,
+  layout = igraph::layout.davidson.harel,
+  ...
+)
 }
 \arguments{
 \item{g}{A network/graph in the \link[igraph]{igraph} class}

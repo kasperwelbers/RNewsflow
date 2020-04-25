@@ -4,16 +4,30 @@
 \alias{newsflow.compare}
 \title{Compare the documents in a dtm with a sliding window over time}
 \usage{
-newsflow.compare(dtm, dtm.y = NULL, meta = NULL, meta.y = NULL,
-  date.var = "date", hour.window = c(-24, 24), group.var = NULL,
-  measure = c("cosine", "overlap_pct", "overlap", "crossprod",
-  "softcosine", "query_lookup", "query_lookup_pct"), min.similarity = 0,
-  n.topsim = NULL, only.from = NULL, only.to = NULL,
-  only.complete.window = TRUE, pvalue = c("disparity", "normal",
-  "lognormal", "nz_normal", "nz_lognormal"), max_p = 1,
-  return_as = c("igraph", "edgelist", "matrix"), batchsize = 1000,
-  simmat = NULL, simmat_thres = NULL, margin_attr = T,
-  verbose = FALSE)
+newsflow.compare(
+  dtm,
+  dtm.y = NULL,
+  meta = NULL,
+  meta.y = NULL,
+  date.var = "date",
+  hour.window = c(-24, 24),
+  group.var = NULL,
+  measure = c("cosine", "overlap_pct", "overlap", "crossprod", "softcosine",
+    "query_lookup", "query_lookup_pct"),
+  min.similarity = 0,
+  n.topsim = NULL,
+  only.from = NULL,
+  only.to = NULL,
+  only.complete.window = TRUE,
+  pvalue = c("disparity", "normal", "lognormal", "nz_normal", "nz_lognormal"),
+  max_p = 1,
+  return_as = c("igraph", "edgelist", "matrix"),
+  batchsize = 1000,
+  simmat = NULL,
+  simmat_thres = NULL,
+  margin_attr = T,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{dtm}{A quanteda \link[quanteda]{dfm}. Alternatively, a DocumentTermMatrix from the tm package can be used, but then the meta parameter needs to be specified manually}

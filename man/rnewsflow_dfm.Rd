@@ -4,7 +4,9 @@
 \name{rnewsflow_dfm}
 \alias{rnewsflow_dfm}
 \title{quanteda dfm for RNewsflow vignette demo}
-\format{dfm}
+\format{
+dfm
+}
 \usage{
 rnewsflow_dfm
 }
