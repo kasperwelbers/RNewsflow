@@ -20,6 +20,7 @@ compare_documents(
   backbone_p = 1,
   simmat = NULL,
   simmat_thres = NULL,
+  batchsize = 1000,
   verbose = FALSE
 )
 }
@@ -61,6 +62,8 @@ measured as all possible edges (within a window), not just the non-zero edges.}
 \item{simmat}{If softcosine is used, a symmetrical matrix with the similarity scores of terms. If NULL, the cosine similarity of terms in dtm will be used}
 
 \item{simmat_thres}{A large, dense simmat can lead to memory problems and slows down computation. A pragmatig (though not mathematically pure) solution is to use a threshold to prune small similarities.}
+
+\item{batchsize}{For internal use (testing)}
 
 \item{verbose}{If TRUE, report progress}
 }

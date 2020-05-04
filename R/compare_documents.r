@@ -44,6 +44,7 @@
 #'                    measured as all possible edges (within a window), not just the non-zero edges.
 #' @param simmat      If softcosine is used, a symmetrical matrix with the similarity scores of terms. If NULL, the cosine similarity of terms in dtm will be used
 #' @param simmat_thres A large, dense simmat can lead to memory problems and slows down computation. A pragmatig (though not mathematically pure) solution is to use a threshold to prune small similarities. 
+#' @param batchsize   For internal use (testing)
 #' @param verbose     If TRUE, report progress
 #' 
 #' @details 
@@ -79,10 +80,9 @@
 compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,24), group_var=NULL, 
                               measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct','cp_lookup','cp_lookup_norm'), tf_idf=F,
                               min_similarity=0, n_topsim=NULL, only_complete_window=T, copy_meta=F,
-                              backbone_p=1, simmat=NULL, simmat_thres=NULL, verbose=FALSE){
+                              backbone_p=1, simmat=NULL, simmat_thres=NULL, batchsize=1000, verbose=FALSE){
     
     measure = match.arg(measure)
-    batchsize = 1000
   
     ########### prepare dtm
     if (!methods::is(dtm, 'dfm')) stop('dtm has to be a quanteda dfm')

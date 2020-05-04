@@ -52,6 +52,8 @@ Inner-product based similarity measures are used, such as cosine similarity.
 It is recommended to weight the DTM beforehand, for instance using Term frequency-inverse document frequency (tf.idf)
 }
 \examples{
-comp = documents.compare(rnewsflow_dfm, min.similarity=0.4)
+## documents.compare is deprecated. Please use compare_documents
+comp = compare_documents(rnewsflow_dfm, min_similarity=0.4)
 head(comp)
+
 }

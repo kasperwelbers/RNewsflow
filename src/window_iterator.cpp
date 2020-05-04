@@ -1,7 +1,7 @@
 #include "window_iterator.h"
 
 void windowIterator::start(const SpMat& m) {
-  if (!m.cols() == index2.size()) stop("Number of columns in m needs to match the size of index2");
+  if (!(m.cols() == index2.size())) stop("Number of columns in m needs to match the size of index2");
   rightsum = std::vector<double>(m.rows());
   leftsum = std::vector<double>(m.rows());
   int date, first_date, loop_date;

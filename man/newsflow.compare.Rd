@@ -105,7 +105,9 @@ This can be used for more refined calculations of edge probabilities before and 
 }
 \examples{
 dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
-g = newsflow.compare(dtm, hour.window = c(0.1, 36))
+
+## newsflow.compare is deprecated. Please use newsflow_compare()
+g = newsflow_compare(dtm, hour_window = c(0.1, 36))
 
 vcount(g) # number of documents, or vertices
 ecount(g) # number of document pairs, or edges

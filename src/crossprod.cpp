@@ -80,7 +80,7 @@ void fill_row_attributes(int i, bool row_attr, bool col_attr, bool lag_attr,
     for (int res_i = 0; res_i < res.size(); res_i++) {
       col_n[std::get<2>(index2[res_i+offset])] += use_pair[res_i];
       col_sum[std::get<2>(index2[res_i+offset])] += res[res_i];
-      if (!res[res_i] == 0) col_nz[std::get<2>(index2[res_i+offset])] += 1;
+      if (!(res[res_i] == 0)) col_nz[std::get<2>(index2[res_i+offset])] += 1;
     }
   }
   if (lag_attr) {
@@ -89,7 +89,7 @@ void fill_row_attributes(int i, bool row_attr, bool col_attr, bool lag_attr,
         if (is_lag[pair_i]) {
           lag_n[std::get<2>(index1[i])] += 1;
           lag_sum[std::get<2>(index1[i])] += res[pair_i];
-          if (!res[pair_i] == 0) lag_nz[std::get<2>(index1[i])] += 1;
+          if (!(res[pair_i] == 0)) lag_nz[std::get<2>(index1[i])] += 1;
         } 
       }
     }

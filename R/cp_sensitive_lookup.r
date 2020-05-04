@@ -1,37 +1,19 @@
 cp_idf_matrix <- function(dtm, min_docfreq=1, max_docprob=1, min_obs_exp=0) {
-  #dtm = dtm > 0
-  #simmat = Matrix::crossprod(dtm)
-  #simmat@x[simmat@x / nrow(dtm) > 0.01] = 0
-  
   simmat = term_cooccurence_docprob(dtm, max_docfreq = max_docprob * nrow(dtm), min_obs_exp=min_obs_exp,
                                     min_docfreq=min_docfreq)
   
-  #diag(simmat) = 0   ## !! disables single terms
   simmat = Matrix::drop0(simmat)
   simmat = Matrix::tril(simmat) ## only the lower triangle is used in the cp_lookup similarity measure
   
-  simmat = as(simmat, 'dgTMatrix')
+  simmat = methods::as(simmat, 'dgTMatrix')
   simmat@x = log(nrow(dtm) / simmat@x)
-  
-  #n = nrow(dtm)
-  #weightfun <- function(x) log((n - x + 0.5) / (x+0.5), base=2)^2
-  #weightfun <- function(x) log((n - x + 0.5) / (x+0.5))^2
-  #simmat@x = weightfun(simmat@x) / weightfun(1)
-
-  #weightfun <- function(x, base=1.02) base/(base^x)
-  #simmat@x = weightfun(simmat@x, base=1.02)
-  #simmat@x[simmat@x < 0.0001] = 0
-  #simmat = Matrix::drop0(simmat)
   
   term_idf = diag(simmat)
   cooc_indices = summary(simmat)[,c('i','j')]
   simmat@x = simmat@x - (term_idf[cooc_indices$i] + term_idf[cooc_indices$j])
-  ###simmat@x[simmat@x < 0] = 0
   diag(simmat) = term_idf
   
-  
   simmat = Matrix::drop0(simmat)
-  #simmat = simmat^2
   methods::as(simmat, 'dgCMatrix')
 }
 

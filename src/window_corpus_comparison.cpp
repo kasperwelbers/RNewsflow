@@ -9,7 +9,8 @@
 std::vector<double> lr_chi(const SpMat& m, windowIterator& wi, double min_chi, double min_ratio, double smooth = 0.05, bool yates=true) {
   int nterms = wi.leftsum.size();
   std::vector<double> res(nterms);
-  
+   
+   
   double lefttotal = wi.lefttotal + (nterms * smooth);
   double righttotal = wi.righttotal + (nterms * smooth);
   

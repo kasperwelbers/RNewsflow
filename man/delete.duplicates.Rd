@@ -56,5 +56,7 @@ This should be considered if the temporal order of publications is relevant for 
 }
 \examples{
 ## example with very low similarity threshold (normally not recommended!)
-dtm2 = delete.duplicates(rnewsflow_dfm, similarity = 0.5, keep='first', tf.idf = TRUE)
+
+## delete.duplicates is deprecated. Please use delete_duplicates
+dtm2 = delete_duplicates(rnewsflow_dfm, similarity = 0.5, keep='first', tf_idf = TRUE)
 }

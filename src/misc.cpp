@@ -124,7 +124,8 @@ Index create_index(Rcpp::IntegerVector group,
   std::vector<double> o;
   g = as<std::vector<double> >(group);
   o = as<std::vector<double> >(order);
-  return(index_and_sort<double,double>(g,o));
+  Index out = index_and_sort<double,double>(g,o); 
+  return(out);
 }
 
 
@@ -165,7 +166,7 @@ double sum_std_vec(std::vector<double>& x) {
 double nz_std_vec(std::vector<double>& x) {
   double out = 0;
   for (auto& v : x)
-    if (!v == 0) out += 1;
+    if (!(v == 0)) out += 1;
   return(out);
 }
 

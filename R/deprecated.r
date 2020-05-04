@@ -513,8 +513,10 @@ document.network <- function(d, meta, id.var='document_id', date.var='date', min
 #' @import tm
 #' 
 #' @examples
-#' comp = documents.compare(rnewsflow_dfm, min.similarity=0.4)
+#' ## documents.compare is deprecated. Please use compare_documents
+#' comp = compare_documents(rnewsflow_dfm, min_similarity=0.4)
 #' head(comp)
+#' 
 documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct'), 
                               min.similarity=0, n.topsim=NULL, max_p=1, pvalue=c("none", "normal", "lognormal", "nz_normal", "nz_lognormal", "disparity"), 
                               simmat=NULL, simmat_thres=NULL) {  
@@ -615,7 +617,9 @@ documents.compare <- function(dtm, dtm.y=NULL, measure=c('cosine','overlap_pct',
 #' 
 #' @examples 
 #' dtm = quanteda::dfm_tfidf(rnewsflow_dfm)
-#' g = newsflow.compare(dtm, hour.window = c(0.1, 36))
+#' 
+#' ## newsflow.compare is deprecated. Please use newsflow_compare()
+#' g = newsflow_compare(dtm, hour_window = c(0.1, 36))
 #' 
 #' vcount(g) # number of documents, or vertices
 #' ecount(g) # number of document pairs, or edges
@@ -892,7 +896,9 @@ newsflow.compare <- function(dtm, dtm.y=NULL, meta=NULL, meta.y=NULL, date.var='
 #' 
 #' @examples
 #' ## example with very low similarity threshold (normally not recommended!)
-#' dtm2 = delete.duplicates(rnewsflow_dfm, similarity = 0.5, keep='first', tf.idf = TRUE)
+#' 
+#' ## delete.duplicates is deprecated. Please use delete_duplicates
+#' dtm2 = delete_duplicates(rnewsflow_dfm, similarity = 0.5, keep='first', tf_idf = TRUE)
 delete.duplicates <- function(dtm, meta=NULL, date.var='date', hour.window=c(-24,24), group.var=NULL, measure=c('cosine','overlap_pct'), similarity=1, keep='first', tf.idf=FALSE, dup_csv=NULL, verbose=F){
   is_deprecated(new='delete_duplicates')
   
