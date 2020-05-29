@@ -6,21 +6,23 @@ test_that("rnewsflow", {
   library(quanteda)
   
   dtm = rnewsflow_dfm
+  docvars(dtm)$ym = docvars(dtm)$date
+  docvars(dtm)$date = NULL
   
-  el1 = compare_documents(dtm, date_var = 'date', min_similarity = 0.1)
+  el1 = compare_documents(dtm, date_var = 'ym', min_similarity = 0.1)
   testthat::expect_equal(nrow(el1$d), 50518)
-  el2 = compare_documents(dtm, date_var = 'date', min_similarity = 0.5)
+  el2 = compare_documents(dtm, date_var = 'ym', min_similarity = 0.5)
   testthat::expect_equal(nrow(el2$d), 4238)
 
   g = as_document_network(el1)
   
   ## meta with margin attributes
-  test = compare_documents(dtm, date_var = 'date', min_similarity = 0.5)
+  test = compare_documents(dtm, date_var = 'ym', min_similarity = 0.5)
   testthat::expect_true(all(c('from_n','from_sum','lag_n','lag_sum') %in% colnames(test$from_meta)))
   testthat::expect_true(all(c('to_n','to_sum') %in% colnames(test$to_meta)))
   
   ## test deduplication
-  x = delete_duplicates(dtm, date_var='date', similarity = 0.9, tf_idf = T)
+  x = delete_duplicates(dtm, date_var='ym', similarity = 0.9, tf_idf = T)
   
   
   ## test if lag_attr is correct
