@@ -31,8 +31,7 @@
 #' @param group_var   Optionally,  The name of the column in docvars that specifies a group (e.g., source, sourcetype). If given, only documents within the same group will be compared.
 #' @param measure     The measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document 
 #'                    that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental).
-#'                    The regular crossprod (inner product) is also supported.
-#'                    If the dtm's are prepared with the create_queries function, the special "query_lookup" and "query_lookup_pct" can be used.
+#'                    The regular dot product (dot_product) is also supported.
 #' @param tf_idf      If TRUE, weigh the dtm (and dtm_y) by term frequency - inverse document frequency. For more control over weighting,
 #'                    we recommend using quanteda's \link[quanteda]{dfm_tfidf} or \link[quanteda]{dfm_weight} on dtm and dtm_y. 
 #' @param min_similarity A threshold for similarity. lower values are deleted. For all available similarity measures zero means no similarity.
@@ -78,10 +77,11 @@
 #' g = compare_documents(dtm, measure = 'overlap_pct')
 #' g
 compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,24), group_var=NULL, 
-                              measure=c('cosine','overlap_pct','overlap','crossprod','softcosine','query_lookup','query_lookup_pct','cp_lookup','cp_lookup_norm'), tf_idf=F,
-                              min_similarity=0, n_topsim=NULL, only_complete_window=T, copy_meta=F,
+                              measure=c('cosine','overlap_pct','overlap','dot_product', 'softcosine'), tf_idf=F,
+                              min_similarity=0, n_topsim=NULL, only_complete_window=T, copy_meta=T,
                               backbone_p=1, simmat=NULL, simmat_thres=NULL, batchsize=1000, verbose=FALSE){
     
+    if (measure[1] == 'crossprod') stop('the "crossprod" measure has been renamed "dot_product", because the connection to the base crossprod function was not worth how utterly confusing this was')
     measure = match.arg(measure)
   
     ########### prepare dtm
@@ -153,18 +153,18 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
     if (measure == 'overlap')      cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = 'min', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
                                                           date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
                                                           row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
-    if (measure == 'crossprod')    cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = 'prod', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
+    if (measure == 'dot_product')    cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = 'prod', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
                                                           date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
                                                           row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
-    if (measure == 'query_lookup') cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = 'lookup', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
-                                                          date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
-                                                          row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
-    if (measure == 'query_lookup_pct') cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = T, max_p=backbone_p, pvalue="disparity", crossfun = 'lookup', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
-                                                          date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
-                                                          row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
-    if (measure %in% c('cp_lookup','cp_lookup_norm')) cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = measure, min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
-                                                              date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
-                                                              row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
+    #if (measure == 'query_lookup') cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = 'lookup', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
+    #                                                      date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
+    #                                                      row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
+    #if (measure == 'query_lookup_pct') cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = T, max_p=backbone_p, pvalue="disparity", crossfun = 'lookup', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
+    #                                                      date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
+    #                                                     row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
+    #if (measure %in% c('cp_lookup','cp_lookup_norm')) cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = measure, min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
+    #                                                          date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
+    #                                                          row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
     if (measure == 'softcosine')   cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = T, max_p=backbone_p, pvalue="disparity", normalize='softl2', crossfun = 'softprod', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
                                                           date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
                                                           row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)

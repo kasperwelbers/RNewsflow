@@ -9,13 +9,13 @@ create_queries(
   ref_dtm = NULL,
   min_docfreq = 2,
   max_docprob = 0.01,
-  weight = c("tfidf", "tfidf_sq", "binary"),
+  weight = c("tfidf", "binary"),
   norm_weight = c("max", "doc_max", "dtm_max", "none"),
   min_obs_exp = NA,
   union_sim_thres = NA,
   combine_all = T,
   only_dtm_combs = T,
-  use_dtm_and_ref = T,
+  use_dtm_and_ref = F,
   verbose = F
 )
 }
@@ -28,11 +28,8 @@ create_queries(
 
 \item{max_docprob}{The maximum probability (document frequency / N) for terms or combinations of terms}
 
-\item{weight}{Determine how to weight the queries (if ref_dtm is used, uses the idf of the ref_dtm). 
-Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting (actually just idf, since scores are binary). 
-The ref_dfm will always be binary. "tfidf_sq" uses the squared tfidf. This weight even heavier by idf, and makes sense because 
-the query_lookup function will only count the occurences in query_dfm (if both the query_dfm and ref_dfm would be weighted and a crossprod
-based similarity measure is used, terms are also multiplied)}
+\item{weight}{Determine how to weight the queries (if ref_dtm is used, uses the idf of the ref_dtm, or of both the dtm and ref dtm if use_dtm_and_ref is T). 
+Default is "binary" (does/does not occur). "tfidf" uses common tf-idf weighting (actually just idf, since scores are binary).}
 
 \item{norm_weight}{Normalize the weight score so that the highest value is 1. If "max" is used, max is the highest possible value. "doc_max" uses the highest value within each document, and "dtm_max" uses the highest observed value in the dtm.}
 
@@ -44,7 +41,7 @@ based similarity measure is used, terms are also multiplied)}
 
 \item{only_dtm_combs}{Only include term combinations that occur in dtm. This makes sense (and saves a lot of memory) if you are only interested in assymetric similarity measures based on the query}
 
-\item{use_dtm_and_ref}{if a ref_dtm is used, both the dtm and ref_dtm are used to compute the docfreq and docprob values used for filtering and weighting. If use_dtm_and_ref is set o FALSE, only the ref_dtm is used.}
+\item{use_dtm_and_ref}{if a ref_dtm is used, the weight is computed based only on the document frequencies in the ref dtm. If use_dtm_and_ref is set to TRUE, both the dtm and ref_dtm are used.}
 
 \item{verbose}{If true, report progress}
 }
@@ -70,11 +67,6 @@ To emphasize that this feature preparation step is geared towards the task of 'l
 we use the terminolog of a 'query'. The output of the function is a list of two dtm: query_dtm and ref_dtm.
 Both dtms have the exact same columns that contain the query terms.
 The values in query_dtm are by default tfidf weighted, and the values in ref_dtm are binary.
-
-The special `query_lookup` measure in the \code{\link{compare_documents}} function can be used to
-perform the lookup. Note that a more common approach is to weigh both the queries and documents and then match queries to documents
-with cosine similarity. However, for event matching we only want to see whether a query 'suffiently' matches a
-document. The query_lookup function calculates a query->document weight as the sum of query terms that occur in the document.
  
 Several options are given to only create term combinations that are informative. Firstly, a minimum and maximum document frequency of term combinations can be defined. 
 Secondly, a minimum observed/expected ratio can be given. The expected probability of a combination of term A and term B

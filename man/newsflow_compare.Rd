@@ -10,8 +10,7 @@ newsflow_compare(
   date_var = "date",
   hour_window = c(-24, 24),
   group_var = NULL,
-  measure = c("cosine", "overlap_pct", "overlap", "crossprod", "softcosine",
-    "query_lookup", "query_lookup_pct"),
+  measure = c("cosine", "overlap_pct", "overlap", "dot_product", "softcosine"),
   tf_idf = F,
   min_similarity = 0,
   n_topsim = NULL,
@@ -36,8 +35,7 @@ It is possible to specify time windows down to the level of seconds by using fra
 
 \item{measure}{The measure that should be used to calculate similarity/distance/adjacency. Currently supports the symmetrical measure "cosine" (cosine similarity), the assymetrical measures "overlap_pct" (percentage of term scores in the document 
 that also occur in the other document), "overlap" (like overlap_pct, but as the sum of overlap instead of the percentage) and the symmetrical soft cosine measure (experimental).
-The regular crossprod (inner product) is also supported.
-If the dtm's are prepared with the create_queries function, the special "query_lookup" and "query_lookup_pct" can be used.}
+The regular dot product (dot_product) is also supported.}
 
 \item{tf_idf}{If TRUE, weigh the dtm (and dtm_y) by term frequency - inverse document frequency. For more control over weighting,
 we recommend using quanteda's \link[quanteda]{dfm_tfidf} or \link[quanteda]{dfm_weight} on dtm and dtm_y.}
