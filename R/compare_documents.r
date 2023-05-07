@@ -38,7 +38,7 @@
 #' @param n_topsim    An alternative or additional sort of threshold for similarity. Only keep the [n_topsim] highest similarity scores for x. Can return more than [n_topsim] similarity scores in the case of duplicate similarities.
 #' @param only_complete_window If True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.
 #' @param copy_meta   If TRUE, copy the dtm docvars to the from_meta and to_meta data.tables
-#' @param backbone_p  Apply backbone filtering with a "disparity" filter (see \href{https://www.pnas.org/doi/full/10.1073/pnas.0808904106}{Serrano et al.}).
+#' @param backbone_p  Apply backbone filtering with a "disparity" filter (see Serrano et al., DOI: 10.1073/pnas.0808904106).
 #'                    It is different from the original disparity filter algorithm in that it only looks at outward edges. Also, the outward degree k is
 #'                    measured as all possible edges (within a window), not just the non-zero edges.
 #' @param simmat      If softcosine is used, a symmetrical matrix with the similarity scores of terms. If NULL, the cosine similarity of terms in dtm will be used

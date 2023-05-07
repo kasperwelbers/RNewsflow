@@ -4,7 +4,8 @@ testthat::context('Using newsflow')
 test_that("rnewsflow", {
   library(RNewsflow)
   library(quanteda)
-  #options(Matrix.warnDeprecatedCoerce = 2)
+  options(Matrix.warnDeprecatedCoerce = 2)
+  
   
   dtm = rnewsflow_dfm
   docvars(dtm)$ym = docvars(dtm)$date

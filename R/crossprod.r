@@ -28,7 +28,7 @@
 #' @param rowsum_div  If true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering).
 #' @param max_p       A threshold for maximium p value. 
 #' @param pvalue      If max_p < 1, edges are removed based on a p value. For each document in dtm, a p value is calculated over its outward edges. 
-#'                    Default is the p-value based on uniform distribution, akin to a "disparity" filter (see \href{https://www.pnas.org/doi/full/10.1073/pnas.0808904106}{Serrano et al.}) but without filtering on inward edges.
+#'                    Default is the p-value based on uniform distribution, akin to a "disparity" filter (see Serrano et al., DOI: 10.1073/pnas.0808904106) but without filtering on inward edges.
 #' @param normalize   Normalize rows by a given norm score (before calculating similarity). Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 
 #'                    'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine).
 #' @param crossfun    The function used in the vector operations. 

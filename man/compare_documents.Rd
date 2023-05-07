@@ -54,7 +54,7 @@ we recommend using quanteda's \link[quanteda]{dfm_tfidf} or \link[quanteda]{dfm_
 
 \item{copy_meta}{If TRUE, copy the dtm docvars to the from_meta and to_meta data.tables}
 
-\item{backbone_p}{Apply backbone filtering with a "disparity" filter (see \href{https://www.pnas.org/doi/full/10.1073/pnas.0808904106}{Serrano et al.}).
+\item{backbone_p}{Apply backbone filtering with a "disparity" filter (see Serrano et al., DOI: 10.1073/pnas.0808904106).
 It is different from the original disparity filter algorithm in that it only looks at outward edges. Also, the outward degree k is
 measured as all possible edges (within a window), not just the non-zero edges.}
 

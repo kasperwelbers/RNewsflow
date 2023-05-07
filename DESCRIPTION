@@ -8,7 +8,7 @@ Description: A collection of tools for measuring the similarity of text messages
     time and across media. 
 License: GPL-3
 Depends: 
-    R (>= 3.2.0),
+    R (>= 3.3.0),
     igraph (>= 1.3.4),
     Matrix (>= 1.5)
 Imports: 
@@ -24,7 +24,6 @@ LinkingTo:
     RcppEigen (>= 0.3.3.9.2),
     RcppProgress (>= 0.4.2)
 LazyData: true
-SystemRequirements: C++11
 RoxygenNote: 7.2.1
 Suggests: 
     knitr (>= 1.40),
