@@ -170,7 +170,7 @@ By selecting the terms with low entropy scores, the DTM can be filtered by using
 [^autoboiler]: Note that this is also a good automatic approach for filtering out stopwords, boilerplate words, and word forms such as articles and common verbs.  
 
 ```{r}
-select_terms = tdd$term[tdd$days.entropy.norm <= 0.3]
+select_terms = tdd$term[tdd$days.entropy.norm <= 0.1]
 dtm = dtm[,select_terms]
 ```
 
@@ -307,13 +307,13 @@ To visualize these components, we offer the `document_network_plot` function.
 This function draws a network where nodes (i.e. documents) are positioned based on their date (x-axis) and source (y-axis).
 
 ```{r, fig.width = 7, fig.height = 3}
-gs = g_subcomps[[55]] # select the second sub-component
+gs = g_subcomps[[20]] # select the second sub-component
 document_network_plot(gs)
 ```
 
-The visualization shows that a news message was first published by the news agency on June 5th at 9:21 AM. 
-Soon after this messages was adopted by two online newspapers, and the next day a print newspaper followed.
-The grayscale and width of the edges also show that the online newspaper messages were more similar (i.e. thick and black) to the news agency message compared to the print newspaper message.
+The visualization shows that a news message was first published by the news agency on June 26th. 
+Soon after this messages was covered in an online newspaper, and the next day it was also covered in a print newspaper.
+The grayscale of the edges indicates the level of similarity, showing that the online article was much more similar to the original newsagency article.
 
 By default, the "source" attribute is used for the y-axis, but this can be changed to other document attributes using the `source_attribute` parameters.
 If a DTM is also provided, the visualization will also include a word cloud with the most frequent words of these documents.
@@ -368,11 +368,11 @@ head(e)
 In the edges of the aggregated network there are six scores for each edge. 
 The `edges` attribute counts the number of edges from the `from` group to the `to` group. 
 For example, we see that *Newsagency* documents have 434 edges to later published *Online NP 1* documents.
-The `agg.hourdiff` attribute shows that the median of the hourdiff attribute of these 434 edges is 1.27 (1 hour and 16 minutes).
+The `agg.hourdiff` attribute shows that the median of the hourdiff attribute of these 440 edges is 1.26 (1 hour and 16 minutes).
 In addition to the edges, we can look at the number of messages (i.e. vertices) in the `from` group that matched with at least one message in the `to` group. 
-This is given by the `from.V` attribute, which shows here that 380 *Newsagency* documents matched with a later published *Online NP 1* document[^lowerthanedges].
+This is given by the `from.V` attribute, which shows here that 384 *Newsagency* documents matched with a later published *Online NP 1* document[^lowerthanedges].
 This is also given as the proportion of all vertices/documents in the `from` group, as the `from.Vprop` attribute.
-Substantially, the `from.Vprop` score thus indicates that 63.65% of political news messages in *Newsagency* is similar or identical to later published *Online NP 1* messages.
+Substantially, the `from.Vprop` score thus indicates that 64.32% of political news messages in *Newsagency* is similar or identical to later published *Online NP 1* messages.
 
 Alternatively, we can also look at the *to.V* and *to.Vprop* scores to focus on the number and proportion of messages in the `to` group that match with at least one message in the `from` group.
 Here we see, for instance, that 87.88% of political news messages in *Online NP 1* is similar to or identical to previously published messages *Newsagency* messages.
@@ -520,8 +520,7 @@ library(quanteda)
 dtm = rnewsflow_dfm  ## copy demo data
 
 tdd = term_day_dist(dtm)
-dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.3]]
-
+dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.1]]
 dtm = dfm_tfidf(dtm)
 
 # Prepare document similarity network

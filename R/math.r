@@ -1,13 +1,13 @@
 entropy <- function(x) {
   x = x/sum(x)
-  prod((1/x)^x)
+  -sum(x * log(x), na.rm = T)
 }
 
 columnEntropy <- function(m){
   m = methods::as(methods::as(m, 'generalMatrix'), 'TsparseMatrix')
   m@x = m@x / Matrix::colSums(m)[m@j+1]
-  m@x = (1/m@x)^m@x
-  tapply(m@x, m@j, prod)
+  m@x = m@x * log(m@x)
+  -tapply(m@x, m@j, sum, na.rm=T)
 }
 
 # get 1-day halflife decay

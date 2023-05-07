@@ -29,7 +29,7 @@ tdd = term_day_dist(dtm)
 tail(tdd, 3)
 
 ## -----------------------------------------------------------------------------
-select_terms = tdd$term[tdd$days.entropy.norm <= 0.3]
+select_terms = tdd$term[tdd$days.entropy.norm <= 0.1]
 dtm = dtm[,select_terms]
 
 ## -----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ show_window(g, to_attribute = 'source')
 g_subcomps = decompose(g)
 
 ## ---- fig.width = 7, fig.height = 3-------------------------------------------
-gs = g_subcomps[[55]] # select the second sub-component
+gs = g_subcomps[[20]] # select the second sub-component
 document_network_plot(gs)
 
 ## ---- fig.width = 7, fig.height = 4-------------------------------------------
@@ -136,8 +136,7 @@ head(docXsource)
 #  dtm = rnewsflow_dfm  ## copy demo data
 #  
 #  tdd = term_day_dist(dtm)
-#  dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.3]]
-#  
+#  dtm = dtm[,tdd$term[tdd$days.entropy.norm <= 0.1]]
 #  dtm = dfm_tfidf(dtm)
 #  
 #  # Prepare document similarity network
