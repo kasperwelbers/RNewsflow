@@ -10,7 +10,7 @@
 #' To achieve this, options for similarity measures are included in the function.
 #' For example, to get the cosine similarity, you can normalize with "l2" and use the "prod" (product) function for the   
 #'
-#' This function is called by the document comparison functions (documents.compare, newsflow.compare, delete.duplicates).
+#' This function is called by the document comparison functions (newsflow_compare, delete_duplicates).
 #' We only expose it here for additional flexibility, and because it could be usefull outside of the purpose of this package. 
 #'
 #' The output matrix also has an attribute "margin", which contains margin scores (e.g., row_sum) if the row_attr or col_attr arguments are used.
@@ -18,8 +18,8 @@
 #' If group or date is used, we don't know how many columns a rows has been compared to (normally this is all columns).
 #' If a min/max or top_n filter is used, we don't know the true row sums (and thus row means).
 #'
-#' @param m           A dgCMatrix
-#' @param m2          A dgCMatrix
+#' @param m           A CsparseMatrix
+#' @param m2          A CsparseMatrix
 #' @param min_value   Optionally, a numerical value, specifying the threshold for including a score in the output. 
 #' @param max_value   Optionally, a numerical value for the upper limit for including a score in the output.
 #' @param only_upper  If true, only the upper triangle of the matrix is returned. Only possible for symmetrical output (m and m2 have same number of columns)
@@ -28,7 +28,7 @@
 #' @param rowsum_div  If true, divide crossproduct by column sums of m. (this has to happen within the loop for min_value and top_n filtering).
 #' @param max_p       A threshold for maximium p value. 
 #' @param pvalue      If max_p < 1, edges are removed based on a p value. For each document in dtm, a p value is calculated over its outward edges. 
-#'                    Default is the p-value based on uniform distribution, akin to a "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}) but without filtering on inward edges.
+#'                    Default is the p-value based on uniform distribution, akin to a "disparity" filter (see \href{https://www.pnas.org/doi/full/10.1073/pnas.0808904106}{Serrano et al.}) but without filtering on inward edges.
 #' @param normalize   Normalize rows by a given norm score (before calculating similarity). Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 
 #'                    'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine).
 #' @param crossfun    The function used in the vector operations. 
@@ -54,7 +54,7 @@
 #' @param batchsize   If group and/or date are used, size of batches.
 #' @param verbose     if TRUE, report progress
 #'
-#' @return A dgCMatrix
+#' @return A CsparseMatrix
 #' @export
 #'
 #' @examples
@@ -145,26 +145,26 @@ tcrossprod_sparse <- function(m, m2=NULL,
       if (!nrow(simmat) == ncol(simmat)) stop('simmat has to be symmetrical')
       if (!identical(colnames(simmat), colnames(m))) stop('colnames(m) has to be identical to colnames(simmat)')
       if (!is.null(simmat_thres)) m[m < simmat_thres] = 0
-      simmat = methods::as(simmat, 'dgCMatrix')
+      simmat = methods::as(simmat, 'CsparseMatrix')
     } else {
       if (identical(m,m2)) {
         simmat = tcrossprod_sparse(t(m), normalize='l2', min_value = simmat_thres, diag=T)
       } else {
         if (!identical(colnames(m), colnames(m2))) {
           terms = union(colnames(m), colnames(m2))
-          m = methods::as(reindexTerms(m, terms), 'dgCMatrix')
-          m2 = methods::as(reindexTerms(m2, terms), 'dgCMatrix')
+          m = methods::as(reindexTerms(m, terms), 'CsparseMatrix')
+          m2 = methods::as(reindexTerms(m2, terms), 'CsparseMatrix')
         }
         simmat = tcrossprod_sparse(t(rbind(m,m2)),normalize='l2', min_value = simmat_thres, diag=T)
       }
     }
   } else if (crossfun %in% c('cp_lookup','cp_lookup_norm')) {
-    ## this is a special scenario, and currently we're still testing how usefull it is.
+    ## this is a special scenario, and currently we're still testing how useful it is.
     ## if it works, I'll tidy this up.
     
-    simmat = prepare_cp_lookup_matrix(m, m2, id_from = 'm2')
+    simmat = prepare_cp_lookup_matrix(m, m2, idf_from = 'm2')
   } else {
-    simmat = methods::as(Matrix::spMatrix(0,0), 'dgCMatrix')
+    simmat = methods::as(Matrix::spMatrix(0,0), 'CsparseMatrix')
   }
   
  
@@ -184,7 +184,7 @@ tcrossprod_sparse <- function(m, m2=NULL,
 }
 
 reindexTerms <- function(dtm, terms){
-  dtm = methods::as(dtm, 'dgTMatrix')
+  dtm = methods::as(methods::as(dtm, 'generalMatrix'), 'TsparseMatrix')
   documents = rownames(dtm)
   dtm = Matrix::spMatrix(nrow(dtm), length(terms), dtm@i+1, match(colnames(dtm)[dtm@j+1], terms), dtm@x)
   dimnames(dtm) = list(documents, terms)

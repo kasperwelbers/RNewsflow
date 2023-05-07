@@ -18,7 +18,7 @@ term_innovation(
 )
 }
 \arguments{
-\item{m}{A dgCMatrix}
+\item{m}{A CsparseMatrix}
 
 \item{date}{a character vector that specifies a date for each row in m. If given, only pairs of rows within a given date range (see lwindow, rwindow and date_unit) are calculated.}
 
@@ -39,7 +39,7 @@ term_innovation(
 \item{smooth}{The smoothing factor (prevents -Inf/Inf ratio)}
 }
 \value{
-A dgCMatrix
+A CsparseMatrix
 }
 \description{
 For each term in m, the usage before and after the document date is compared (with a chi2 test) to see whether usage increased.

@@ -4,6 +4,7 @@ testthat::context('Using newsflow')
 test_that("rnewsflow", {
   library(RNewsflow)
   library(quanteda)
+  #options(Matrix.warnDeprecatedCoerce = 2)
   
   dtm = rnewsflow_dfm
   docvars(dtm)$ym = docvars(dtm)$date
@@ -26,7 +27,9 @@ test_that("rnewsflow", {
   
   
   ## test if lag_attr is correct
-  m = quanteda::dfm(c('a b c d e', 'b c d f', 'a b d e', 'b c f', 'f g h'))
+  tokens = quanteda::tokens(c('a b c d e', 'b c d f', 'a b d e', 'b c f', 'f g h'))
+  m = quanteda::dfm(tokens)
+  
   docvars(m, 'date') = seq.POSIXt(as.POSIXct('2010-01-01'), as.POSIXct('2010-01-05'), by='day')
   docvars(m, 'date')[2] = docvars(m, 'date')[1]
   g = newsflow_compare(m, hour_window=c(-1000,1000), only_complete_window = F)

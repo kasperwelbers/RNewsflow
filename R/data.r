@@ -9,5 +9,5 @@
 #' @docType data
 #' @keywords datasets
 #' @name docnet
-#' @format docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[RNewsflow]{document.network} or \link[RNewsflow]{newsflow.compare}.
+#' @format docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[RNewsflow]{create_document_network} or \link[RNewsflow]{newsflow_compare}.
 NULL

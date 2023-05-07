@@ -29,7 +29,7 @@ dtmToSparseMatrix <- function(dtm){
 term_day_dist <- function(dtm, meta=NULL, date.var='date'){
   if (is.null(meta)) meta = quanteda::docvars(dtm)
   dtm = quanteda::as.dfm(dtm)
-  dtm = methods::as(dtm, 'dgTMatrix')
+  dtm = methods::as(methods::as(dtm, 'generalMatrix'), 'TsparseMatrix')
   if (!date.var %in% colnames(meta)) stop('The name specified in date.var is not a valid dfm docvar')
   
   document.date = as.Date(meta[[date.var]])
@@ -55,7 +55,7 @@ term_day_dist <- function(dtm, meta=NULL, date.var='date'){
   i = match(i, dateseq)
   m = Matrix::spMatrix(length(dateseq), ncol(dtm), i, dtm@j+1, dtm@x)
   
-  m = methods::as(m, 'dgCMatrix')
+  m = methods::as(m, 'CsparseMatrix')
   days.entropy = columnEntropy(m)
   days.n = Matrix::colSums(m>0)
 

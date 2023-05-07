@@ -7,9 +7,9 @@
 term_union(dtm, simmat, as_dfm = T, verbose = F, sep = "|", par = NA)
 }
 \arguments{
-\item{dtm}{A quanteda \link[quanteda]{dfm} or a dgCMatrix.}
+\item{dtm}{A quanteda \link[quanteda]{dfm} or a CsparseMatrix.}
 
-\item{simmat}{A similarity matrix in dgCMatrix format. For instance, created with \link{term_char_sim}}
+\item{simmat}{A similarity matrix in CsparseMatrix format. For instance, created with \link{term_char_sim}}
 
 \item{as_dfm}{If True, return as quanteda dfm}
 
@@ -22,7 +22,7 @@ specification if OR (term_union) and AND (term_intersect) operations are combine
 If NA, this is based on whether parenthese are present.}
 }
 \value{
-A dgCMatrix or quanteda dfm
+A CsparseMatrix or quanteda dfm
 }
 \description{
 Given a dtm and a similarity (adjacency) matrix, group clusters of similar terms (simmat > 0) into a single column.
@@ -30,7 +30,7 @@ Column names will be concatenated, with a "|" seperator (read as OR)
 }
 \examples{
 dfm = quanteda::dfm(c('That guy Gadaffi','Do you mean Kadaffi?',
-                      'Nah more like Gadaffel','What Gargamel?'))
+                      'Nah more like Gadaffel','Not Kadaffel?'))
 simmat = term_char_sim(colnames(dfm), same_start=0)
 term_union(dfm, simmat, verbose = FALSE)
 }

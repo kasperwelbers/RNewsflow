@@ -71,7 +71,7 @@ The values in query_dtm are by default tfidf weighted, and the values in ref_dtm
 Several options are given to only create term combinations that are informative. Firstly, a minimum and maximum document frequency of term combinations can be defined. 
 Secondly, a minimum observed/expected ratio can be given. The expected probability of a combination of term A and term B
 is the joint probability. If the observed probability is not higher, the combination is not more informative than chance.
-Thirdly, before intersecting terms, one can first cluster very similar terms together as single columns to reduct the number
+Thirdly, before intersecting terms, one can first cluster very similar terms together as single columns to reduce the number
 of possible combinations.
 }
 \examples{

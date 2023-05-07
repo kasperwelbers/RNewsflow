@@ -48,7 +48,7 @@ meta = data.frame(document_id = 1:8,
                          by='hour', length.out = 8),
                   medium = c(rep('Newspapers', 4), rep('Blog', 4)))
 
-g = document.network(d, meta)
+g = create_document_network(d, meta)
 
 igraph::get.data.frame(g, 'both')
 igraph::plot.igraph(g)

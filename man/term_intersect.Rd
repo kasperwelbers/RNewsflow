@@ -7,9 +7,9 @@
 term_intersect(dtm, simmat, as_dfm = T, verbose = F, sep = " & ", par = NA)
 }
 \arguments{
-\item{dtm}{A quanteda \link[quanteda]{dfm} or a dgCMatrix.}
+\item{dtm}{A quanteda \link[quanteda]{dfm} or a CsparseMatrix.}
 
-\item{simmat}{A similarity matrix in dgCMatrix format. For instance, created with \link{term_char_sim}}
+\item{simmat}{A similarity matrix in CsparseMatrix format. For instance, created with \link{term_char_sim}}
 
 \item{as_dfm}{If True, return as quanteda dfm}
 
@@ -22,7 +22,7 @@ specification if OR (term_union) and AND (term_intersect) operations are combine
 If NA, this is based on whether parenthese are present.}
 }
 \value{
-A dgCMatrix or quanteda dfm
+A CsparseMatrix or quanteda dfm
 }
 \description{
 Given a dtm and a similarity (adjacency) matrix, create a new column for each nonzero cell in the

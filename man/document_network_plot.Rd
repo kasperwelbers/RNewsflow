@@ -20,7 +20,7 @@ document_network_plot(
 )
 }
 \arguments{
-\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}}
+\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow_compare} or \link[RNewsflow]{create_document_network}}
 
 \item{date_attribute}{The label of the vertex/document date attribute. Default is "date"}
 

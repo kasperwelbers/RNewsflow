@@ -4,7 +4,7 @@ entropy <- function(x) {
 }
 
 columnEntropy <- function(m){
-  m = methods::as(m, 'dgTMatrix')
+  m = methods::as(methods::as(m, 'generalMatrix'), 'TsparseMatrix')
   m@x = m@x / Matrix::colSums(m)[m@j+1]
   m@x = (1/m@x)^m@x
   tapply(m@x, m@j, prod)

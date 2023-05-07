@@ -7,7 +7,7 @@
 show_window(g, to_attribute = NULL, from_attribute = NULL)
 }
 \arguments{
-\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}}
+\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow_compare} or \link[RNewsflow]{create_document_network}}
 
 \item{to_attribute}{The vertex attribute to aggregate the `to` group of the edges}
 
@@ -20,7 +20,7 @@ A data.frame showing the left and right edges of the window for each unique grou
 This function aggregates the edges for all combinations of attributes specified in `from_attribute` and `to_attribute`, and shows the minimum and maximum hour difference for each combination.
 }
 \details{
-The \link[RNewsflow]{filter.window} function can be used to filter edges that fall outside of the intended time window.
+The \link[RNewsflow]{filter_window} function can be used to filter edges that fall outside of the intended time window.
 }
 \examples{
 data(docnet)

@@ -3,12 +3,14 @@ testthat::context('Lookup with cooccurrence')
 
 test_that("Lookup with cooccurrence", {
   library(RNewsflow)
+  options(Matrix.warnDeprecatedCoerce = 2)
   set.seed(1)
+  
   
   m = Matrix::rsparsematrix(10,4,0.4)
   m = (m != 0) * 1
   
-  simmat = RNewsflow:::prepare_cp_lookup_matrix(m, m, id_from = 'm2')
+  simmat = RNewsflow:::prepare_cp_lookup_matrix(m, m, idf_from = 'm2')
   test = RNewsflow::tcrossprod_sparse(m, min_value=0, crossfun = 'cp_lookup', verbose=F)
   
   m[4,] & m[9,]

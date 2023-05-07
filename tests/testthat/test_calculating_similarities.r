@@ -1,9 +1,13 @@
 testthat::context('Calculating similarities')
 
 is_same <- function(m1,m2){
-  testthat::expect_true(identical(methods::as(methods::as(m1, 'dgTMatrix'), 'dgCMatrix'),
-                                  methods::as(methods::as(m2, 'dgTMatrix'), 'dgCMatrix')))
+  ## identical no longer seems to work with new Matrix version
+  m1 = as(as(as(m1, "dMatrix"), "generalMatrix"), "CsparseMatrix")
+  m2 = as(as(as(m2, "dMatrix"), "generalMatrix"), "CsparseMatrix")
+  if (!identical(dim(m1), dim(m2))) return(FALSE)
+  all(m1 == m2)
 }
+
 
 is_same_m1nonzero <- function(m1,m2) {
   ## only compares the nonzero values in m1 to m2 (for testing date/group and batching)
@@ -14,6 +18,8 @@ is_same_m1nonzero <- function(m1,m2) {
 
 test_that("Matrix multiplication", {
   library(RNewsflow)
+  #options(Matrix.warnDeprecatedCoerce = 2)
+  
   set.seed(1)
   m = Matrix::rsparsematrix(10,10,0.5)
   
@@ -26,6 +32,7 @@ test_that("Matrix multiplication", {
   cp = tcrossprod_sparse(m, min_value = NULL)
   cp_correct = Matrix::tcrossprod(m)
   is_same(cp,cp_correct)
+  
   
   tcrossprod_sparse(m, min_value = 0, only_upper = F, diag = F)
   tcrossprod_sparse(m, min_value = 0, only_upper = T, diag = F)
@@ -100,7 +107,7 @@ test_that("Matrix multiplication", {
   cp = tcrossprod_sparse(m, normalize='l2')
   
   mnorm = sqrt(Matrix::rowSums(m^2))
-  m2 = methods::as(m, 'dgTMatrix')
+  m2 = methods::as(m, 'TsparseMatrix')
   m2@x = m2@x / mnorm[m2@i+1]  
   cp_correct = Matrix::tcrossprod(m2)
   

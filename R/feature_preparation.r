@@ -21,7 +21,7 @@
 #' Several options are given to only create term combinations that are informative. Firstly, a minimum and maximum document frequency of term combinations can be defined. 
 #' Secondly, a minimum observed/expected ratio can be given. The expected probability of a combination of term A and term B
 #' is the joint probability. If the observed probability is not higher, the combination is not more informative than chance.
-#' Thirdly, before intersecting terms, one can first cluster very similar terms together as single columns to reduct the number
+#' Thirdly, before intersecting terms, one can first cluster very similar terms together as single columns to reduce the number
 #' of possible combinations. 
 #'
 #' @param dtm          A quanteda \link[quanteda]{dfm}
@@ -69,7 +69,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.01, w
     if (union_sim_thres <= 0 || union_sim_thres > 1) stop('Union sim thres must be a value between 0 and 1')
     if (verbose) message('Computing clusters of similar terms')
     simmat1 = term_occur_sim(m, union_sim_thres, verbose=verbose)
-    m = term_union(m, methods::as(simmat1,'dgCMatrix'), as_dfm=F)
+    m = term_union(m, methods::as(simmat1, 'CsparseMatrix'), as_dfm=F)
   }
   
   if (verbose) message('Computing term combinations')
@@ -83,7 +83,7 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.01, w
     
     m = dtm[,voc]
     if (!is.na(union_sim_thres)) {
-      m = term_union(m, methods::as(simmat1,'dgCMatrix'), as_dfm = F, verbose = F)
+      m = term_union(m, methods::as(simmat1,'CsparseMatrix'), as_dfm = F, verbose = F)
       voc = intersect(colnames(m), colnames(simmat2))
       m = m[,voc]
       simmat2 = simmat2[voc,voc]
@@ -94,26 +94,26 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.01, w
                                        min_docfreq=1)
       nz = which(simmat2 > 0)
       dropval = nz[simmat_filter[nz] == 0]
-      simmat2[dropval] = 0
+      simmat2@x[dropval] = 0
       simmat2 = Matrix::drop0(simmat2)
     }
     
     if (!combine_all) simmat2 = rm_comb_if_diag(simmat2)
-    m = term_intersect(methods::as(m, 'dgCMatrix'), methods::as(simmat2, 'dgCMatrix'), as_dfm=F, verbose=F)
+    m = term_intersect(methods::as(m, 'dMatrix'), methods::as(simmat2, 'dMatrix'), as_dfm=F, verbose=F)
     
     if (verbose) message('Building new reference dtm')
     m_ref = m_ref[,voc]
-    m_ref = term_intersect(methods::as(m_ref, 'dgCMatrix'), methods::as(simmat2, 'dgCMatrix'), as_dfm=F, verbose=F)
+    m_ref = term_intersect(methods::as(m_ref, 'dMatrix'), methods::as(simmat2, 'dMatrix'), as_dfm=F, verbose=F)
     
   } else {
     if (!combine_all) simmat2 = rm_comb_if_diag(simmat2)
-    m = term_intersect(methods::as(m, 'dgCMatrix'), methods::as(simmat2, 'dgCMatrix'), as_dfm=F)
+    m = term_intersect(methods::as(m, 'dMatrix'), methods::as(simmat2, 'dMatrix'), as_dfm=F)
     m_ref = NULL
   }
    
   if (!ncol(m) == 0){
     m = weight_queries(m, m_ref, weight, norm_weight)
-    m_ref = weight_queries(m_ref, m_ref, weight, norm_weight)
+    if (!is.null(m_ref)) m_ref = weight_queries(m_ref, m_ref, weight, norm_weight)
   }
 
   m = quanteda::as.dfm(m)
@@ -134,7 +134,6 @@ create_queries <- function(dtm, ref_dtm=NULL, min_docfreq=2, max_docprob=0.01, w
 
 weight_queries <- function(dfm_x, dfm_y=NULL, weight, norm_weight) {
   if (weight == 'binary') return(dfm_x > 0)
-  
   if (is.null(dfm_y)) dfm_y = dfm_x
   ts = Matrix::colSums(dfm_y > 0)  
   ts = ts[match(colnames(dfm_x), names(ts))]
@@ -175,8 +174,8 @@ match_simmat_terms <- function(dtm, simmat) {
 #' Given a dtm and a similarity (adjacency) matrix, group clusters of similar terms (simmat > 0) into a single column.
 #' Column names will be concatenated, with a "|" seperator (read as OR)
 #'
-#' @param dtm          A quanteda \link[quanteda]{dfm} or a dgCMatrix.
-#' @param simmat       A similarity matrix in dgCMatrix format. For instance, created with \link{term_char_sim}
+#' @param dtm          A quanteda \link[quanteda]{dfm} or a CsparseMatrix.
+#' @param simmat       A similarity matrix in CsparseMatrix format. For instance, created with \link{term_char_sim}
 #' @param as_dfm       If True, return as quanteda dfm
 #' @param verbose      If True, report progress
 #' @param sep          The separator used for pasting the terms
@@ -184,21 +183,23 @@ match_simmat_terms <- function(dtm, simmat) {
 #'                     specification if OR (term_union) and AND (term_intersect) operations are combined. 
 #'                     If NA, this is based on whether parenthese are present. 
 #'
-#' @return  A dgCMatrix or quanteda dfm
+#' @return  A CsparseMatrix or quanteda dfm
 #' @export
 #' 
 #' @examples 
 #' dfm = quanteda::dfm(c('That guy Gadaffi','Do you mean Kadaffi?',
-#'                       'Nah more like Gadaffel','What Gargamel?'))
+#'                       'Nah more like Gadaffel','Not Kadaffel?'))
 #' simmat = term_char_sim(colnames(dfm), same_start=0)
 #' term_union(dfm, simmat, verbose = FALSE)
 term_union <- function(dtm, simmat, as_dfm=T, verbose=F, sep='|', par=NA) {
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
-  #simmat = match_simmat_terms(dtm, simmat)
-  dtm = quanteda::dfm_match(dtm, colnames(simmat))
-
+  dtm = quanteda::dfm_match(quanteda::as.dfm(dtm), colnames(simmat))
+  
   parentheses = if (is.na(par)) grepl('[&]', colnames(dtm)) else par
-  ml = term_union_cpp(dtm, simmat, colnames(dtm), parentheses, verbose, sep)
+  
+  ml = term_union_cpp(methods::as(methods::as(methods::as(dtm, "dMatrix"), "generalMatrix"), "CsparseMatrix"),
+                      methods::as(methods::as(methods::as(simmat, "dMatrix"), "generalMatrix"), "CsparseMatrix"),
+                      colnames(dtm), parentheses, verbose, sep)
   colnames(ml$m) = ml$colnames
   rownames(ml$m) = rownames(dtm)
   ml$m = ml$m[,colSums(ml$m) > 0]
@@ -218,8 +219,8 @@ term_union <- function(dtm, simmat, as_dfm=T, verbose=F, sep='|', par=NA) {
 #' similarity matrix. For the term combinations  (everything except the diagonal) the column names will be
 #' pasted together with a "&" separator (read as AND)
 #'
-#' @param dtm          A quanteda \link[quanteda]{dfm} or a dgCMatrix.
-#' @param simmat       A similarity matrix in dgCMatrix format. For instance, created with \link{term_char_sim}
+#' @param dtm          A quanteda \link[quanteda]{dfm} or a CsparseMatrix.
+#' @param simmat       A similarity matrix in CsparseMatrix format. For instance, created with \link{term_char_sim}
 #' @param as_dfm       If True, return as quanteda dfm
 #' @param verbose      If True, report progress
 #' @param sep          The separator used for pasting the terms
@@ -227,15 +228,17 @@ term_union <- function(dtm, simmat, as_dfm=T, verbose=F, sep='|', par=NA) {
 #'                     specification if OR (term_union) and AND (term_intersect) operations are combined. 
 #'                     If NA, this is based on whether parenthese are present.
 #'
-#' @return  A dgCMatrix or quanteda dfm
+#' @return  A CsparseMatrix or quanteda dfm
 #' @export
 term_intersect <- function(dtm, simmat, as_dfm=T, verbose=F, sep=' & ', par=NA) {
   if (methods::is(dtm, "DocumentTermMatrix")) stop('this function does not work for tm DocumentTermMatrix class')
   #simmat = match_simmat_terms(dtm, simmat)
-  dtm <- quanteda::dfm_match(dtm, colnames(simmat))
+  dtm <- quanteda::dfm_match(quanteda::as.dfm(dtm), colnames(simmat))
 
   parentheses = if (is.na(par)) grepl('[|]', colnames(dtm)) else par
-  ml = term_intersect_cpp(dtm, simmat, colnames(dtm), parentheses, verbose, sep)
+  ml = term_intersect_cpp(methods::as(methods::as(methods::as(dtm, "dMatrix"), "generalMatrix"), "CsparseMatrix"),
+                          methods::as(methods::as(methods::as(simmat, "dMatrix"), "generalMatrix"), "CsparseMatrix"),
+                          colnames(dtm), parentheses, verbose, sep)
   colnames(ml$m) = ml$colnames
   rownames(ml$m) = rownames(dtm)
   ml$m = ml$m[,Matrix::colSums(ml$m) > 0]
@@ -251,28 +254,28 @@ term_intersect <- function(dtm, simmat, as_dfm=T, verbose=F, sep=' & ', par=NA) 
 
 term_occur_sim <- function(m, min_cos, verbose=F) {
   simmat = tcrossprod_sparse(t(m), min_value = min_cos, normalize='l2', verbose=verbose) > 0
-  methods::as(simmat, 'dgCMatrix')
+  methods::as(simmat, 'CsparseMatrix')
 }
 
 ## create a matrix with document probabilities (docfreq / n) for all column combinations
 ## max_docfreq is used to only keep sufficiently rare combinations
 ## typically, min_docfreq is used to drop very sparse terms, and max_docfreq is used to drop terms that are too common to be informative.
 term_cooccurence_docprob <- function(m, max_docfreq, min_docfreq=NULL, min_obs_exp=NA) {
-  #simmat = tcrossprod_sparse(methods::as(t(m > 0), 'dgCMatrix'), min_value=min_docfreq, max_value = max_docfreq, verbose=verbose)
+  #simmat = tcrossprod_sparse(methods::as(t(m > 0), 'CsparseMatrix'), min_value=min_docfreq, max_value = max_docfreq, verbose=verbose)
   simmat = crossprod(m>0)
   simmat@x[simmat@x < min_docfreq] = 0
   simmat@x[simmat@x > max_docfreq] = 0
   simmat = Matrix::drop0(simmat)
   
   if (!is.na(min_obs_exp)) {
-    simmat = methods::as(simmat, 'dgTMatrix')
+    simmat = methods::as(methods::as(simmat, 'generalMatrix'), 'TsparseMatrix')
     prob = Matrix::colMeans(m > 0)
     exp = prob[simmat@i+1] * prob[simmat@j+1] * nrow(m)
     simmat@x[(simmat@x / exp) < min_obs_exp] = 0
     simmat = Matrix::drop0(simmat)
   }
   
-  methods::as(simmat, 'dgCMatrix')
+  methods::as(simmat, 'CsparseMatrix')
 }
 
 ## if the docfreq of a term is lower than max_docfreq
@@ -313,7 +316,7 @@ char_grams <- function(x, type=c('tri','bi'), pad=T, drop_non_alpha=T, min_lengt
   bi = Matrix::spMatrix(nrow = length(x), ncol = length(bi_voc), 
                    i = bi$i, j = match(bi$bigram, bi_voc), x = rep(1, nrow(bi)))
   rownames(bi) = voc
-  methods::as(bi, 'dgCMatrix')
+  methods::as(bi, 'CsparseMatrix')
 }
 
 
@@ -335,7 +338,7 @@ char_grams <- function(x, type=c('tri','bi'), pad=T, drop_non_alpha=T, min_lengt
 #' @param allow_asym     If True, the match only needs to be true for at least one term. In practice, this means that "America" would match perfectly with "Southern-America".
 #' @param verbose        If True, report progress
 #'
-#' @return  A similarity matrix in the dgCMatrix format
+#' @return  A similarity matrix in the CsparseMatrix format
 #' @export
 #'
 #' @examples
@@ -359,7 +362,7 @@ term_char_sim <- function(voc, type=c('tri','bi'), min_overlap=2/3, max_diff=4, 
   }
   if (!allow_asym) simmat = tril(simmat>0) * tril(t(simmat>0)) ## both need to match, because otherwise 
   diag(simmat) = 1
-  methods::as(simmat, 'dgCMatrix')
+  methods::as(simmat, 'CsparseMatrix')
 }
 
 #' View term scores for a given document

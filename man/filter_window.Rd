@@ -7,7 +7,7 @@
 filter_window(g, hour_window, to_vertices = NULL, from_vertices = NULL)
 }
 \arguments{
-\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}}
+\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow_compare} or \link[RNewsflow]{create_document_network}}
 
 \item{hour_window}{A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.}
 
@@ -21,7 +21,7 @@ Works identical to `to_vertices`.}
 A network/graph in the \link[igraph]{igraph} class
 }
 \description{
-The `filter_window` function can be used to filter the document pairs (i.e. edges) using the `hour_window` parameter, which works identical to the `hour_window` parameter in the `newsflow.compare` function. 
+The `filter_window` function can be used to filter the document pairs (i.e. edges) using the `hour_window` parameter, which works identical to the `hour_window` parameter in the `newsflow_compare` function. 
 In addition, the `from_vertices` and `to_vertices` parameters can be used to select the vertices (i.e. documents) for which this filter is applied.
 }
 \details{

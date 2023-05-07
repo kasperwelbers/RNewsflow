@@ -2,7 +2,7 @@
 #'
 #' For each term in m, the usage before and after the document date is compared (with a chi2 test) to see whether usage increased. 
 #'
-#' @param m A dgCMatrix 
+#' @param m A CsparseMatrix 
 #' @param date a character vector that specifies a date for each row in m. If given, only pairs of rows within a given date range (see lwindow, rwindow and date_unit) are calculated. 
 #' @param m2 Optionally, use a different matrix for calculating the innovation scores. For example, if m is a DTM of press releases, m2 can be a DTM of news articles, to see if term usage increased in the news after the press release.
 #' @param date2 If m2 is used, date2 has to be used to specify the date for the rows in m2 (otherwise date will be ignored)
@@ -13,7 +13,7 @@
 #' @param min_ratio The minimum ratio (rwindow score / lwindow score)
 #' @param smooth    The smoothing factor (prevents -Inf/Inf ratio)
 #'
-#' @return A dgCMatrix
+#' @return A CsparseMatrix
 term_innovation <- function(m, date, m2=NULL, date2=NULL, lwindow=-7, rwindow=7, date_unit=c('days','hours','minutes','seconds'), min_chi=5.024, min_ratio=2, smooth=1) {
   date_unit = match.arg(date_unit)
   

@@ -38,7 +38,7 @@
 #' @param n_topsim    An alternative or additional sort of threshold for similarity. Only keep the [n_topsim] highest similarity scores for x. Can return more than [n_topsim] similarity scores in the case of duplicate similarities.
 #' @param only_complete_window If True, only compare articles (x) of which a full window of reference articles (y) is available. Thus, for the first and last [window.size] days, there will be no results for x.
 #' @param copy_meta   If TRUE, copy the dtm docvars to the from_meta and to_meta data.tables
-#' @param backbone_p  Apply backbone filtering with a "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}).
+#' @param backbone_p  Apply backbone filtering with a "disparity" filter (see \href{https://www.pnas.org/doi/full/10.1073/pnas.0808904106}{Serrano et al.}).
 #'                    It is different from the original disparity filter algorithm in that it only looks at outward edges. Also, the outward degree k is
 #'                    measured as all possible edges (within a window), not just the non-zero edges.
 #' @param simmat      If softcosine is used, a symmetrical matrix with the similarity scores of terms. If NULL, the cosine similarity of terms in dtm will be used
@@ -77,7 +77,7 @@
 #' g = compare_documents(dtm, measure = 'overlap_pct')
 #' g
 compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,24), group_var=NULL, 
-                              measure=c('cosine','overlap_pct','overlap','dot_product', 'softcosine'), tf_idf=F,
+                              measure=c('cosine','overlap_pct','overlap','dot_product', 'softcosine', 'cp_lookup','cp_lookup_norm'), tf_idf=F,
                               min_similarity=0, n_topsim=NULL, only_complete_window=T, copy_meta=T,
                               backbone_p=1, simmat=NULL, simmat_thres=NULL, batchsize=1000, verbose=FALSE){
     
@@ -168,6 +168,9 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
     if (measure == 'softcosine')   cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = T, max_p=backbone_p, pvalue="disparity", normalize='softl2', crossfun = 'softprod', min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
                                                           date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
                                                           row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
+    if (measure %in% c('cp_lookup','cp_lookup_norm')) cp = tcrossprod_sparse(dtm, dtm_y, rowsum_div = F, max_p=backbone_p, pvalue="disparity", crossfun = measure, min_value = min_similarity, top_n = n_topsim, diag=diag, group=group, group2 = group_y,
+                                                                             date = date, date2 = date_y, lwindow = hour_window[1], rwindow = hour_window[2], date_unit = 'hours', batchsize=batchsize, simmat=simmat, simmat_thres=simmat_thres, 
+                                                                             row_attr=T, col_attr=T, lag_attr=lag_attr, verbose=verbose)
     
     
     ## meta data is returned as data.table 
@@ -192,7 +195,7 @@ compare_documents <- function(dtm, dtm_y=NULL, date_var=NULL, hour_window=c(-24,
     meta_i = match(meta_y$document_id, colnames(cp))
     for (colvar in colvars) meta_y[[gsub('^col', 'to', colvar)]] = marvars[[colvar]][meta_i]
     
-    cp = methods::as(cp, 'dgTMatrix')
+    cp = methods::as(methods::as(cp, 'generalMatrix'), 'TsparseMatrix')
     if (length(cp@i) == 0) return(NULL)
     
     if (!is.null(date)) {

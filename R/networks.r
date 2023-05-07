@@ -69,7 +69,7 @@ as_document_network <- function(el){
 #'                          by='hour', length.out = 8),
 #'                   medium = c(rep('Newspapers', 4), rep('Blog', 4)))
 #' 
-#' g = document.network(d, meta)
+#' g = create_document_network(d, meta)
 #' 
 #' igraph::get.data.frame(g, 'both')
 #' igraph::plot.igraph(g)
@@ -115,7 +115,7 @@ create_document_network <- function(d, meta, id_var='document_id', date_var='dat
 
 #' Visualize (a subcomponent) of the document similarity network 
 #'
-#' @param g                 A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}
+#' @param g                 A document similarity network, as created with \link[RNewsflow]{newsflow_compare} or \link[RNewsflow]{create_document_network}
 #' @param date_attribute    The label of the vertex/document date attribute. Default is "date"
 #' @param source_attribute  The label of the vertex/document source attribute. Default is "source"
 #' @param subcomp_i         Optional. If an integer is given, the network is decomposed into subcomponents (i.e. unconnected components) and only the i-th component is visualized.
@@ -245,9 +245,9 @@ plot_doc_net <- function(cluster, sources=NULL, only_outer_date=FALSE, date_form
 #'
 #' This function aggregates the edges for all combinations of attributes specified in `from_attribute` and `to_attribute`, and shows the minimum and maximum hour difference for each combination.
 #'
-#' The \link[RNewsflow]{filter.window} function can be used to filter edges that fall outside of the intended time window. 
+#' The \link[RNewsflow]{filter_window} function can be used to filter edges that fall outside of the intended time window. 
 #'
-#' @param g A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}  
+#' @param g A document similarity network, as created with \link[RNewsflow]{newsflow_compare} or \link[RNewsflow]{create_document_network}  
 #' @param to_attribute The vertex attribute to aggregate the `to` group of the edges
 #' @param from_attribute The vertex attribute to aggregate the `from` group of the edges
 #'
@@ -272,12 +272,12 @@ show_window <- function(g, to_attribute=NULL, from_attribute=NULL){
 
 #' Filter edges from the document similarity network based on hour difference
 #'
-#' The `filter_window` function can be used to filter the document pairs (i.e. edges) using the `hour_window` parameter, which works identical to the `hour_window` parameter in the `newsflow.compare` function. 
+#' The `filter_window` function can be used to filter the document pairs (i.e. edges) using the `hour_window` parameter, which works identical to the `hour_window` parameter in the `newsflow_compare` function. 
 #' In addition, the `from_vertices` and `to_vertices` parameters can be used to select the vertices (i.e. documents) for which this filter is applied.
 #'
 #' It is recommended to use the \link[RNewsflow]{show_window} function to verify whether the hour windows are correct according to the assumptions and focus of the study.
 #'
-#' @param g A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}  
+#' @param g A document similarity network, as created with \link[RNewsflow]{newsflow_compare} or \link[RNewsflow]{create_document_network}  
 #' @param hour_window A vector of length 2, in which the first and second value determine the left and right side of the window, respectively. For example, c(-10, 36) will compare each document to all documents between the previous 10 and the next 36 hours.
 #' @param to_vertices A filter to select the vertices `to` which an edge is filtered. 
 #' For example, if `V(g)$sourcetype == "newspaper"` is used, then the hour_window filter is only applied for edges `to` newspaper documents (specifically, where the sourcetype attribute is "newspaper"). 
@@ -320,7 +320,7 @@ filter_window <- function(g, hour_window, to_vertices=NULL, from_vertices=NULL){
 #' 
 #' If there are multiple earliest dated documents (that is, having the same publication date) then edges to all earliest dated documents are kept.
 #' 
-#' @param g A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}  
+#' @param g A document similarity network, as created with \link[RNewsflow]{newsflow_compare} or \link[RNewsflow]{create_document_network}  
 #'
 #' @return A network/graph in the \link[igraph]{igraph} class
 #' @export

@@ -35,9 +35,9 @@ tcrossprod_sparse(
 )
 }
 \arguments{
-\item{m}{A dgCMatrix}
+\item{m}{A CsparseMatrix}
 
-\item{m2}{A dgCMatrix}
+\item{m2}{A CsparseMatrix}
 
 \item{min_value}{Optionally, a numerical value, specifying the threshold for including a score in the output.}
 
@@ -54,7 +54,7 @@ tcrossprod_sparse(
 \item{max_p}{A threshold for maximium p value.}
 
 \item{pvalue}{If max_p < 1, edges are removed based on a p value. For each document in dtm, a p value is calculated over its outward edges. 
-Default is the p-value based on uniform distribution, akin to a "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}) but without filtering on inward edges.}
+Default is the p-value based on uniform distribution, akin to a "disparity" filter (see \href{https://www.pnas.org/doi/full/10.1073/pnas.0808904106}{Serrano et al.}) but without filtering on inward edges.}
 
 \item{normalize}{Normalize rows by a given norm score (before calculating similarity). Default is 'none' (no normalization). 'l2' is the l2 norm (use in combination with 'prod' crossfun for cosine similarity). 
 'l2soft' is the adaptation of l2 for soft similarity (use in combination with 'softprod' crossfun for soft cosine).}
@@ -97,7 +97,7 @@ where the date of the column is before (lag) the date of the row. Only possible 
 \item{verbose}{if TRUE, report progress}
 }
 \value{
-A dgCMatrix
+A CsparseMatrix
 }
 \description{
 This function (including the underlying cpp function batched_tcrossprod_cpp) 
@@ -111,7 +111,7 @@ and date windows, and filters results that do not pass the threshold on the fly.
 To achieve this, options for similarity measures are included in the function.
 For example, to get the cosine similarity, you can normalize with "l2" and use the "prod" (product) function for the   
 
-This function is called by the document comparison functions (documents.compare, newsflow.compare, delete.duplicates).
+This function is called by the document comparison functions (newsflow_compare, delete_duplicates).
 We only expose it here for additional flexibility, and because it could be usefull outside of the purpose of this package. 
 
 The output matrix also has an attribute "margin", which contains margin scores (e.g., row_sum) if the row_attr or col_attr arguments are used.

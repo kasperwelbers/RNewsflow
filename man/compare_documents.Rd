@@ -10,12 +10,13 @@ compare_documents(
   date_var = NULL,
   hour_window = c(-24, 24),
   group_var = NULL,
-  measure = c("cosine", "overlap_pct", "overlap", "dot_product", "softcosine"),
+  measure = c("cosine", "overlap_pct", "overlap", "dot_product", "softcosine",
+    "cp_lookup", "cp_lookup_norm"),
   tf_idf = F,
   min_similarity = 0,
   n_topsim = NULL,
   only_complete_window = T,
-  copy_meta = F,
+  copy_meta = T,
   backbone_p = 1,
   simmat = NULL,
   simmat_thres = NULL,
@@ -53,7 +54,7 @@ we recommend using quanteda's \link[quanteda]{dfm_tfidf} or \link[quanteda]{dfm_
 
 \item{copy_meta}{If TRUE, copy the dtm docvars to the from_meta and to_meta data.tables}
 
-\item{backbone_p}{Apply backbone filtering with a "disparity" filter (see \href{https://www.pnas.org/content/106/16/6483.full}{Serrano et al.}).
+\item{backbone_p}{Apply backbone filtering with a "disparity" filter (see \href{https://www.pnas.org/doi/full/10.1073/pnas.0808904106}{Serrano et al.}).
 It is different from the original disparity filter algorithm in that it only looks at outward edges. Also, the outward degree k is
 measured as all possible edges (within a window), not just the non-zero edges.}
 

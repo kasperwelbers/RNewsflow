@@ -5,7 +5,7 @@
 \alias{docnet}
 \title{Document similarity network for one news agency, and the print and online editions of two newspapers}
 \format{
-docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[RNewsflow]{document.network} or \link[RNewsflow]{newsflow.compare}.
+docnet: A network/graph in the \link[igraph]{igraph} class as created with \link[RNewsflow]{create_document_network} or \link[RNewsflow]{newsflow_compare}.
 }
 \description{
 Document similarity network for one news agency, and the print and online editions of two newspapers

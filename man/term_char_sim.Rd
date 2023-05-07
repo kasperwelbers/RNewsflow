@@ -42,7 +42,7 @@ term_char_sim(
 \item{verbose}{If True, report progress}
 }
 \value{
-A similarity matrix in the dgCMatrix format
+A similarity matrix in the CsparseMatrix format
 }
 \description{
 A quick, language agnostic way for finding terms with similar spelling. 

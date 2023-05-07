@@ -7,6 +7,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // term_union_cpp
 List term_union_cpp(SpMat& m, SpMat& simmat, std::vector<std::string> terms, std::vector<bool> parentheses, bool verbose, std::string sep);
 RcppExport SEXP _RNewsflow_term_union_cpp(SEXP mSEXP, SEXP simmatSEXP, SEXP termsSEXP, SEXP parenthesesSEXP, SEXP verboseSEXP, SEXP sepSEXP) {

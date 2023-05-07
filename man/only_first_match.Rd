@@ -7,7 +7,7 @@
 only_first_match(g)
 }
 \arguments{
-\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow.compare} or \link[RNewsflow]{document.network}}
+\item{g}{A document similarity network, as created with \link[RNewsflow]{newsflow_compare} or \link[RNewsflow]{create_document_network}}
 }
 \value{
 A network/graph in the \link[igraph]{igraph} class
