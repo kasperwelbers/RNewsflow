@@ -21,3 +21,5 @@ src/*.so
 src/*.dll
 doc
 Meta
+/doc/
+/Meta/

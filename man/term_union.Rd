@@ -29,8 +29,9 @@ Given a dtm and a similarity (adjacency) matrix, group clusters of similar terms
 Column names will be concatenated, with a "|" seperator (read as OR)
 }
 \examples{
-dfm = quanteda::dfm(c('That guy Gadaffi','Do you mean Kadaffi?',
-                      'Nah more like Gadaffel','Not Kadaffel?'))
+dfm = quanteda::tokens(c('That guy Gadaffi','Do you mean Kadaffi?',
+                         'Nah more like Gadaffel','Not Kadaffel?')) |>
+  quanteda::dfm()
 simmat = term_char_sim(colnames(dfm), same_start=0)
 term_union(dfm, simmat, verbose = FALSE)
 }

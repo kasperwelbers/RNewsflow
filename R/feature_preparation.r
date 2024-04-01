@@ -187,8 +187,9 @@ match_simmat_terms <- function(dtm, simmat) {
 #' @export
 #' 
 #' @examples 
-#' dfm = quanteda::dfm(c('That guy Gadaffi','Do you mean Kadaffi?',
-#'                       'Nah more like Gadaffel','Not Kadaffel?'))
+#' dfm = quanteda::tokens(c('That guy Gadaffi','Do you mean Kadaffi?',
+#'                          'Nah more like Gadaffel','Not Kadaffel?')) |>
+#'   quanteda::dfm()
 #' simmat = term_char_sim(colnames(dfm), same_start=0)
 #' term_union(dfm, simmat, verbose = FALSE)
 term_union <- function(dtm, simmat, as_dfm=T, verbose=F, sep='|', par=NA) {
@@ -342,8 +343,9 @@ char_grams <- function(x, type=c('tri','bi'), pad=T, drop_non_alpha=T, min_lengt
 #' @export
 #'
 #' @examples
-#' dfm = quanteda::dfm(c('That guy Gadaffi','Do you mean Kadaffi?',
-#'                       'Nah more like Gadaffel','What Gargamel?'))
+#' dfm = quanteda::tokens(c('That guy Gadaffi','Do you mean Kadaffi?',
+#'                          'Nah more like Gadaffel','What Gargamel?')) |>
+#'   quanteda::dfm()
 #' simmat = term_char_sim(colnames(dfm), same_start=0)
 #' term_union(dfm, simmat, verbose = FALSE)
 term_char_sim <- function(voc, type=c('tri','bi'), min_overlap=2/3, max_diff=4, pad=F, as_lower=T, same_start=1, drop_non_alpha=T, min_length=5, allow_asym=F, verbose=T) {

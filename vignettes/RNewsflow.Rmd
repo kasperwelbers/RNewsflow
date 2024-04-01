@@ -90,7 +90,7 @@ d = data.frame(id = c(1,2,3),
                stringsAsFactors = F)
 
 corp = corpus(d, docid_field = 'id', text_field='text')
-dtm = dfm(corp)
+dtm = dfm(tokens(corp))
 
 dtm
 docvars(dtm)
