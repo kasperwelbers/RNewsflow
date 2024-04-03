@@ -15,14 +15,6 @@ term_day_dist(dtm, meta = NULL, date.var = "date")
 }
 \value{
 A data.frame with statistics for each term.
-\itemize{
- \item{freq:}{ The number of times a term occurred}
- \item{doc.freq:}{ The number of documents in which a term occured}
- \item{days.n:}{ The number of days on which a term occured}
- \item{days.pct:}{ The percentage of days on which a term occured}
- \item{days.entropy:}{ The entropy of the distribution of term frequency across days}
- \item{days.entropy.norm:}{ The normalized days.entropy, where 1 is a discrete uniform distribution}
-}
 }
 \description{
 Calculate statistics for term occurence across days

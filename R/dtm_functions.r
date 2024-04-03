@@ -12,14 +12,6 @@ dtmToSparseMatrix <- function(dtm){
 #' @param date.var The name of the meta column specifying the document date. default is "date". The values should be of type POSIXlt or POSIXct
 #'
 #' @return A data.frame with statistics for each term.
-#' \itemize{
-#'  \item{freq:}{ The number of times a term occurred}
-#'  \item{doc.freq:}{ The number of documents in which a term occured}
-#'  \item{days.n:}{ The number of days on which a term occured}
-#'  \item{days.pct:}{ The percentage of days on which a term occured}
-#'  \item{days.entropy:}{ The entropy of the distribution of term frequency across days}
-#'  \item{days.entropy.norm:}{ The normalized days.entropy, where 1 is a discrete uniform distribution}
-#' }
 #' @export
 #'
 #' @examples
