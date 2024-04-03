@@ -50,8 +50,9 @@ Calculates similarity as percentage of a terms bigram's or trigram's that also o
 The percentage has to be above the given threshold for both terms (unless allow_asym = T)
 }
 \examples{
-dfm = quanteda::dfm(c('That guy Gadaffi','Do you mean Kadaffi?',
-                      'Nah more like Gadaffel','What Gargamel?'))
+dfm = quanteda::tokens(c('That guy Gadaffi','Do you mean Kadaffi?',
+                         'Nah more like Gadaffel','What Gargamel?')) |>
+  quanteda::dfm()
 simmat = term_char_sim(colnames(dfm), same_start=0)
 term_union(dfm, simmat, verbose = FALSE)
 }

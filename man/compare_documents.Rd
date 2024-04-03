@@ -111,7 +111,8 @@ d = data.frame(text = c('a b c d e',
                date = as.POSIXct(c('2010-01-01','2010-01-01','2012-01-01')), 
                stringsAsFactors=FALSE)
 corp = quanteda::corpus(d, text_field='text')
-dtm = quanteda::dfm(corp)
+dtm = quanteda::tokens(corp) |>
+  quanteda::dfm()
 
 g = compare_documents(dtm)
 g
